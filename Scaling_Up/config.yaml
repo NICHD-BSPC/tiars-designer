@@ -1,0 +1,16 @@
+sampletable: 'sampletable.tsv'                                            # path to sampletable.ts
+enzyme_list: 'default'                                        # path to tsv of desired enzymes. If using default all enzymes, put 'default'
+
+codon_usage_tsv: 'codon_frequency.tsv'                                    # path to txt file of organism used
+
+min_Rsite_distance: 5                                                     # 5 is default and recommended
+
+single_enzyme_filters: 'all'                                              # list of single enzyme filters desired. If you want to run all of them put 'all'
+
+enzyme_pair_filters:                                                      # list of enzyme pair filters if desired. If you want to run all of them put 'all'
+  - 'both_have_endogenous_sites'
+  - 'compatible_polarity'
+  - 'both_Renzymes_depend_on_at_least_one_unique_substitution'  
+
+verbose: TRUE                                                             # boolean value
+

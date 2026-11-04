@@ -1,0 +1,20 @@
+
+[build-system]
+requires = ['setuptools']
+build-backend = 'setuptools.build_meta'
+[project]
+name='tiarsdesigner'
+version='0.1.5'
+authors= [{name='Sydney Hertafeld', email='shertafeld@gmail.com'}]
+description='A python package for designing CRISPR repair oligos'
+readme='README.md'
+license='MIT'
+license-files=['LICENSE']
+classifiers=[
+    'Programming Language :: Python :: 3',
+    'Operating System :: OS Independent'
+    ]
+[project.scripts]
+tiarsdesigner='tiarsdesigner.run_locus:main'
+[project.urls]
+url='https://github.com/NICHD-BSPC/tiars-designer'
