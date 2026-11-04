@@ -1,0 +1,1479 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>tiarsdesigner &#8212; TIARS Oligo Designer  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="../_static/basic.css?v=b08954a9" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=27fed22d" />
+    <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=4ae1632d" />
+    <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+              <div class="related top">
+                &nbsp;
+  <nav id="rellinks">
+    <ul>
+    </ul>
+  </nav>
+              </div>
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for tiarsdesigner</h1><div class="highlight"><pre>
+<span></span><span class="n">__version__</span><span class="o">=</span><span class="s1">'0.1.5'</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">Bio.Restriction</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">Levenshtein</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">utils</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+
+<div class="viewcode-block" id="Designer">
+<a class="viewcode-back" href="../autoapi/tiarsdesigner/index.html#tiarsdesigner.Designer">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">Designer</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">"""The parent class for Endogenous and Candidate, which stores functions and</span>
+<span class="sd">    variables common to both"""</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sequence</span><span class="p">,</span> <span class="n">cutsite</span><span class="p">,</span> <span class="n">Renzyme_list</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+
+<span class="sd">        sequence: string</span>
+<span class="sd">            An in frame sequence of DNA nucleotides of max length 273</span>
+<span class="sd">            nucleotides. It should have a PAM sequence that makes it suitable</span>
+<span class="sd">            for CRISPR/Cas9 activity.</span>
+
+<span class="sd">        cutsite: int</span>
+<span class="sd">            The index location of the CRISPR/Cas9 cutsite (3 nt after the PAM</span>
+<span class="sd">            if it's CCN, 3 before if it's NGG).</span>
+<span class="sd">        Renzyme_list: list</span>
+<span class="sd">            Optional: provide a list of Renzymes to use. Default is</span>
+<span class="sd">            Bio.Restriction AllEnzymes.</span>
+
+<span class="sd">        Attributes:</span>
+<span class="sd">        ----------</span>
+
+<span class="sd">        sequence: string</span>
+<span class="sd">            The input sequence.</span>
+
+<span class="sd">        cutsite: int</span>
+<span class="sd">            The input cutsite</span>
+
+<span class="sd">        cutsite_region: string</span>
+<span class="sd">            a subset of sequence that extends 15 bp to either side of</span>
+<span class="sd">            cutsite.</span>
+
+<span class="sd">        cutsite_frame: int</span>
+<span class="sd">            a number describing the frame of the cutsite region. '0' means it's</span>
+<span class="sd">            in frame. '1' means the second bp of the cutsite region is the</span>
+<span class="sd">            first bp of the first codon, and '2' means the third bp of the</span>
+<span class="sd">            cutsite region is the first bp of the first codon.</span>
+
+<span class="sd">        Renzymes: dict</span>
+<span class="sd">            a dictionary of restriction enzymes with a recognition sites  in</span>
+<span class="sd">            self.sequence, with re names as keys and their cutsite as the</span>
+<span class="sd">            values.</span>
+
+<span class="sd">        splicing_hexamers: dict</span>
+<span class="sd">            a dictionary of splicing hexamers found in self.sequence with the</span>
+<span class="sd">            hexamer sequences as keys and their locations in self.sequence as</span>
+<span class="sd">            values. splicing hexamers, aka exonic splicing enhancers, are 6 nt</span>
+<span class="sd">            sequences that enhance premrna splicing. the list of possible</span>
+<span class="sd">            hexamers comes from rescue-ese</span>
+<span class="sd">            (http://genes.mit.edu/burgelab/rescue-ese/). This dictionary will</span>
+<span class="sd">            help us filter out candidates that interfere with splicing by</span>
+<span class="sd">            modifying any of the splicing enhancers</span>
+<span class="sd">        """</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">sequence</span> <span class="o">=</span> <span class="n">sequence</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cutsite</span> <span class="o">=</span> <span class="n">cutsite</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cutsite_region</span> <span class="o">=</span> <span class="n">sequence</span><span class="p">[(</span><span class="n">cutsite</span> <span class="o">-</span> <span class="mi">15</span><span class="p">):(</span><span class="n">cutsite</span> <span class="o">+</span> <span class="mi">15</span><span class="p">)]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cutsite_frame</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cutsite</span> <span class="o">%</span> <span class="mi">3</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Renzyme_list</span> <span class="o">=</span> <span class="n">Renzyme_list</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Renzymes</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">get_restriction_sites</span><span class="p">(</span><span class="n">sequence</span><span class="p">,</span> <span class="n">Renzyme_list</span><span class="p">)</span>
+<span class="c1">#        self.splicing_hexamers = self.get_splicing_hexamers(sequence)</span>
+
+<div class="viewcode-block" id="Designer.get_distance_from">
+<a class="viewcode-back" href="../autoapi/tiarsdesigner/index.html#tiarsdesigner.Designer.get_distance_from">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_distance_from</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pos</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""</span>
+<span class="sd">        Takes all of the restriction enzymes in self.Renzymes and returns</span>
+<span class="sd">        a dictionary with REnames as their values and their distances from</span>
+<span class="sd">        `pos` as the values.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+
+<span class="sd">        pos: int</span>
+<span class="sd">            an integer in range(0, len(self.sequence))</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        A dictionary of Restriction enzymes that would cut the sequence, with</span>
+<span class="sd">        the enzymes as keys and the distances between their cutsites and pos as</span>
+<span class="sd">        values. A positive distance means that the REcutsite is later in</span>
+<span class="sd">        the string than `pos`, while a negative distance means that the</span>
+<span class="sd">        REcutsite appears before `pos` in the string.</span>
+<span class="sd">        """</span>
+        <span class="n">REdistances</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">enzyme</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">Renzymes</span><span class="p">:</span>
+            <span class="c1"># subtract 1 from the cutsites because they consider the first</span>
+            <span class="c1"># bp in the sequence to be 1 rather than 0</span>
+
+            <span class="n">REdistances</span><span class="p">[</span><span class="n">enzyme</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="n">i</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">pos</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">Renzymes</span><span class="p">[</span><span class="n">enzyme</span><span class="p">]</span>
+            <span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">REdistances</span></div>
+
+
+<div class="viewcode-block" id="Designer.get_splicing_hexamers">
+<a class="viewcode-back" href="../autoapi/tiarsdesigner/index.html#tiarsdesigner.Designer.get_splicing_hexamers">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_splicing_hexamers</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sequence</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""</span>
+<span class="sd">        This function searches the input sequence for splicing hexamers (6 nt</span>
+<span class="sd">        sequences that enhance premRNA splicing, AKA exonic splicing enhancers)</span>
+<span class="sd">        from the list provided by RESCUE-ESE</span>
+<span class="sd">        (http://genes.mit.edu/burgelab/rescue-ese/zebrafish). This list has</span>
+<span class="sd">        been copied into 'splicing_hexamers.txt' with duplicate hexamers</span>
+<span class="sd">        removed and returns a dictionary of splicing hexamers found in the</span>
+<span class="sd">        input sequence and their locations in the sequence.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        sequence: string</span>
+<span class="sd">            A DNA nucleotide sequence. Must be all capital letters.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Dictionary of hexamers in the sequence with the hexamer sequences as</span>
+<span class="sd">        keys and their locations in the input sequence as values</span>
+<span class="sd">        """</span>
+        <span class="n">hexamers</span> <span class="o">=</span> <span class="p">[</span><span class="n">line</span><span class="p">[:</span><span class="mi">6</span><span class="p">]</span> <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">open</span><span class="p">(</span><span class="s1">'splicing_hexamers.txt'</span><span class="p">)]</span>
+        <span class="n">seq_hexamers</span> <span class="o">=</span> <span class="p">[</span><span class="n">hexamer</span> <span class="k">for</span> <span class="n">hexamer</span> <span class="ow">in</span> <span class="n">hexamers</span> <span class="k">if</span> <span class="n">hexamer</span> <span class="ow">in</span> <span class="n">sequence</span><span class="p">]</span>
+        <span class="n">seq_hexamer_sites</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">hexamer</span> <span class="ow">in</span> <span class="n">seq_hexamers</span><span class="p">:</span>
+            <span class="n">seq_hexamer_sites</span><span class="p">[</span><span class="n">hexamer</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">start</span><span class="p">()</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">re</span><span class="o">.</span><span class="n">finditer</span><span class="p">(</span><span class="n">hexamer</span><span class="p">,</span> <span class="n">sequence</span><span class="p">)]</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="n">seq_hexamer_sites</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="Endogenous">
+<a class="viewcode-back" href="../autoapi/tiarsdesigner/index.html#tiarsdesigner.Endogenous">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">Endogenous</span><span class="p">(</span><span class="n">Designer</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""An Endogenous object is a subclass of the designer class, and an</span>
+<span class="sd">    Endogenous object is the endogenous sequence for a CRISPR/Cas9 experiment</span>
+<span class="sd">    before any edits are made to the sequence"""</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">sequence</span><span class="p">,</span>
+        <span class="n">gRNA_start</span><span class="p">,</span>
+        <span class="n">gRNA_end</span><span class="p">,</span>
+        <span class="n">PAM_start</span><span class="p">,</span>
+        <span class="n">which_PAM</span><span class="p">,</span>
+        <span class="n">AA_change_site</span><span class="p">,</span>
+        <span class="n">new_codon</span><span class="p">,</span>
+        <span class="n">Renzyme_list</span><span class="o">=</span><span class="kc">None</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">"""</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+
+<span class="sd">        sequence: string</span>
+<span class="sd">            The endogenous/wt dna sequence without any synonymous changes</span>
+<span class="sd">            and without the desired CRISPR facilitated amino acid change. Max</span>
+<span class="sd">            length is 273 bp, must be in frame.</span>
+
+<span class="sd">        gRNA_start: int</span>
+<span class="sd">            the index location in the sequence of the beginning of the</span>
+<span class="sd">            region the CRISPR/Cas9 guide RNA will target.</span>
+
+<span class="sd">        gRNA_end: int</span>
+<span class="sd">            the index location in the sequence of the end of the region</span>
+<span class="sd">            the CRISPR/Cas9 guide RNA will target.</span>
+
+<span class="sd">        PAM_start: int</span>
+<span class="sd">            The index location in the sequence of the beginning of the</span>
+<span class="sd">            PAM site. For now, the PAM region has to be either 'CCN' or 'NGG'.</span>
+<span class="sd">        </span>
+<span class="sd">        which_PAM: string</span>
+<span class="sd">            The sequence of the PAM site (e.g. 'NGG' or 'CCN' for Cas9, or 'TTTN' or 'BAAA' for Cfp1)</span>
+
+<span class="sd">        AA_change_site: int</span>
+<span class="sd">            the index location in the sequence of the beginning of</span>
+<span class="sd">            the codon that is to be nonsynonymously changed in the CRISPR/Cas9</span>
+<span class="sd">            process</span>
+
+<span class="sd">        new_codon: string</span>
+<span class="sd">            the codon to replace the existing codon at the</span>
+<span class="sd">            AA_change_site</span>
+
+<span class="sd">        Attributes</span>
+<span class="sd">        ----------</span>
+
+<span class="sd">        From Parent Class:</span>
+
+<span class="sd">        sequence</span>
+<span class="sd">        cutsite (determined based on the PAM location and whether it's 'CCN' or</span>
+<span class="sd">        'NGG')</span>
+<span class="sd">        cutsite_region</span>
+<span class="sd">        cutsite_frame</span>
+<span class="sd">        Renzymes</span>
+<span class="sd">        splicing_hexamers</span>
+
+<span class="sd">        Unique to Endogenous Class:</span>
+
+<span class="sd">        gRNA_location: tuple</span>
+<span class="sd">            A tuple of the start and end coordinates of the region in sequence</span>
+<span class="sd">            to be targeted by the guide RNA.</span>
+
+<span class="sd">        PAM_start: int</span>
+<span class="sd">            The index location of the beginning of the PAM site in sequence.</span>
+<span class="sd">            For now, the PAM site has to be either 'CCN' or 'NGG'.</span>
+
+<span class="sd">        cas9_cut_from_PAM: int</span>
+<span class="sd">            The location of the CRISPR/Cas9 cutsite in the sequence relative to</span>
+<span class="sd">            the PAM_start site. For 'CCN' it will be 6, and for 'NGG' it will</span>
+<span class="sd">            be -3. Since the value is different for each PAM, it is also useful</span>
+<span class="sd">            for indicating whether the PAM sequence is 'CCN' or 'NGG'.</span>
+
+<span class="sd">        AA_change_site: int</span>
+<span class="sd">            The index location in the sequence of the codon that is to be</span>
+<span class="sd">            nonsynonymously changed in the CRISPR/Cas9 process.</span>
+
+<span class="sd">        AA_change_sequence:</span>
+<span class="sd">            A sequence identical to the endogenous sequence (self.sequence),</span>
+<span class="sd">            but it has the new_codon substitution at the AA site.  In other</span>
+<span class="sd">            words, it's the endogenous sequence with the desired CRISPR/Cas9</span>
+<span class="sd">            nonsynonymous substitution.</span>
+
+<span class="sd">        PAM_can_change: bool</span>
+<span class="sd">            a boolean value indicating whether or not the PAM site can be</span>
+<span class="sd">            interrupted via only synonymous substitutions. This means that one</span>
+<span class="sd">            or both of the non 'N' basepair's in the PAM site can be changed to</span>
+<span class="sd">            anything else without changing the resulting amino acid sequence.</span>
+<span class="sd">            This value will also be True if the desired amino acid change</span>
+<span class="sd">            interrupts the PAM.</span>
+<span class="sd">        """</span>
+
+        <span class="c1"># create dictionary with PAM startsites as keys and the locations of</span>
+        <span class="c1"># the CRISPR cutsites relative to the PAM startsites as values</span>
+        <span class="n">PAM_dict</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">"CCN"</span><span class="p">:</span> <span class="mi">6</span><span class="p">,</span>
+            <span class="s2">"NGG"</span><span class="p">:</span> <span class="o">-</span><span class="mi">3</span><span class="p">,</span>
+            <span class="s2">"TTTV"</span><span class="p">:</span> <span class="mi">23</span><span class="p">,</span>
+            <span class="s2">"BAAA"</span><span class="p">:</span> <span class="o">-</span><span class="mi">23</span>
+        <span class="p">}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">gRNA_location</span> <span class="o">=</span> <span class="p">(</span><span class="n">gRNA_start</span><span class="p">,</span> <span class="n">gRNA_end</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">PAM_start</span> <span class="o">=</span> <span class="n">PAM_start</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">which_PAM</span> <span class="o">=</span> <span class="n">which_PAM</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cas9_cut_from_PAM</span> <span class="o">=</span> <span class="n">PAM_dict</span><span class="p">[</span><span class="n">which_PAM</span><span class="p">]</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">sequence</span><span class="p">,</span> <span class="n">PAM_start</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">cas9_cut_from_PAM</span><span class="p">,</span> <span class="n">Renzyme_list</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">AA_change_site</span> <span class="o">=</span> <span class="n">AA_change_site</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">AA_change_sequence</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sequence</span><span class="p">[:</span><span class="bp">self</span><span class="o">.</span><span class="n">AA_change_site</span><span class="p">]</span>
+            <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">new_codon</span><span class="p">)</span>
+            <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">sequence</span><span class="p">[(</span><span class="bp">self</span><span class="o">.</span><span class="n">AA_change_site</span> <span class="o">+</span> <span class="mi">3</span><span class="p">):]</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">PAM_can_change</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">PAM_can_change</span><span class="p">()</span>
+
+<div class="viewcode-block" id="Endogenous.PAM_can_change">
+<a class="viewcode-back" href="../autoapi/tiarsdesigner/index.html#tiarsdesigner.Endogenous.PAM_can_change">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">PAM_can_change</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""</span>
+<span class="sd">        This function will return a boolean value indicating whether or not</span>
+<span class="sd">        the PAM site can be interrupted via synonymous substitutions or the</span>
+<span class="sd">        desired nonsynonymous change.  For the PAM to be interrupted, one or</span>
+<span class="sd">        both of the non 'N' basepair's in the PAM site can be changed to any</span>
+<span class="sd">        other bp.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        False if the PAM cannot be interrupted, True if it can</span>
+<span class="sd">        """</span>
+         
+        <span class="n">PAM_start</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">PAM_start</span>
+        <span class="n">PAM_frame</span> <span class="o">=</span> <span class="n">PAM_start</span> <span class="o">%</span> <span class="mi">3</span>
+        <span class="n">AA_change_seq</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">AA_change_sequence</span>
+        <span class="c1"># if PAM site is 'CCN'</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">which_PAM</span> <span class="o">==</span> <span class="s1">'CCN'</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">PAM_frame</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">syn_seqs</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
+                    <span class="n">utils</span><span class="o">.</span><span class="n">synonymous_seqs</span><span class="p">(</span>
+                        <span class="n">AA_change_seq</span><span class="p">[</span><span class="n">PAM_start</span><span class="p">:</span><span class="n">PAM_start</span> <span class="o">+</span> <span class="mi">3</span><span class="p">]</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
+                <span class="k">for</span> <span class="n">seq</span> <span class="ow">in</span> <span class="n">syn_seqs</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">seq</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span> <span class="o">!=</span> <span class="s1">'CC'</span><span class="p">:</span>
+                        <span class="k">return</span> <span class="kc">True</span>
+                <span class="k">return</span> <span class="kc">False</span>
+            <span class="k">if</span> <span class="n">PAM_frame</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">syn_seqs</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
+                    <span class="n">utils</span><span class="o">.</span><span class="n">synonymous_seqs</span><span class="p">(</span>
+                        <span class="n">AA_change_seq</span><span class="p">[</span><span class="n">PAM_start</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span> <span class="n">PAM_start</span> <span class="o">+</span> <span class="mi">2</span><span class="p">]</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
+                <span class="k">for</span> <span class="n">seq</span> <span class="ow">in</span> <span class="n">syn_seqs</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">seq</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">!=</span> <span class="s1">'CC'</span><span class="p">:</span>
+                        <span class="k">return</span> <span class="kc">True</span>
+                <span class="k">return</span> <span class="kc">False</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">syn_seqs</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
+                    <span class="n">utils</span><span class="o">.</span><span class="n">synonymous_seqs</span><span class="p">(</span>
+                        <span class="n">AA_change_seq</span><span class="p">[</span><span class="n">PAM_start</span> <span class="o">-</span> <span class="mi">2</span><span class="p">:</span> <span class="n">PAM_start</span> <span class="o">+</span> <span class="mi">4</span><span class="p">]</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
+                <span class="k">for</span> <span class="n">seq</span> <span class="ow">in</span> <span class="n">syn_seqs</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">seq</span><span class="p">[</span><span class="mi">2</span><span class="p">:</span><span class="mi">4</span><span class="p">]</span> <span class="o">!=</span> <span class="s1">'CC'</span><span class="p">:</span>
+                        <span class="k">return</span> <span class="kc">True</span>
+                <span class="k">return</span> <span class="kc">False</span>
+        <span class="c1"># if PAM is 'NGG'</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">which_PAM</span> <span class="o">==</span> <span class="s1">'NGG'</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">PAM_frame</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">syn_seqs</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
+                    <span class="n">utils</span><span class="o">.</span><span class="n">synonymous_seqs</span><span class="p">(</span>
+                        <span class="n">AA_change_seq</span><span class="p">[</span><span class="n">PAM_start</span><span class="p">:</span><span class="n">PAM_start</span> <span class="o">+</span> <span class="mi">3</span><span class="p">]</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
+                <span class="k">for</span> <span class="n">seq</span> <span class="ow">in</span> <span class="n">syn_seqs</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">seq</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">!=</span> <span class="s1">'GG'</span><span class="p">:</span>
+                        <span class="k">return</span> <span class="kc">True</span>
+                <span class="k">return</span> <span class="kc">False</span>
+            <span class="k">if</span> <span class="n">PAM_frame</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">syn_seqs</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
+                    <span class="n">utils</span><span class="o">.</span><span class="n">synonymous_seqs</span><span class="p">(</span>
+                        <span class="n">AA_change_seq</span><span class="p">[</span><span class="n">PAM_start</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span> <span class="n">PAM_start</span> <span class="o">+</span> <span class="mi">5</span><span class="p">]</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
+                <span class="k">for</span> <span class="n">seq</span> <span class="ow">in</span> <span class="n">syn_seqs</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">seq</span><span class="p">[</span><span class="mi">2</span><span class="p">:</span><span class="mi">4</span><span class="p">]</span> <span class="o">!=</span> <span class="s1">'GG'</span><span class="p">:</span>
+                        <span class="k">return</span> <span class="kc">True</span>
+                <span class="k">return</span> <span class="kc">False</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">syn_seqs</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">utils</span><span class="o">.</span><span class="n">synonymous_seqs</span><span class="p">(</span>
+                    <span class="n">AA_change_seq</span><span class="p">[</span><span class="n">PAM_start</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:</span> <span class="n">PAM_start</span> <span class="o">+</span> <span class="mi">4</span><span class="p">])</span>
+                <span class="p">)</span>
+                <span class="k">for</span> <span class="n">seq</span> <span class="ow">in</span> <span class="n">syn_seqs</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">seq</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span> <span class="o">!=</span> <span class="s1">'GG'</span><span class="p">:</span>
+                        <span class="k">return</span> <span class="kc">True</span>
+                <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">which_PAM</span> <span class="o">==</span> <span class="s1">'TTTV'</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">which_PAM</span> <span class="o">==</span> <span class="s1">'BAAA'</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">PAM_frame</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">syn_seqs</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
+                    <span class="n">utils</span><span class="o">.</span><span class="n">synonymous_seqs</span><span class="p">(</span>
+                        <span class="n">AA_change_seq</span><span class="p">[</span><span class="n">PAM_start</span><span class="p">:</span><span class="n">PAM_start</span> <span class="o">+</span> <span class="mi">6</span><span class="p">]</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
+                <span class="k">for</span> <span class="n">seq</span> <span class="ow">in</span> <span class="n">syn_seqs</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">which_PAM</span> <span class="o">==</span> <span class="s1">'TTTV'</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">seq</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span> <span class="o">!=</span> <span class="s1">'TTT'</span> <span class="ow">or</span> <span class="n">seq</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">==</span> <span class="s1">'T'</span><span class="p">:</span>
+                            <span class="k">return</span> <span class="kc">True</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">seq</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="mi">4</span><span class="p">]</span> <span class="o">!=</span> <span class="s1">'AAA'</span> <span class="ow">or</span> <span class="n">seq</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">'A'</span><span class="p">:</span>
+                            <span class="k">return</span> <span class="kc">True</span>
+                <span class="k">return</span> <span class="kc">False</span>
+            <span class="k">if</span> <span class="n">PAM_frame</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">syn_seqs</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
+                    <span class="n">utils</span><span class="o">.</span><span class="n">synonymous_seqs</span><span class="p">(</span>
+                        <span class="n">AA_change_seq</span><span class="p">[</span><span class="n">PAM_start</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span> <span class="n">PAM_start</span> <span class="o">+</span> <span class="mi">5</span><span class="p">]</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
+                <span class="k">for</span> <span class="n">seq</span> <span class="ow">in</span> <span class="n">syn_seqs</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">which_PAM</span> <span class="o">==</span> <span class="s1">'TTTV'</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">seq</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="mi">4</span><span class="p">]</span> <span class="o">!=</span> <span class="s1">'TTT'</span> <span class="ow">or</span> <span class="n">seq</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">==</span> <span class="s1">'T'</span><span class="p">:</span>
+                            <span class="k">return</span> <span class="kc">True</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">seq</span><span class="p">[</span><span class="mi">2</span><span class="p">:</span><span class="mi">5</span><span class="p">]</span> <span class="o">!=</span> <span class="s1">'AAA'</span> <span class="ow">or</span> <span class="n">seq</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">'A'</span><span class="p">:</span>
+                            <span class="k">return</span> <span class="kc">True</span>
+                <span class="k">return</span> <span class="kc">False</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">syn_seqs</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
+                    <span class="n">utils</span><span class="o">.</span><span class="n">synonymous_seqs</span><span class="p">(</span>
+                        <span class="n">AA_change_seq</span><span class="p">[</span><span class="n">PAM_start</span> <span class="o">-</span><span class="mi">2</span><span class="p">:</span> <span class="n">PAM_start</span> <span class="o">+</span> <span class="mi">4</span><span class="p">]</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
+                <span class="k">for</span> <span class="n">seq</span> <span class="ow">in</span> <span class="n">syn_seqs</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">which_PAM</span> <span class="o">==</span> <span class="s1">'TTTV'</span><span class="p">:</span> 
+                        <span class="k">if</span> <span class="n">seq</span><span class="p">[</span><span class="mi">2</span><span class="p">:</span><span class="mi">5</span><span class="p">]</span> <span class="o">!=</span> <span class="s1">'TTT'</span> <span class="ow">or</span> <span class="n">seq</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span> <span class="o">==</span> <span class="s1">'T'</span><span class="p">:</span>
+                            <span class="k">return</span> <span class="kc">True</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">seq</span><span class="p">[</span><span class="mi">3</span><span class="p">:]</span> <span class="o">!=</span> <span class="s1">'AAA'</span> <span class="ow">or</span> <span class="n">seq</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="s1">'A'</span><span class="p">:</span>
+                            <span class="k">return</span> <span class="kc">True</span>
+                <span class="k">return</span> <span class="kc">False</span></div>
+
+
+
+
+<div class="viewcode-block" id="Endogenous.get_filtered_candidates">
+<a class="viewcode-back" href="../autoapi/tiarsdesigner/index.html#tiarsdesigner.Endogenous.get_filtered_candidates">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_filtered_candidates</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">locusname</span><span class="p">,</span> <span class="n">single_enzyme_filters</span><span class="p">,</span> <span class="n">min_Rsite_distance</span><span class="p">,</span> <span class="n">get_filter_stats</span><span class="p">,</span> <span class="n">codon_usage_tsv</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""</span>
+<span class="sd">        Builds a generator of all potential repair oligo candidates with the</span>
+<span class="sd">        desired nonsynonymous amino acid change and at least one synonymous</span>
+<span class="sd">        substitution in self.cutsite_region. Before being run through the</span>
+<span class="sd">        generator, however, each candidate-Renzyme combination is run through</span>
+<span class="sd">        all of the single Renzyme filters, and only the combinations that pass</span>
+<span class="sd">        all of them go through.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        locusname: string</span>
+<span class="sd">            A user created name for the locus for writing the filter stats to file</span>
+<span class="sd">        single_enzyme_filters: list</span>
+<span class="sd">            A list of filters to run for this locus (will run all filters if not specified)</span>
+<span class="sd">        min_Rsite_distance: int</span>
+<span class="sd">            An integer indicating the minimum allowable distance between any</span>
+<span class="sd">            novel and endogenous site for a given restriction enzyme</span>
+<span class="sd">        get_filter_stats: bool</span>
+<span class="sd">            A boolean value indicating whether or not the function should</span>
+<span class="sd">            generate filter stats in the form of a percentage of passing</span>
+<span class="sd">            candidates for each filter.</span>
+<span class="sd">        codon_usage_tsv: tsv</span>
+<span class="sd">            A tsv mapping codons to their usage frequency for the organism</span>
+<span class="sd">            used.</span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Generator of all the possible candidate sequence/Renzyme combinations</span>
+<span class="sd">        that passed all of the single Renzyme filters. A candidate sequence is</span>
+<span class="sd">        very similar to the endogenous sequence, but it has the amino acid</span>
+<span class="sd">        change (could be any codon that corresponds to that amino acid) and</span>
+<span class="sd">        anywhere from one to the maximum possible number of synonymous</span>
+<span class="sd">        substitutions. If 'get_filter_stats', it will also write out a file</span>
+<span class="sd">        called '[locusname]_filter_stats.tsv' that includes a percentage of</span>
+<span class="sd">        candidates that passed for each filter, along with the total number of</span>
+<span class="sd">        candidates.</span>
+<span class="sd">        """</span>
+        <span class="c1"># base the candidates on the endogenous sequence with the desired amino</span>
+        <span class="c1"># acid change</span>
+        <span class="n">codon_freq_dict</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">get_codon_frequency_dict</span><span class="p">(</span><span class="n">codon_usage_tsv</span><span class="p">)</span>
+        <span class="n">AA_change_seq</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">AA_change_sequence</span>
+        <span class="n">cutsite</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cutsite</span>
+        <span class="c1"># Generate a list of synonymous cutsite regions</span>
+        <span class="n">alt_cutsite_regions</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">generate_exon_seqs</span><span class="p">(</span>
+            <span class="n">cutsite</span> <span class="o">-</span> <span class="mi">15</span><span class="p">,</span>
+            <span class="n">cutsite</span> <span class="o">+</span> <span class="mi">15</span><span class="p">,</span>
+            <span class="n">AA_change_seq</span>
+        <span class="p">)</span>
+
+
+        <span class="k">if</span> <span class="n">get_filter_stats</span><span class="p">:</span>
+            <span class="n">filter_stats</span> <span class="o">=</span> <span class="p">{</span><span class="n">filter_name</span><span class="p">:</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">filter_name</span> <span class="ow">in</span> <span class="n">single_enzyme_filters</span><span class="p">}</span>
+        <span class="n">total_cands</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">total_passing_cands</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">alt_cutsite_region</span> <span class="ow">in</span> <span class="n">alt_cutsite_regions</span><span class="p">:</span>
+            <span class="c1"># make the full candidate sequence, which is the endogenous</span>
+            <span class="c1"># sequence with the cutsite region replaced with</span>
+            <span class="c1"># alt_cutsite_region. If the cutsite region was extended,</span>
+            <span class="c1"># restrict it back to 30 bp so no substitutions outsite the 30</span>
+            <span class="c1"># bp cutsite_region are included.</span>
+            <span class="n">candidate_full_seq</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">AA_change_seq</span><span class="p">[:</span><span class="n">cutsite</span><span class="o">-</span><span class="mi">15</span><span class="p">]</span>
+                <span class="o">+</span> <span class="n">alt_cutsite_region</span>
+                <span class="o">+</span> <span class="n">AA_change_seq</span><span class="p">[</span><span class="n">cutsite</span> <span class="o">+</span> <span class="mi">15</span><span class="p">:]</span>
+            <span class="p">)</span>
+            <span class="c1"># make the sequence into a Candidate object and add it to the</span>
+            <span class="c1"># list!</span>
+            <span class="n">candidate</span> <span class="o">=</span> <span class="n">Candidate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">candidate_full_seq</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">candidate</span><span class="o">.</span><span class="n">PAM_is_disrupted</span><span class="p">()</span> <span class="ow">or</span> <span class="n">candidate</span><span class="o">.</span><span class="n">endogenous</span><span class="o">.</span><span class="n">which_PAM</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">'TTTV'</span><span class="p">,</span> <span class="s1">'BAAA'</span><span class="p">]:</span>
+
+                <span class="n">filter_functions</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">get_filter_function_dict</span><span class="p">(</span><span class="n">single_enzyme_filters</span><span class="p">,</span> <span class="n">candidate</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">Renzyme</span> <span class="ow">in</span> <span class="n">candidate</span><span class="o">.</span><span class="n">sub_dep_Renzymes</span><span class="p">:</span>
+                                       
+                    <span class="c1"># if getting filter stats, add each filter's result to the tally</span>
+                    <span class="n">filter_results</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="k">for</span> <span class="n">Filter</span> <span class="ow">in</span> <span class="n">single_enzyme_filters</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">Filter</span> <span class="o">==</span> <span class="s1">'no_endogenous_cutsites_within_Nnt_of_endogenous_cutsite'</span><span class="p">:</span>
+                            <span class="n">filter_result</span> <span class="o">=</span> <span class="n">filter_functions</span><span class="p">[</span><span class="n">Filter</span><span class="p">](</span><span class="n">Renzyme</span><span class="p">,</span> <span class="n">min_Rsite_distance</span><span class="p">)</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">filter_result</span> <span class="o">=</span> <span class="n">filter_functions</span><span class="p">[</span><span class="n">Filter</span><span class="p">](</span><span class="n">Renzyme</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="n">get_filter_stats</span><span class="p">:</span>
+                            <span class="n">filter_stats</span><span class="p">[</span><span class="n">Filter</span><span class="p">]</span> <span class="o">+=</span> <span class="n">filter_result</span>
+                        <span class="k">if</span> <span class="n">Filter</span> <span class="o">!=</span> <span class="s1">'no_unneeded_substitutions'</span><span class="p">:</span>
+                            <span class="n">filter_results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">filter_result</span><span class="p">)</span>
+                    <span class="n">total_cands</span> <span class="o">+=</span> <span class="mi">1</span>
+                    <span class="c1"># if a candidate passed all the filters, create a candidate</span>
+                    <span class="c1"># object for it and yield it</span>
+                    <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="n">filter_results</span><span class="p">):</span>
+                        <span class="n">passed_cand_dict</span> <span class="o">=</span> <span class="p">{</span>
+                            <span class="s1">'seq'</span><span class="p">:</span> <span class="n">candidate</span><span class="o">.</span><span class="n">sequence</span><span class="p">,</span>
+                            <span class="s1">'Renzyme'</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">Renzyme</span><span class="p">),</span>
+                            <span class="s1">'codon frequency change'</span><span class="p">:</span> <span class="n">utils</span><span class="o">.</span><span class="n">get_codon_frequency_differences</span><span class="p">(</span><span class="n">candidate</span><span class="o">.</span><span class="n">endogenous</span><span class="o">.</span><span class="n">sequence</span><span class="p">,</span> <span class="n">candidate</span><span class="o">.</span><span class="n">sequence</span><span class="p">,</span> <span class="n">codon_freq_dict</span><span class="p">),</span>
+                            <span class="s1">'average distance to Cas cut'</span><span class="p">:</span> <span class="n">candidate</span><span class="o">.</span><span class="n">get_average_distance_between_RE_cutsites_and_Cas9_cutsite</span><span class="p">(</span><span class="n">Renzyme</span><span class="p">),</span>
+                                                        <span class="s1">'cutsite distance outside Rsite'</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">Renzyme</span><span class="o">.</span><span class="n">elucidate</span><span class="p">())</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">Renzyme</span><span class="o">.</span><span class="n">site</span><span class="p">),</span>
+                            <span class="s1">'distance to Amino Acid change'</span><span class="p">:</span> <span class="n">candidate</span><span class="o">.</span><span class="n">get_distance_from_nonsynonymous_codon_to_Renzyme_cutsite</span><span class="p">(</span><span class="n">Renzyme</span><span class="p">)</span>
+                        <span class="p">}</span>
+                        <span class="k">if</span> <span class="s1">'no_unneeded_substitutions'</span> <span class="ow">in</span> <span class="n">single_enzyme_filters</span><span class="p">:</span>
+                            <span class="n">passed_cand_dict</span><span class="p">[</span><span class="s1">'no unneeded substitutions'</span><span class="p">]</span><span class="o">=</span> <span class="n">candidate</span><span class="o">.</span><span class="n">no_unneeded_substitutions</span><span class="p">(</span><span class="n">Renzyme</span><span class="p">)</span>
+                            <span class="k">if</span> <span class="n">filter_functions</span><span class="p">[</span><span class="s1">'no_unneeded_substitutions'</span><span class="p">](</span><span class="n">Renzyme</span><span class="p">):</span> 
+                                <span class="n">total_passing_cands</span> <span class="o">+=</span> <span class="mi">1</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">total_passing_cands</span> <span class="o">+=</span><span class="mi">1</span>
+                        <span class="k">yield</span> <span class="n">passed_cand_dict</span>
+        <span class="k">if</span> <span class="n">get_filter_stats</span><span class="p">:</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">locusname</span> <span class="o">+</span> <span class="s1">'_filter_stats.tsv'</span><span class="p">,</span> <span class="s1">'w'</span><span class="p">)</span> <span class="k">as</span> <span class="n">fout</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">filtername</span> <span class="ow">in</span> <span class="n">filter_stats</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                    <span class="n">fout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span>
+                        <span class="n">filtername</span>
+                        <span class="o">+</span> <span class="s1">'</span><span class="se">\t</span><span class="s1">'</span>
+                        <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">round</span><span class="p">((</span><span class="n">filter_stats</span><span class="p">[</span><span class="n">filtername</span><span class="p">]</span><span class="o">/</span><span class="n">total_cands</span><span class="p">)</span> <span class="o">*</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+                        <span class="o">+</span> <span class="s1">'</span><span class="se">\n</span><span class="s1">'</span>
+                    <span class="p">)</span>
+                <span class="n">fout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">'total_candidates</span><span class="se">\t</span><span class="s1">'</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">total_cands</span><span class="p">)</span> <span class="o">+</span> <span class="s1">'</span><span class="se">\n</span><span class="s1">'</span><span class="p">)</span>
+                <span class="n">fout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">'total_passing_candidates</span><span class="se">\t</span><span class="s1">'</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">total_passing_cands</span><span class="p">))</span></div>
+
+
+
+
+    <span class="s2">"ENDOGENOUS LEVEL ENZYME FILTERING METHODS"</span>
+
+<div class="viewcode-block" id="Endogenous.no_endogenous_cutsites_within_Nnt_of_primers">
+<a class="viewcode-back" href="../autoapi/tiarsdesigner/index.html#tiarsdesigner.Endogenous.no_endogenous_cutsites_within_Nnt_of_primers">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">no_endogenous_cutsites_within_Nnt_of_primers</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Renzyme</span><span class="p">,</span> <span class="n">N</span><span class="o">=</span><span class="mi">5</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""</span>
+<span class="sd">        Filters out Renzymes for all candidates that have endogenous sites</span>
+<span class="sd">        within N nucleotides of the primers.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        Renzyme: Bio.Restriction enzyme object</span>
+<span class="sd">            A restriction enzyme in the form of a Bio.Restriction enzyme object</span>
+
+<span class="sd">        N: int</span>
+<span class="sd">            The desired minimum distance in nucleotides an endogenous site must</span>
+<span class="sd">            be from the primers for the Renzyme to pass this filter. Default</span>
+<span class="sd">            = 5</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        False if Renzyme has an endogenous site within Nnt of one of the</span>
+<span class="sd">        primers, True otherwise. This function will be easier to write when</span>
+<span class="sd">        we've fleshed out exactly what sequences we are giving to Endogenous</span>
+<span class="sd">        and Candidate"""</span>
+        <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="Endogenous.does_not_exceed_max_cutsites">
+<a class="viewcode-back" href="../autoapi/tiarsdesigner/index.html#tiarsdesigner.Endogenous.does_not_exceed_max_cutsites">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">does_not_exceed_max_cutsites</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Renzyme</span><span class="p">,</span> <span class="n">N</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""</span>
+<span class="sd">        Filters out this Renzyme for all candidates it it has more than</span>
+<span class="sd">        N cutsites in the endogenous sequence.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        N: int</span>
+<span class="sd">            The maximum number of endogenous cutsites Renzyme is allowed to</span>
+<span class="sd">            have.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        False if Renzyme has more than N cutsites in the endogenous sequence,</span>
+<span class="sd">        True otherwise.</span>
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Renzymes</span><span class="p">[</span><span class="n">Renzyme</span><span class="p">])</span> <span class="o">&gt;</span> <span class="n">N</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">True</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="Candidate">
+<a class="viewcode-back" href="../autoapi/tiarsdesigner/index.html#tiarsdesigner.Candidate">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">Candidate</span><span class="p">(</span><span class="n">Designer</span><span class="p">):</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">endogenous</span><span class="p">,</span> <span class="n">sequence</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""The Candidate class is a subclass of the designer class, and</span>
+<span class="sd">        a candidate is a candidate repair oligo with synonymous substitutions</span>
+<span class="sd">        to the endogenous sequence within 15 nt of the Cas9 cutsite.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+
+<span class="sd">        endogenous: Endogenou object</span>
+<span class="sd">            An Endogenous object, the wildtype sequence that the candidate is</span>
+<span class="sd">            based on.</span>
+
+<span class="sd">        sequence: string</span>
+<span class="sd">            The candidate sequence, very similar to the endogenous object</span>
+<span class="sd">            sequence but it has the desired CRISPR/cas9 nonsynonymous</span>
+<span class="sd">            substitution, as well as a series of synonymous substitutions</span>
+<span class="sd">            within the cutsite region.</span>
+
+<span class="sd">        Attributes</span>
+<span class="sd">        ----------</span>
+
+<span class="sd">        From Parent Class:</span>
+
+<span class="sd">        sequence</span>
+<span class="sd">        cutsite</span>
+<span class="sd">        cutsite_region</span>
+<span class="sd">        cutsite_frame</span>
+<span class="sd">        Renzymes</span>
+<span class="sd">        splicing_hexamers</span>
+
+<span class="sd">        Unique to Candidate Class:</span>
+
+<span class="sd">        endogenous: Endogenous object</span>
+<span class="sd">            An Endogenous object, the wildtype sequence that the Candidate is</span>
+<span class="sd">            based on.</span>
+
+<span class="sd">        sub_dep_Renzymes: dict</span>
+<span class="sd">            substitution dependent restriction enzymes, a dictionary of</span>
+<span class="sd">            Restriction enzymes with cutsites that depend on synonymous</span>
+<span class="sd">            substitutions in cutsite_region. This means that the bp</span>
+<span class="sd">            substitutions in the Candidate sequence created recognition sites</span>
+<span class="sd">            in the candidate sequence for these enzymes that aren't in the</span>
+<span class="sd">            endogenous sequence. In other words, this is a dictionary of</span>
+<span class="sd">            enzymes with recognition sites that are in the Candidate sequence</span>
+<span class="sd">            but not in the endogenous sequence.  If an enzyme has recognition</span>
+<span class="sd">            sites in the endogenous sequence AND new additional substitution</span>
+<span class="sd">            dependent sites in the candidate sequence, only the novel</span>
+<span class="sd">            substitution dependent cutsites will be listed for that enzyme in</span>
+<span class="sd">            this dictionary.</span>
+
+<span class="sd">        sub_dep_Renzyme_recognition_sites: dict</span>
+<span class="sd">            very similar to sub_dep_Renzymes, but the dictionary values are the</span>
+<span class="sd">            coordinates of the enzyme recognition sites rather than the</span>
+<span class="sd">            cutsites.</span>
+
+<span class="sd">        num_subs: int</span>
+<span class="sd">            the number of bp substitutions the candidate has compared to the</span>
+<span class="sd">            wildtypes sequence (endogenous.sequence)</span>
+
+<span class="sd">        endogenous_matches: dict</span>
+<span class="sd">            a dictionary of the restriction enzymes with values describing the</span>
+<span class="sd">            "polarity" of the endogenous site(s) compared to the substitution</span>
+<span class="sd">            dependent site(s). This dictionary will assign 'None' restriction</span>
+<span class="sd">            enzymes that have sandwiched endogenous or candidate sites (see</span>
+<span class="sd">            method 'no_sandwhiched_cutsites' for more details. For polarity,</span>
+<span class="sd">            '0' means that the restriction enzyme has no endogenous cutsites.</span>
+<span class="sd">            A '+' value means that the restriction enzyme has one or more</span>
+<span class="sd">            endogenous sites after the substitution dependent cutsite(s) in the</span>
+<span class="sd">            sequence string (and none before it). A '-' value means that it has</span>
+<span class="sd">            one or more endogenous cutsites before the substitution dependent</span>
+<span class="sd">            cutsite(s) in the string (and none after it)</span>
+<span class="sd">        """</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">endogenous</span> <span class="o">=</span> <span class="n">endogenous</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">sequence</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">endogenous</span><span class="o">.</span><span class="n">cutsite</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">endogenous</span><span class="o">.</span><span class="n">Renzyme_list</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sub_dep_Renzymes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_substitution_dependent_Renzymes</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sub_dep_Renzyme_recognition_sites</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_sub_dep_Renzyme_recognition_sites</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_subs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_hamming_distance</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">endogenous_matches</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_endogenous_matches</span><span class="p">()</span>
+
+    <span class="s2">"METHODS THAT SET ATTRIBUTES"</span>
+
+<div class="viewcode-block" id="Candidate.get_hamming_distance">
+<a class="viewcode-back" href="../autoapi/tiarsdesigner/index.html#tiarsdesigner.Candidate.get_hamming_distance">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_hamming_distance</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""</span>
+<span class="sd">        Returns the hamming distance between the endogenous sequence and the</span>
+<span class="sd">        candidate sequence, AKA the number of single character substitutions in</span>
+<span class="sd">        the candidate (self.sequence) compared to the endogenous sequence</span>
+<span class="sd">        (self.endogenous.sequence)</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Integer indicating the number of substitutions to the endogenous</span>
+<span class="sd">        sequence are in the candidate sequence.</span>
+<span class="sd">        """</span>
+
+        <span class="k">return</span> <span class="n">Levenshtein</span><span class="o">.</span><span class="n">distance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">endogenous</span><span class="o">.</span><span class="n">sequence</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sequence</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Candidate.get_substitution_dependent_Renzymes">
+<a class="viewcode-back" href="../autoapi/tiarsdesigner/index.html#tiarsdesigner.Candidate.get_substitution_dependent_Renzymes">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_substitution_dependent_Renzymes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Finds restriction enzyme cutsites that depend on synonymous</span>
+<span class="sd">        substitutions in the cutsite region (AKA they are in the candidate</span>
+<span class="sd">        sequence but not the endogenous sequence because one or more</span>
+<span class="sd">        substitutions created their recognition site) and returns</span>
+<span class="sd">        a dictionary mapping those cutsites to their enzymes.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        A dictionary with enzyme names as keys and their substitution dependent</span>
+<span class="sd">        cutsites as values.  If an enzyme has multiple cutsites in the</span>
+<span class="sd">        sequence, it will only return the cutsites that are unique to the</span>
+<span class="sd">        candidate sequence (compared to the endogenous</span>
+<span class="sd">        self.endogenous.sequence)</span>
+<span class="sd">        """</span>
+
+        <span class="n">sub_dep_Renzymes</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">Renzyme</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">Renzymes</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">Renzyme</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">endogenous</span><span class="o">.</span><span class="n">Renzymes</span><span class="p">:</span>
+                <span class="n">candidate_unique_sites</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
+                    <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Renzymes</span><span class="p">[</span><span class="n">Renzyme</span><span class="p">])</span>
+                    <span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">endogenous</span><span class="o">.</span><span class="n">Renzymes</span><span class="p">[</span><span class="n">Renzyme</span><span class="p">])</span>
+                <span class="p">)</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">candidate_unique_sites</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">sub_dep_Renzymes</span><span class="p">[</span><span class="n">Renzyme</span><span class="p">]</span> <span class="o">=</span> <span class="n">candidate_unique_sites</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">sub_dep_Renzymes</span><span class="p">[</span><span class="n">Renzyme</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Renzymes</span><span class="p">[</span><span class="n">Renzyme</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">sub_dep_Renzymes</span></div>
+
+
+<div class="viewcode-block" id="Candidate.get_endogenous_matches">
+<a class="viewcode-back" href="../autoapi/tiarsdesigner/index.html#tiarsdesigner.Candidate.get_endogenous_matches">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_endogenous_matches</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+<span class="w">        </span><span class="sd">"""This function will look at restriction enzymes with endogenous and</span>
+<span class="sd">        substitution dependent sites, and it'll return a dictionary of the</span>
+<span class="sd">        restriction enzymes with values describing the "polarity" of the</span>
+<span class="sd">        endogenous site(s) compared to the substitution dependent site(s).</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        A dictionary with enzymes as keys and symbols indicating the polarity</span>
+<span class="sd">        of their cutsites as values. A '0' value means that the restriction</span>
+<span class="sd">        enzyme has no endogenous cutsites. A '+' value means that the</span>
+<span class="sd">        restriction enzyme has one or more endogenous sites after the</span>
+<span class="sd">        substitution dependent cutsite(s) in the sequence string (and none</span>
+<span class="sd">        before it). A '-' value means that it has one or more endogenous</span>
+<span class="sd">        cutsites before the substitution dependent cutsite(s) in the string</span>
+<span class="sd">        (and none after it). A value of None means that that enzyme either has</span>
+<span class="sd">        novel site(s) sandwiched between endogenous sites, or endogenous</span>
+<span class="sd">        site(s) sandwiched between novel sites.</span>
+<span class="sd">        """</span>
+
+        <span class="n">endogenous_matches</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">Renzyme</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sub_dep_Renzymes</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">Renzyme</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">endogenous</span><span class="o">.</span><span class="n">Renzymes</span><span class="p">:</span>
+                <span class="n">endogenous_matches</span><span class="p">[</span><span class="n">Renzyme</span><span class="p">]</span> <span class="o">=</span> <span class="s1">'0'</span>
+            <span class="k">elif</span> <span class="p">(</span>
+                <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sub_dep_Renzymes</span><span class="p">[</span><span class="n">Renzyme</span><span class="p">])</span>
+                <span class="o">&lt;</span> <span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">endogenous</span><span class="o">.</span><span class="n">Renzymes</span><span class="p">[</span><span class="n">Renzyme</span><span class="p">])</span>
+            <span class="p">):</span>
+                <span class="n">endogenous_matches</span><span class="p">[</span><span class="n">Renzyme</span><span class="p">]</span> <span class="o">=</span> <span class="s1">'+'</span>
+            <span class="k">elif</span> <span class="p">(</span>
+                <span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sub_dep_Renzymes</span><span class="p">[</span><span class="n">Renzyme</span><span class="p">])</span>
+                <span class="o">&gt;</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">endogenous</span><span class="o">.</span><span class="n">Renzymes</span><span class="p">[</span><span class="n">Renzyme</span><span class="p">])</span>
+            <span class="p">):</span>
+                <span class="n">endogenous_matches</span><span class="p">[</span><span class="n">Renzyme</span><span class="p">]</span> <span class="o">=</span> <span class="s1">'-'</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">endogenous_matches</span><span class="p">[</span><span class="n">Renzyme</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">return</span> <span class="n">endogenous_matches</span></div>
+
+
+<div class="viewcode-block" id="Candidate.get_sub_dep_Renzyme_recognition_sites">
+<a class="viewcode-back" href="../autoapi/tiarsdesigner/index.html#tiarsdesigner.Candidate.get_sub_dep_Renzyme_recognition_sites">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_sub_dep_Renzyme_recognition_sites</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Finds restriction enzyme recognition sites within the candidate seq</span>
+<span class="sd">        that depend on synonymous substitutions in the cutsite region (AKA they</span>
+<span class="sd">        are in the candidate sequence but not the endogenous sequence because</span>
+<span class="sd">        one or more substitutions created them) and returns a dictionary</span>
+<span class="sd">        mapping those recognition site coordinates to their enzymes.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        A dictionary with enzyme names as keys and their substitution dependent</span>
+<span class="sd">        recognition site coordinates as values.  If an enzyme has multiple</span>
+<span class="sd">        recognition sites in the sequence, it will only return the recognition</span>
+<span class="sd">        site coordinates that are unique to the candidate sequence (compared to</span>
+<span class="sd">        the endogenous self.endogenous.sequence)</span>
+<span class="sd">        """</span>
+        <span class="n">unfiltered_candidate_dict</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">get_Rsite_dict</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sequence</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sub_dep_Renzymes</span>
+        <span class="p">)</span>
+        <span class="n">endogenous_dict</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">get_Rsite_dict</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">endogenous</span><span class="o">.</span><span class="n">sequence</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sub_dep_Renzymes</span>
+        <span class="p">)</span>
+        <span class="n">filtered_dict</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">Renzyme</span> <span class="ow">in</span> <span class="n">unfiltered_candidate_dict</span><span class="p">:</span>
+            <span class="n">filtered_dict</span><span class="p">[</span><span class="n">Renzyme</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">unfiltered_candidate_dict</span><span class="p">[</span><span class="n">Renzyme</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">endogenous_dict</span><span class="p">[</span><span class="n">Renzyme</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">candidate_unique_sites</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
+                        <span class="nb">set</span><span class="p">(</span><span class="n">unfiltered_candidate_dict</span><span class="p">[</span><span class="n">Renzyme</span><span class="p">])</span>
+                        <span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="n">endogenous_dict</span><span class="p">[</span><span class="n">Renzyme</span><span class="p">])</span>
+                    <span class="p">)</span>
+                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">candidate_unique_sites</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="n">filtered_dict</span><span class="p">[</span><span class="n">Renzyme</span><span class="p">]</span> <span class="o">=</span> <span class="n">candidate_unique_sites</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">filtered_dict</span><span class="p">[</span><span class="n">Renzyme</span><span class="p">]</span> <span class="o">=</span> <span class="n">unfiltered_candidate_dict</span><span class="p">[</span><span class="n">Renzyme</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">filtered_dict</span></div>
+
+
+<div class="viewcode-block" id="Candidate.get_average_distance_between_RE_cutsites_and_Cas9_cutsite">
+<a class="viewcode-back" href="../autoapi/tiarsdesigner/index.html#tiarsdesigner.Candidate.get_average_distance_between_RE_cutsites_and_Cas9_cutsite">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_average_distance_between_RE_cutsites_and_Cas9_cutsite</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Renzyme</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""</span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        The average distance in nucleotides between novel cutsite and cas9</span>
+<span class="sd">        cutsite for each novel cutsite for Renzyme in the candidate sequence.</span>
+<span class="sd">        """</span>
+        <span class="n">REdistances</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="nb">abs</span><span class="p">(</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">cutsite</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sub_dep_Renzymes</span><span class="p">[</span><span class="n">Renzyme</span><span class="p">]</span>
+        <span class="p">]</span>
+        <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span><span class="n">REdistances</span><span class="p">)</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="n">REdistances</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Candidate.get_distance_from_nonsynonymous_codon_to_Renzyme_cutsite">
+<a class="viewcode-back" href="../autoapi/tiarsdesigner/index.html#tiarsdesigner.Candidate.get_distance_from_nonsynonymous_codon_to_Renzyme_cutsite">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_distance_from_nonsynonymous_codon_to_Renzyme_cutsite</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Renzyme</span><span class="p">):</span>
+        <span class="n">AA_change_site</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">endogenous</span><span class="o">.</span><span class="n">AA_change_site</span>
+        <span class="n">Renzyme_cutsites</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="o">-</span> <span class="mi">1</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">Renzymes</span><span class="p">[</span><span class="n">Renzyme</span><span class="p">]]</span>
+        <span class="n">REdistances</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">cutsite</span> <span class="ow">in</span> <span class="n">Renzyme_cutsites</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">cutsite</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">AA_change_site</span><span class="p">,</span> <span class="n">AA_change_site</span> <span class="o">+</span> <span class="mi">3</span><span class="p">):</span>
+                <span class="n">REdistances</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">cutsite</span> <span class="o">&lt;</span> <span class="n">AA_change_site</span><span class="p">:</span>
+                <span class="n">REdistances</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">AA_change_site</span> <span class="o">-</span> <span class="n">cutsite</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">cutsite</span> <span class="o">&gt;=</span> <span class="n">AA_change_site</span> <span class="o">+</span> <span class="mi">3</span><span class="p">:</span>
+                <span class="n">REdistances</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cutsite</span> <span class="o">-</span> <span class="p">(</span><span class="n">AA_change_site</span> <span class="o">+</span> <span class="mi">3</span><span class="p">))</span>
+        <span class="k">return</span> <span class="nb">min</span><span class="p">(</span><span class="n">REdistances</span><span class="p">)</span></div>
+
+
+    <span class="s2">"CANDIDATE FILTERING METHODS"</span>
+
+<div class="viewcode-block" id="Candidate.more_than_one_substitution">
+<a class="viewcode-back" href="../autoapi/tiarsdesigner/index.html#tiarsdesigner.Candidate.more_than_one_substitution">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">more_than_one_substitution</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""</span>
+<span class="sd">        Filters out candidates that have less than two substitutions.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        False if the candidate only has one substitution, True otherwise</span>
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_subs</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">True</span></div>
+
+
+<div class="viewcode-block" id="Candidate.no_new_cutsites">
+<a class="viewcode-back" href="../autoapi/tiarsdesigner/index.html#tiarsdesigner.Candidate.no_new_cutsites">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">no_new_cutsites</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""</span>
+<span class="sd">        Filters out candidates for which the synonymous changes did not create</span>
+<span class="sd">        any new enzyme recognition sites.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        False if the synonymous changes did not create</span>
+<span class="sd">        any new enzyme recognition sites, True otherwise"""</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sub_dep_Renzymes</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">True</span></div>
+
+
+<div class="viewcode-block" id="Candidate.no_splicing_interference">
+<a class="viewcode-back" href="../autoapi/tiarsdesigner/index.html#tiarsdesigner.Candidate.no_splicing_interference">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">no_splicing_interference</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""</span>
+<span class="sd">        Filters out candidates for which the substitutions interferred with</span>
+<span class="sd">        splicing hexamers.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        False if there are any differences between self.splicing_hexamers and</span>
+<span class="sd">        self.endogenous.splicing_hexamers (which would indicate that the</span>
+<span class="sd">        candidate's synonymous changes interfered with the splicing hexamers),</span>
+<span class="sd">        True otherwise.</span>
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">splicing_hexamers</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">endogenous</span><span class="o">.</span><span class="n">splicing_hexamers</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span></div>
+
+
+<div class="viewcode-block" id="Candidate.PAM_is_disrupted">
+<a class="viewcode-back" href="../autoapi/tiarsdesigner/index.html#tiarsdesigner.Candidate.PAM_is_disrupted">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">PAM_is_disrupted</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""</span>
+<span class="sd">        Filters out candidates for which the PAM site could be interrupted by</span>
+<span class="sd">        a synonymous change or the desired AA change, but isn't.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        False if the PAM site can be interrupted but isn't, True otherwise.</span>
+<span class="sd">        """</span>
+        <span class="n">PAM_start</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">endogenous</span><span class="o">.</span><span class="n">PAM_start</span>
+        <span class="n">which_PAM</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">endogenous</span><span class="o">.</span><span class="n">which_PAM</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">endogenous</span><span class="o">.</span><span class="n">PAM_can_change</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">which_PAM</span> <span class="o">==</span> <span class="s1">'CCN'</span><span class="p">:</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sequence</span><span class="p">[</span><span class="n">PAM_start</span><span class="p">:</span><span class="n">PAM_start</span> <span class="o">+</span> <span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="s1">'CC'</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="kc">False</span>
+            
+            <span class="k">if</span> <span class="n">which_PAM</span> <span class="o">==</span> <span class="s1">'NGG'</span><span class="p">:</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sequence</span><span class="p">[</span><span class="n">PAM_start</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:</span> <span class="n">PAM_start</span> <span class="o">+</span> <span class="mi">3</span><span class="p">]</span> <span class="o">==</span> <span class="s1">'GG'</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="kc">False</span>
+            
+            <span class="k">if</span> <span class="n">which_PAM</span> <span class="o">==</span> <span class="s1">'TTTV'</span><span class="p">:</span>
+                <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sequence</span><span class="p">[</span><span class="n">PAM_start</span><span class="p">:</span> <span class="n">PAM_start</span> <span class="o">+</span> <span class="mi">3</span><span class="p">]</span> <span class="o">==</span> <span class="s1">'TTT'</span>
+                <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">sequence</span><span class="p">[</span><span class="n">PAM_start</span> <span class="o">+</span> <span class="mi">3</span><span class="p">]</span> <span class="o">!=</span> <span class="s1">'T'</span><span class="p">):</span>
+                    <span class="k">return</span> <span class="kc">False</span>
+            
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">endogenous</span><span class="o">.</span><span class="n">which_PAM</span> <span class="o">==</span> <span class="s1">'BAAA'</span><span class="p">:</span>
+                <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sequence</span><span class="p">[</span><span class="n">PAM_start</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:</span> <span class="n">PAM_start</span> <span class="o">+</span> <span class="mi">4</span><span class="p">]</span> <span class="o">==</span> <span class="s1">'AAA'</span>
+                <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">sequence</span><span class="p">[</span><span class="n">PAM_start</span><span class="p">]</span> <span class="o">!=</span> <span class="s1">'A'</span><span class="p">):</span>
+                    <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">return</span> <span class="kc">True</span></div>
+
+
+<div class="viewcode-block" id="Candidate.miRNA_target_interference">
+<a class="viewcode-back" href="../autoapi/tiarsdesigner/index.html#tiarsdesigner.Candidate.miRNA_target_interference">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">miRNA_target_interference</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span></div>
+
+
+    <span class="s2">"CANDIDATE LEVEL ENZYME FILTERING METHODS"</span>
+
+    <span class="c1"># This one is also a helper function for get_endogenous_matches()</span>
+<div class="viewcode-block" id="Candidate.no_sandwiched_cutsites">
+<a class="viewcode-back" href="../autoapi/tiarsdesigner/index.html#tiarsdesigner.Candidate.no_sandwiched_cutsites">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">no_sandwiched_cutsites</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Renzyme</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""</span>
+<span class="sd">        Filters out Renzymes for this candidate that have either one or more</span>
+<span class="sd">        substitution dependent sites sandwiched between endogenous sites, or</span>
+<span class="sd">        one or more endogenous sites sandwiched between substitution dependent</span>
+<span class="sd">        sites.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        Renzyme: Bio.Restriction enzyme object</span>
+<span class="sd">            A restriction enzyme in the form of a Bio.Restriction object.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        False if the Renzyme has any sandwiched cutsites, True otherwise</span>
+<span class="sd">        """</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">endogenous_matches</span><span class="p">[</span><span class="n">Renzyme</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span></div>
+
+
+<div class="viewcode-block" id="Candidate.non_ambiguous_cutsites">
+<a class="viewcode-back" href="../autoapi/tiarsdesigner/index.html#tiarsdesigner.Candidate.non_ambiguous_cutsites">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">non_ambiguous_cutsites</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Renzyme</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""</span>
+<span class="sd">        Filters out enzymes for which the exact location of the cutsite is</span>
+<span class="sd">        not fully known.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        Renzyme: Bio.Restriction enzyme object</span>
+<span class="sd">            A restriction enzyme in the form of a Bio.Restriction object.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        False if Renzyme has an unknown/ambiguous cutsite, True otherwise.</span>
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="s1">'?'</span> <span class="ow">in</span> <span class="n">Renzyme</span><span class="o">.</span><span class="n">elucidate</span><span class="p">():</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">True</span></div>
+
+
+<div class="viewcode-block" id="Candidate.no_endogenous_cutsites_within_Nnt_of_novel_cutsite">
+<a class="viewcode-back" href="../autoapi/tiarsdesigner/index.html#tiarsdesigner.Candidate.no_endogenous_cutsites_within_Nnt_of_novel_cutsite">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">no_endogenous_cutsites_within_Nnt_of_novel_cutsite</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Renzyme</span><span class="p">,</span> <span class="n">N</span><span class="o">=</span><span class="mi">5</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""</span>
+<span class="sd">        Filters out Renzymes for this candidate that have endogenous cutsites</span>
+<span class="sd">        within N nucleotides of a substitution dependent cutsite.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        Renzyme: Bio.Restriction enzyme object</span>
+<span class="sd">            A restriction enzyme in the form of a Bio.Restriction object.</span>
+
+<span class="sd">        N: int</span>
+<span class="sd">            The minimum distance in nucleotides any endogenous site can be from</span>
+<span class="sd">            any substitution dependent site.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        False if the Renzyme has an endogenous site within N nt of</span>
+<span class="sd">        a novel site for this candidate, True otherwise.</span>
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="n">Renzyme</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">endogenous</span><span class="o">.</span><span class="n">Renzymes</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">for</span> <span class="n">cutsite</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sub_dep_Renzymes</span><span class="p">[</span><span class="n">Renzyme</span><span class="p">]:</span>
+            <span class="n">distances</span> <span class="o">=</span> <span class="p">[</span><span class="nb">abs</span><span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">cutsite</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">endogenous</span><span class="o">.</span><span class="n">Renzymes</span><span class="p">[</span><span class="n">Renzyme</span><span class="p">]]</span>
+            <span class="k">if</span> <span class="nb">min</span><span class="p">(</span><span class="n">distances</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">N</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">return</span> <span class="kc">True</span></div>
+
+
+<div class="viewcode-block" id="Candidate.no_lost_endogenous_sites">
+<a class="viewcode-back" href="../autoapi/tiarsdesigner/index.html#tiarsdesigner.Candidate.no_lost_endogenous_sites">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">no_lost_endogenous_sites</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Renzyme</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""</span>
+<span class="sd">        Filters out Renzymes for this candidate that have endogenous sites that</span>
+<span class="sd">        have been interrupted by substitutions, such that they only appear in</span>
+<span class="sd">        the endogenous sequence and not in the candidate sequence.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        Renzyme: Bio.Restriction enzyme object</span>
+<span class="sd">            A restriction enzyme in the form of a Bio.Restriction object.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        False if any endogenous cutsites for</span>
+<span class="sd">        Renzyme are lost with the synonymous substitutions, True</span>
+<span class="sd">        otherwise"""</span>
+        <span class="k">if</span> <span class="n">Renzyme</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">endogenous</span><span class="o">.</span><span class="n">Renzymes</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">Renzyme</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">Renzymes</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">False</span>
+            <span class="k">for</span> <span class="n">cutsite</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">endogenous</span><span class="o">.</span><span class="n">Renzymes</span><span class="p">[</span><span class="n">Renzyme</span><span class="p">]:</span>
+                <span class="k">if</span> <span class="n">cutsite</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">Renzymes</span><span class="p">[</span><span class="n">Renzyme</span><span class="p">]:</span>
+                    <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">return</span> <span class="kc">True</span></div>
+
+
+<div class="viewcode-block" id="Candidate.novel_site_depends_on_at_least_two_substitutions">
+<a class="viewcode-back" href="../autoapi/tiarsdesigner/index.html#tiarsdesigner.Candidate.novel_site_depends_on_at_least_two_substitutions">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">novel_site_depends_on_at_least_two_substitutions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Renzyme</span><span class="p">):</span>
+
+<span class="w">        </span><span class="sd">"""</span>
+<span class="sd">        Filters out Renzymes for this candidate that have substitution</span>
+<span class="sd">        dependent recognition sites in the candidate sequence that depend on</span>
+<span class="sd">        less than two substitutions.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        Renzyme: Bio.Restriction enzyme object</span>
+<span class="sd">            A restriction enzyme in the form of a Bio.Restriction object.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        False if any of the substitution dependent recognition sites for this</span>
+<span class="sd">        Renzyme in this candidate depend on less than two substitutions, True</span>
+<span class="sd">        otherwise.</span>
+<span class="sd">        """</span>
+        <span class="c1"># get the locations of the substitutions that each recognition site for</span>
+        <span class="c1"># Renzyme depend on</span>
+        <span class="n">Renzyme_subs</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">get_substitutions_Renzyme_depends_on</span><span class="p">(</span>
+            <span class="n">Renzyme</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">endogenous</span><span class="o">.</span><span class="n">sequence</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sequence</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sub_dep_Renzyme_recognition_sites</span><span class="p">[</span><span class="n">Renzyme</span><span class="p">]</span>
+        <span class="p">)</span>
+
+        <span class="c1"># If there's a site with only one sub, we don't want that RE!</span>
+        <span class="k">if</span> <span class="nb">all</span><span class="p">(</span>
+            <span class="p">[</span>
+                <span class="nb">len</span><span class="p">(</span><span class="n">Renzyme_subs</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">&gt;=</span> <span class="mi">2</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">Renzyme_subs</span><span class="p">))</span>
+            <span class="p">]</span>
+        <span class="p">):</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">return</span> <span class="kc">False</span></div>
+
+
+<div class="viewcode-block" id="Candidate.num_recognition_sites_equals_num_cutsites">
+<a class="viewcode-back" href="../autoapi/tiarsdesigner/index.html#tiarsdesigner.Candidate.num_recognition_sites_equals_num_cutsites">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">num_recognition_sites_equals_num_cutsites</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Renzyme</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""</span>
+<span class="sd">        Filters out any Renzymes for this candidate for which the number of</span>
+<span class="sd">        recognition sites in the whole sequence does not equal the number of</span>
+<span class="sd">        cutsites for the whole sequence.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        Renzyme: Bio.Restriction enzyme object</span>
+<span class="sd">            A restriction enzyme in the form of a Bio.Restriction object.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        False if there are a different number of</span>
+<span class="sd">        cutsites from recognition sites for Renzyme (which could mean that the</span>
+<span class="sd">        enzyme cuts outsite the recognitition site and the Renzyme is close</span>
+<span class="sd">        enough to the edge that the cut would not appear in the sequence, or</span>
+<span class="sd">        maybe the enzyme cuts twice), True otherwise"""</span>
+
+        <span class="n">full_Rsite_dict</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">get_Rsite_dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sequence</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Renzymes</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">Renzyme</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">Renzymes</span> <span class="ow">and</span> <span class="n">Renzyme</span> <span class="ow">in</span> <span class="n">full_Rsite_dict</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Renzymes</span><span class="p">[</span><span class="n">Renzyme</span><span class="p">])</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">full_Rsite_dict</span><span class="p">[</span><span class="n">Renzyme</span><span class="p">]):</span>
+                <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">return</span> <span class="kc">False</span></div>
+
+
+    <span class="s2">"ENZYME PAIR FILTERING METHODS"</span>
+
+<div class="viewcode-block" id="Candidate.at_least_one_has_endogenous_site">
+<a class="viewcode-back" href="../autoapi/tiarsdesigner/index.html#tiarsdesigner.Candidate.at_least_one_has_endogenous_site">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">at_least_one_has_endogenous_site</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">RenzymeA</span><span class="p">,</span> <span class="n">RenzymeB</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""</span>
+<span class="sd">        Filters out Renzyme pairs for this candidate for which neither Renzyme</span>
+<span class="sd">        in the pair has an endogenous site.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        RenzymeA: Bio.Restriction enzyme object</span>
+<span class="sd">            A restriction enzyme in the form of a Bio.Restriction object.</span>
+
+<span class="sd">        RenzymeB: Bio.Restriction enzyme object</span>
+<span class="sd">            A restriction enzyme other than RenzymeA, in the form of</span>
+<span class="sd">            a Bio.Restriction object.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        False if neither RenzymeA nor RenzymeB have</span>
+<span class="sd">        any endogenous sites (AKA if both have polarities of '0'), True</span>
+<span class="sd">        otherwise.</span>
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">endogenous_matches</span><span class="p">[</span><span class="n">RenzymeA</span><span class="p">]</span> <span class="o">==</span> <span class="s1">'0'</span>
+            <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">endogenous_matches</span><span class="p">[</span><span class="n">RenzymeB</span><span class="p">]</span> <span class="o">==</span> <span class="s1">'0'</span>
+        <span class="p">):</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">True</span></div>
+
+
+<div class="viewcode-block" id="Candidate.both_have_endogenous_sites">
+<a class="viewcode-back" href="../autoapi/tiarsdesigner/index.html#tiarsdesigner.Candidate.both_have_endogenous_sites">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">both_have_endogenous_sites</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">RenzymeA</span><span class="p">,</span> <span class="n">RenzymeB</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""</span>
+<span class="sd">        A harsher version of 'at_least_one_has_endogenous_site', this filters</span>
+<span class="sd">        out Renzyme pairs for this candidate for which at least one of the</span>
+<span class="sd">        candidates in the pair does not have an endogenous site.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        RenzymeA: Bio.Restriction enzyme object</span>
+<span class="sd">            A restriction enzyme in the form of a Bio.Restriction object.</span>
+
+<span class="sd">        RenzymeB: Bio.Restriction enzyme object</span>
+<span class="sd">            A restriction enzyme other than RenzymeA, in the form of</span>
+<span class="sd">            a Bio.Restriction object.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        False unless both Renzymes have an endogenous site</span>
+<span class="sd">        """</span>
+
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">endogenous_matches</span><span class="p">[</span><span class="n">RenzymeA</span><span class="p">]</span> <span class="o">==</span> <span class="s1">'0'</span>
+            <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">endogenous_matches</span><span class="p">[</span><span class="n">RenzymeB</span><span class="p">]</span> <span class="o">==</span> <span class="s1">'0'</span>
+        <span class="p">):</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">True</span></div>
+
+
+<div class="viewcode-block" id="Candidate.compatible_polarity">
+<a class="viewcode-back" href="../autoapi/tiarsdesigner/index.html#tiarsdesigner.Candidate.compatible_polarity">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">compatible_polarity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">RenzymeA</span><span class="p">,</span> <span class="n">RenzymeB</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""</span>
+<span class="sd">        Filters out Renzyme pairs for this candidates if they have endogenous</span>
+<span class="sd">        sites on opposite sides of their novel sites with respect to the</span>
+<span class="sd">        beginning of the sequence (AKA one of the primers).</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        RenzymeA: Bio.Restriction enzyme object</span>
+<span class="sd">            A restriction enzyme in the form of a Bio.Restriction object.</span>
+
+<span class="sd">        RenzymeB: Bio.Restriction enzyme object</span>
+<span class="sd">            A restriction enzyme other than RenzymeA, in the form of</span>
+<span class="sd">            a Bio.Restriction object.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        This function will return False if Renzyme A and Renzyme B have</span>
+<span class="sd">        incompatible polarities (e.g. if one has a '-' polarity and the other</span>
+<span class="sd">        has a '+' polarity), True otherwise.</span>
+<span class="sd">        """</span>
+
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">endogenous_matches</span><span class="p">[</span><span class="n">RenzymeA</span><span class="p">]</span> <span class="o">==</span> <span class="s1">'+'</span>
+            <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">endogenous_matches</span><span class="p">[</span><span class="n">RenzymeB</span><span class="p">]</span> <span class="o">==</span> <span class="s1">'-'</span>
+        <span class="p">):</span>
+            <span class="k">return</span> <span class="kc">False</span>
+
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">endogenous_matches</span><span class="p">[</span><span class="n">RenzymeA</span><span class="p">]</span> <span class="o">==</span> <span class="s1">'-'</span>
+            <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">endogenous_matches</span><span class="p">[</span><span class="n">RenzymeB</span><span class="p">]</span> <span class="o">==</span> <span class="s1">'+'</span>
+        <span class="p">):</span>
+            <span class="k">return</span> <span class="kc">False</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">True</span></div>
+
+
+<div class="viewcode-block" id="Candidate.different_recognition_sites">
+<a class="viewcode-back" href="../autoapi/tiarsdesigner/index.html#tiarsdesigner.Candidate.different_recognition_sites">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">different_recognition_sites</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">RenzymeA</span><span class="p">,</span> <span class="n">RenzymeB</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""</span>
+<span class="sd">        Filters out Renzyme pairs for this candidate that have the same</span>
+<span class="sd">        recognition site.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        RenzymeA: Bio.Restriction enzyme object</span>
+<span class="sd">            A restriction enzyme in the form of a Bio.Restriction object.</span>
+
+<span class="sd">        RenzymeB: Bio.Restriction enzyme object</span>
+<span class="sd">            A restriction enzyme other than RenzymeA, in the form of</span>
+<span class="sd">            a Bio.Restriction object.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        False if RenzymeA and RenzymeB have the same recognition site"""</span>
+        <span class="k">if</span> <span class="n">RenzymeA</span><span class="o">.</span><span class="n">is_isoschizomer</span><span class="p">(</span><span class="n">RenzymeB</span><span class="p">):</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">True</span></div>
+
+
+<div class="viewcode-block" id="Candidate.both_Renzymes_depend_on_at_least_one_unique_substitution">
+<a class="viewcode-back" href="../autoapi/tiarsdesigner/index.html#tiarsdesigner.Candidate.both_Renzymes_depend_on_at_least_one_unique_substitution">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">both_Renzymes_depend_on_at_least_one_unique_substitution</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">RenzymeA</span><span class="p">,</span>
+        <span class="n">RenzymeB</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">"""</span>
+<span class="sd">        Filters out Renzyme pairs for this candidate for which both Renzymes</span>
+<span class="sd">        depend on the exact same set of substitutions for their substitution</span>
+<span class="sd">        dependent recognition sites.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        RenzymeA: Bio.Restriction enzyme object</span>
+<span class="sd">            A restriction enzyme in the form of a Bio.Restriction object.</span>
+
+<span class="sd">        RenzymeB: Bio.Restriction enzyme object</span>
+<span class="sd">            A restriction enzyme other than RenzymeA, in the form of</span>
+<span class="sd">            a Bio.Restriction object.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        True only if RenzymeA and RenzymeB each depend on at least one</span>
+<span class="sd">        substitution that the other does not depend on, False otherwise.</span>
+<span class="sd">        """</span>
+        <span class="n">RenzymeA_subs</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">get_substitutions_Renzyme_depends_on</span><span class="p">(</span>
+            <span class="n">RenzymeA</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">endogenous</span><span class="o">.</span><span class="n">sequence</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sequence</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sub_dep_Renzyme_recognition_sites</span><span class="p">[</span><span class="n">RenzymeA</span><span class="p">]</span>
+        <span class="p">)</span>
+        <span class="n">RenzymeB_subs</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">get_substitutions_Renzyme_depends_on</span><span class="p">(</span>
+            <span class="n">RenzymeB</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">endogenous</span><span class="o">.</span><span class="n">sequence</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sequence</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sub_dep_Renzyme_recognition_sites</span><span class="p">[</span><span class="n">RenzymeB</span><span class="p">]</span>
+        <span class="p">)</span>
+
+        <span class="n">N</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">Atuple</span> <span class="ow">in</span> <span class="n">RenzymeA_subs</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">Btuple</span> <span class="ow">in</span> <span class="n">RenzymeB_subs</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">Atuple</span><span class="p">)</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="n">Btuple</span><span class="p">))</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">Btuple</span><span class="p">)</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="n">Atuple</span><span class="p">))</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">N</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="n">N</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span></div>
+
+
+<div class="viewcode-block" id="Candidate.no_unneeded_substitutions">
+<a class="viewcode-back" href="../autoapi/tiarsdesigner/index.html#tiarsdesigner.Candidate.no_unneeded_substitutions">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">no_unneeded_substitutions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">RenzymeA</span><span class="p">,</span> <span class="n">RenzymeB</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""</span>
+<span class="sd">        Filters out Renzyme pairs for this candidate if there are any</span>
+<span class="sd">        synonymous substitutions that are not needed to create the novel sites</span>
+<span class="sd">        for Renzyme A and B and the desired AA change. If the PAM site cannot</span>
+<span class="sd">        be changed, it will not exclude candidates with unneeded substitutions</span>
+<span class="sd">        that are within the gRNA target region as long as they have no unneeded</span>
+<span class="sd">        substitutions outside the gRNA target region."</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        RenzymeA: Bio.Restriction enzyme object</span>
+<span class="sd">            A restriction enzyme in the form of a Bio.Restriction object.</span>
+
+<span class="sd">        RenzymeB: Bio.Restriction enzyme object</span>
+<span class="sd">            A restriction enzyme other than RenzymeA, in the form of</span>
+<span class="sd">            a Bio.Restriction object. To run this filter only on RenzymeA, do</span>
+<span class="sd">            not specify a RenzymeB</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        False if there are any unneeded substitutions (unless the PAM can't be</span>
+<span class="sd">        changed, in which case there can be unneeded substitutions as long as</span>
+<span class="sd">        they are within the gRNA target region), True otherwise.</span>
+<span class="sd">        """</span>
+
+        <span class="c1"># get a flattened list of all the substitutions RenzymeA and Renzyme</span>
+        <span class="c1"># B depend on</span>
+        <span class="n">RenzymeA_subs</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">get_substitutions_Renzyme_depends_on</span><span class="p">(</span>
+            <span class="n">RenzymeA</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">endogenous</span><span class="o">.</span><span class="n">sequence</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sequence</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sub_dep_Renzyme_recognition_sites</span><span class="p">[</span><span class="n">RenzymeA</span><span class="p">]</span>
+        <span class="p">)</span>
+        <span class="n">flattened_RenzymeA_subs</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">RenzymeA_subs</span><span class="p">,</span> <span class="p">()))</span>
+        <span class="n">flattened_RenzymeB_subs</span> <span class="o">=</span> <span class="n">flattened_RenzymeA_subs</span>
+        <span class="k">if</span> <span class="n">RenzymeB</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">RenzymeB_subs</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">get_substitutions_Renzyme_depends_on</span><span class="p">(</span>
+                <span class="n">RenzymeB</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">endogenous</span><span class="o">.</span><span class="n">sequence</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">sequence</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">sub_dep_Renzyme_recognition_sites</span><span class="p">[</span><span class="n">RenzymeB</span><span class="p">])</span>
+            <span class="n">flattened_RenzymeB_subs</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">RenzymeB_subs</span><span class="p">,</span> <span class="p">()))</span>
+
+        <span class="c1"># for each character in self.sequence, check if there's a substitution.</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sequence</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">endogenous</span><span class="o">.</span><span class="n">sequence</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sequence</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>
+                <span class="c1"># if there is, check if the substitution is outside of the</span>
+                <span class="c1"># codon yielding the nonsynonymous mutation</span>
+                <span class="k">if</span> <span class="n">i</span> <span class="ow">not</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">endogenous</span><span class="o">.</span><span class="n">AA_change_site</span><span class="p">,</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">endogenous</span><span class="o">.</span><span class="n">AA_change_site</span> <span class="o">+</span> <span class="mi">3</span>
+                <span class="p">):</span>
+                    <span class="c1"># then, check to make sure the substitution is not needed</span>
+                    <span class="c1"># for a Renzyme recognition site</span>
+                    <span class="k">if</span> <span class="p">(</span>
+                        <span class="n">i</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">flattened_RenzymeA_subs</span>
+                        <span class="ow">and</span> <span class="n">i</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">flattened_RenzymeB_subs</span>
+                    <span class="p">):</span>
+                        <span class="c1"># if the PAM can change, return False if the candidate</span>
+                        <span class="c1"># has any unneeded substitutions</span>
+                        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">endogenous</span><span class="o">.</span><span class="n">PAM_can_change</span><span class="p">:</span>
+                            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">endogenous</span><span class="o">.</span><span class="n">which_PAM</span> <span class="o">==</span> <span class="s1">'CCN'</span><span class="p">:</span>
+                                <span class="k">if</span> <span class="n">i</span> <span class="ow">not</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span>
+                                    <span class="bp">self</span><span class="o">.</span><span class="n">endogenous</span><span class="o">.</span><span class="n">PAM_start</span><span class="p">,</span>
+                                    <span class="bp">self</span><span class="o">.</span><span class="n">endogenous</span><span class="o">.</span><span class="n">PAM_start</span> <span class="o">+</span> <span class="mi">2</span>
+                                <span class="p">):</span>
+                                    <span class="k">return</span> <span class="kc">False</span>
+                            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">endogenous</span><span class="o">.</span><span class="n">which_PAM</span> <span class="o">==</span> <span class="s1">'NGG'</span><span class="p">:</span>
+                                <span class="k">if</span> <span class="n">i</span> <span class="ow">not</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span>
+                                    <span class="bp">self</span><span class="o">.</span><span class="n">endogenous</span><span class="o">.</span><span class="n">PAM_start</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>
+                                    <span class="bp">self</span><span class="o">.</span><span class="n">endogenous</span><span class="o">.</span><span class="n">PAM_start</span> <span class="o">+</span> <span class="mi">3</span>
+                                <span class="p">):</span>
+                                    <span class="k">return</span> <span class="kc">False</span>
+                            <span class="k">if</span> <span class="p">(</span>
+                                    <span class="bp">self</span><span class="o">.</span><span class="n">endogenous</span><span class="o">.</span><span class="n">which_PAM</span> <span class="o">==</span> <span class="s1">'TTTV'</span>
+                                    <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">endogenous</span><span class="o">.</span><span class="n">which_PAM</span> <span class="o">==</span> <span class="s1">'BAAA'</span>
+                            <span class="p">):</span>
+                                <span class="k">if</span> <span class="n">i</span> <span class="ow">not</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span>
+                                    <span class="bp">self</span><span class="o">.</span><span class="n">endogenous</span><span class="o">.</span><span class="n">PAM_start</span><span class="p">,</span>
+                                    <span class="bp">self</span><span class="o">.</span><span class="n">endogenous</span><span class="o">.</span><span class="n">PAM_start</span> <span class="o">+</span> <span class="mi">4</span>
+                                <span class="p">):</span>
+                                    <span class="k">return</span> <span class="kc">False</span>
+                        <span class="c1"># if the PAM can't change, only exclude candidates with</span>
+                        <span class="c1"># unneeded substitutions outside the gRNA</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="k">if</span> <span class="n">i</span> <span class="ow">not</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span>
+                                <span class="bp">self</span><span class="o">.</span><span class="n">endogenous</span><span class="o">.</span><span class="n">gRNA_location</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                                <span class="bp">self</span><span class="o">.</span><span class="n">endogenous</span><span class="o">.</span><span class="n">gRNA_location</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                            <span class="p">):</span>
+                                <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">return</span> <span class="kc">True</span></div>
+</div>
+
+</pre></div>
+
+          </div>
+              <div class="related bottom">
+                &nbsp;
+  <nav id="rellinks">
+    <ul>
+    </ul>
+  </nav>
+              </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">TIARS Oligo Designer</a></h1>
+
+
+
+
+
+
+
+
+
+<search id="searchbox" style="display: none" role="search">
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Search"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script><h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../output.html">Interpreting the output</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../filters.html">Filters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../scaling_up.html">Scaling up with Snakemake</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../autoapi/index.html">API Reference</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2026, Sydney Hertafeld.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 9.2.0</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

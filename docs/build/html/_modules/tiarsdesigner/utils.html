@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>tiarsdesigner.utils &#8212; TIARS Oligo Designer  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="../../_static/basic.css?v=b08954a9" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css?v=27fed22d" />
+    <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
+    <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+              <div class="related top">
+                &nbsp;
+  <nav id="rellinks">
+    <ul>
+    </ul>
+  </nav>
+              </div>
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for tiarsdesigner.utils</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">Bio</span><span class="w"> </span><span class="kn">import</span> <span class="n">Restriction</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">Bio.Restriction</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">Bio.Seq</span><span class="w"> </span><span class="kn">import</span> <span class="n">Seq</span>
+<span class="c1">#from Bio.Alphabet.IUPAC import IUPACAmbiguousDNA</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">itertools</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">collections</span><span class="w"> </span><span class="kn">import</span> <span class="n">defaultdict</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">Bio.Data</span><span class="w"> </span><span class="kn">import</span> <span class="n">CodonTable</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">fnmatch</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">docx</span><span class="w"> </span><span class="kn">import</span> <span class="n">Document</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">docx.enum.text</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">docx.shared</span><span class="w"> </span><span class="kn">import</span> <span class="n">RGBColor</span>
+
+
+<div class="viewcode-block" id="reformat_codon_table">
+<a class="viewcode-back" href="../../autoapi/tiarsdesigner/utils/index.html#tiarsdesigner.utils.reformat_codon_table">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">reformat_codon_table</span><span class="p">(</span><span class="n">table</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""</span>
+<span class="sd">    Given a codon table, returns a dictionary mapping each codon to its other</span>
+<span class="sd">    possible synonymous codons. Each key is at considered a synonymous codon of</span>
+<span class="sd">    itself, so it is included in the list.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    table : dict</span>
+<span class="sd">        Dictionary mapping codon to amino acid. If None, then use</span>
+<span class="sd">        Bio.Data.CodonTable.standard_dna_table.forward_table</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Dictionary mapping each codon to the set of alternative codons (that does</span>
+<span class="sd">    not include itself).</span>
+
+<span class="sd">    Example</span>
+<span class="sd">    -------</span>
+
+<span class="sd">    &gt;&gt;&gt; d = {'ATT': 'I', 'ATC': 'I', 'ATA': 'I', 'ATG': 'M'}</span>
+<span class="sd">    &gt;&gt;&gt; expected = {</span>
+<span class="sd">    ... 'ATT': ['ATT', 'ATC', 'ATA'],</span>
+<span class="sd">    ... 'ATC': ['ATT', 'ATC', 'ATA'],</span>
+<span class="sd">    ... 'ATA': ['ATT', 'ATC', 'ATA'],</span>
+<span class="sd">    ... 'ATG': ['ATG'],</span>
+<span class="sd">    ... 'TAA': ['TAA'],</span>
+<span class="sd">    ... 'TGA': ['TGA'],</span>
+<span class="sd">    ... 'TAG': ['TAG']}</span>
+<span class="sd">    &gt;&gt;&gt; reformat_codon_table(d) == expected</span>
+<span class="sd">    True</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="n">table</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">table</span> <span class="o">=</span> <span class="n">CodonTable</span><span class="o">.</span><span class="n">standard_dna_table</span><span class="o">.</span><span class="n">forward_table</span>
+
+    <span class="c1"># Convert dict of form codon: AA to dict of form AA: [codons]</span>
+    <span class="n">synonymous_per_aa</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">list</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">table</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">synonymous_per_aa</span><span class="p">[</span><span class="n">v</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
+
+    <span class="c1"># Convert dict of form AA: [codons] to dict of form codon: [alt codons]</span>
+    <span class="n">synonymous</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">list</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">synonymous_per_aa</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">v</span><span class="p">:</span>
+            <span class="n">synonymous</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+    <span class="n">synonymous_dict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">synonymous</span><span class="p">)</span>
+    <span class="c1"># add stop codons</span>
+    <span class="n">synonymous_dict</span><span class="p">[</span><span class="s1">'TAA'</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'TAA'</span><span class="p">]</span>
+    <span class="n">synonymous_dict</span><span class="p">[</span><span class="s1">'TGA'</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'TGA'</span><span class="p">]</span>
+    <span class="n">synonymous_dict</span><span class="p">[</span><span class="s1">'TAG'</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'TAG'</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">synonymous_dict</span></div>
+
+
+<div class="viewcode-block" id="synonymous_seqs">
+<a class="viewcode-back" href="../../autoapi/tiarsdesigner/utils/index.html#tiarsdesigner.utils.synonymous_seqs">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">synonymous_seqs</span><span class="p">(</span><span class="n">seq</span><span class="p">,</span> <span class="n">table</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""</span>
+<span class="sd">    Generator of all possible synonymous versions of the provided sequence</span>
+<span class="sd">    using the provided table.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    seq : str or Bio.Seq</span>
+<span class="sd">        Sequence containing codons from which synonymous versions will be</span>
+<span class="sd">        generated. Must be divisible by 3.</span>
+
+<span class="sd">    table : dict</span>
+<span class="sd">        Optional codon: amino acid dictionary passed to reformat_codon_table;</span>
+<span class="sd">        see that function for details.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+
+<span class="sd">    Generator of synonymous sequences (each one a string of same length as</span>
+<span class="sd">    original).</span>
+
+<span class="sd">    Example</span>
+<span class="sd">    -------</span>
+
+<span class="sd">    &gt;&gt;&gt; list(synonymous_seqs('ATCCAATGG'))</span>
+<span class="sd">    ['ATTCAATGG', 'ATTCAGTGG', 'ATCCAATGG', 'ATCCAGTGG', 'ATACAATGG', 'ATACAGTGG']</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">seq</span><span class="p">,</span> <span class="n">Seq</span><span class="p">):</span>
+        <span class="n">seq</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">seq</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">seq</span><span class="p">)</span> <span class="o">%</span> <span class="mi">3</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="s1">'Sequence is length </span><span class="si">{0}</span><span class="s1">, not divisible by 3'</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">seq</span><span class="p">)))</span>
+
+    <span class="n">codons</span> <span class="o">=</span> <span class="p">[</span><span class="n">seq</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">i</span><span class="o">+</span><span class="mi">3</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">seq</span><span class="p">)</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">)]</span>
+
+    <span class="n">d</span> <span class="o">=</span> <span class="n">reformat_codon_table</span><span class="p">(</span><span class="n">table</span><span class="p">)</span>
+    <span class="n">expanded</span> <span class="o">=</span> <span class="p">[</span><span class="n">d</span><span class="p">[</span><span class="n">c</span><span class="p">]</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">codons</span><span class="p">]</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">itertools</span><span class="o">.</span><span class="n">product</span><span class="p">(</span><span class="o">*</span><span class="n">expanded</span><span class="p">):</span>
+        <span class="k">yield</span> <span class="s1">''</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">i</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="get_endogenous_sequence_and_stats">
+<a class="viewcode-back" href="../../autoapi/tiarsdesigner/utils/index.html#tiarsdesigner.utils.get_endogenous_sequence_and_stats">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_endogenous_sequence_and_stats</span><span class="p">(</span>
+    <span class="n">full_seq</span><span class="p">,</span>
+    <span class="n">gRNA_start</span><span class="p">,</span>
+    <span class="n">gRNA_end</span><span class="p">,</span>
+    <span class="n">PAM_start</span><span class="p">,</span>
+    <span class="n">AA_change_site</span><span class="p">,</span>
+    <span class="n">which_PAM</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">"""</span>
+<span class="sd">    Given a full sequence and the locations of the gRNA, PAM, and AA change</span>
+<span class="sd">    site, returns a dictionary of the isolated 273 bp sequence that extends 155</span>
+<span class="sd">    nt upstream and 120 nt downstream (or as close to that as the sequence</span>
+<span class="sd">    extends) of the Cas9 cutsite and the adjusted gRNA, PAM, and AA change site</span>
+<span class="sd">    values that correspond to the isolated endogenous sequence.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    full_seq: string</span>
+<span class="sd">        The full DNA locus sequence, must extend at least 85 nt upstream and</span>
+<span class="sd">        50 nt downstream of the Cas9 cutsite.</span>
+
+<span class="sd">     gRNA_start: int</span>
+<span class="sd">        the index location in the sequence of the beginning of the</span>
+<span class="sd">        region the CRISPR/Cas9 guide RNA will target.</span>
+
+<span class="sd">    gRNA_end: int</span>
+<span class="sd">        the index location in the sequence of the end of the region</span>
+<span class="sd">        the CRISPR/Cas9 guide RNA will target.</span>
+
+<span class="sd">    PAM_start: int</span>
+<span class="sd">        The index location in the sequence of the beginning of the</span>
+<span class="sd">        PAM site. For now, the PAM region has to be either 'CCN' or 'NGG'.</span>
+
+<span class="sd">    AA_change_site: int</span>
+<span class="sd">        the index location in the sequence of the beginning of</span>
+<span class="sd">        the codon that is to be nonsynonymously changed in the CRISPR/Cas9</span>
+<span class="sd">        process</span>
+
+<span class="sd">    which_pam: string</span>
+<span class="sd">        The sequence of the PAM site (for now 'CCN', 'NGG', 'TTTV', and 'BAAA'</span>
+<span class="sd">        are supported)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Dictionary of the isolated endogenous sequence and the adjusted gRNA, PAM,</span>
+<span class="sd">    and AA_change_site locations.</span>
+<span class="sd">    """</span>
+      
+    <span class="c1"># create dictionary with PAM startsites as keys and the locations of the</span>
+    <span class="c1"># CRISPR cutsites relative to the PAM startsites as values</span>
+    <span class="n">pam_dict</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">'CCN'</span><span class="p">:</span> <span class="mi">6</span><span class="p">,</span>
+        <span class="s1">'NGG'</span><span class="p">:</span> <span class="o">-</span><span class="mi">3</span><span class="p">,</span>
+        <span class="s1">'TTTV'</span><span class="p">:</span> <span class="mi">23</span><span class="p">,</span>
+        <span class="s1">'BAAA'</span><span class="p">:</span> <span class="o">-</span><span class="mi">23</span>
+    <span class="p">}</span>
+
+    <span class="n">full_seq</span> <span class="o">=</span> <span class="n">full_seq</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">" "</span><span class="p">,</span> <span class="s2">""</span><span class="p">)</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+    <span class="n">Cas9_cutsite</span> <span class="o">=</span> <span class="n">PAM_start</span> <span class="o">+</span> <span class="n">pam_dict</span><span class="p">[</span><span class="n">which_PAM</span><span class="p">]</span>
+    <span class="n">seq_stats</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">'gRNA_start'</span><span class="p">:</span> <span class="n">gRNA_start</span><span class="p">,</span>
+        <span class="s1">'gRNA_end'</span><span class="p">:</span> <span class="n">gRNA_end</span><span class="p">,</span>
+        <span class="s1">'PAM_start'</span><span class="p">:</span> <span class="n">PAM_start</span><span class="p">,</span>
+        <span class="s1">'AA_change_site'</span><span class="p">:</span> <span class="n">AA_change_site</span>
+    <span class="p">}</span>
+
+    <span class="c1">#cut it down to 15 nt on either side of cutsite + 70 nt upstream and 35</span>
+    <span class="c1">#nt downstream + 70 nt spacers on either side.</span>
+    <span class="n">new_zero</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">new_end</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">full_seq</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">which_PAM</span> <span class="o">==</span> <span class="s1">'CCN'</span> <span class="ow">or</span> <span class="n">which_PAM</span> <span class="o">==</span> <span class="s1">'TTTV'</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">Cas9_cutsite</span> <span class="o">&gt;</span> <span class="mi">155</span><span class="p">:</span>
+            <span class="n">new_zero</span> <span class="o">=</span> <span class="n">Cas9_cutsite</span> <span class="o">-</span> <span class="mi">155</span>
+        <span class="k">if</span> <span class="n">new_end</span> <span class="o">-</span> <span class="n">Cas9_cutsite</span> <span class="o">&gt;</span> <span class="mi">120</span><span class="p">:</span>
+            <span class="n">new_end</span> <span class="o">=</span> <span class="n">Cas9_cutsite</span> <span class="o">+</span> <span class="mi">120</span>
+
+    <span class="k">if</span> <span class="n">which_PAM</span> <span class="o">==</span> <span class="s1">'NGG'</span> <span class="ow">or</span> <span class="n">which_PAM</span> <span class="o">==</span> <span class="s1">'BAAA'</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">Cas9_cutsite</span> <span class="o">&gt;</span> <span class="mi">120</span><span class="p">:</span>
+            <span class="n">new_zero</span> <span class="o">=</span> <span class="n">Cas9_cutsite</span> <span class="o">-</span> <span class="mi">120</span>
+        <span class="k">if</span> <span class="n">new_end</span> <span class="o">-</span> <span class="n">Cas9_cutsite</span> <span class="o">&gt;</span> <span class="mi">155</span><span class="p">:</span>
+            <span class="n">new_end</span> <span class="o">=</span> <span class="n">Cas9_cutsite</span> <span class="o">+</span> <span class="mi">155</span>
+    <span class="n">focus_seq</span> <span class="o">=</span> <span class="n">full_seq</span><span class="p">[</span><span class="n">new_zero</span><span class="p">:</span> <span class="n">new_end</span><span class="p">]</span>
+
+    <span class="c1">#adjust all of the seq_stats to correspond focus_seq rather than full_seq</span>
+    <span class="n">seq_stats</span><span class="o">.</span><span class="n">update</span><span class="p">((</span><span class="n">k</span><span class="p">,</span><span class="n">v</span> <span class="o">-</span> <span class="n">new_zero</span><span class="p">)</span> <span class="k">for</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span><span class="n">v</span><span class="p">)</span> <span class="ow">in</span> <span class="n">seq_stats</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
+    <span class="c1">#check the frame of the new sequence based the AA change site, which</span>
+    <span class="c1">#has to be at the beginning of a codon.</span>
+    <span class="n">frame</span> <span class="o">=</span> <span class="n">seq_stats</span><span class="p">[</span><span class="s1">'AA_change_site'</span><span class="p">]</span> <span class="o">%</span> <span class="mi">3</span>
+    <span class="c1">#adjust the sequence to be in frame and divisible by 3</span>
+    <span class="n">focus_seq</span> <span class="o">=</span> <span class="n">focus_seq</span><span class="p">[</span><span class="n">frame</span><span class="p">:</span> <span class="mi">273</span> <span class="o">+</span> <span class="n">frame</span><span class="p">]</span>
+    <span class="c1">#adjust the important locations to match the in frame focus_seq</span>
+    <span class="n">seq_stats</span><span class="o">.</span><span class="n">update</span><span class="p">((</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="o">-</span> <span class="n">frame</span><span class="p">)</span> <span class="k">for</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span> <span class="ow">in</span> <span class="n">seq_stats</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
+    <span class="c1">#add focus_seq to the dictionary before returning it</span>
+    <span class="n">seq_stats</span><span class="p">[</span><span class="s1">'sequence'</span><span class="p">]</span> <span class="o">=</span> <span class="n">focus_seq</span>
+    <span class="n">seq_stats</span><span class="p">[</span><span class="s1">'which_PAM'</span><span class="p">]</span> <span class="o">=</span> <span class="n">which_PAM</span>
+    <span class="k">return</span> <span class="n">seq_stats</span></div>
+
+
+
+<div class="viewcode-block" id="generate_exon_seqs">
+<a class="viewcode-back" href="../../autoapi/tiarsdesigner/utils/index.html#tiarsdesigner.utils.generate_exon_seqs">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">generate_exon_seqs</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">,</span> <span class="n">AA_change_seq</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""</span>
+<span class="sd">    Given a sequence, and start and end coordinates for the cutsite region</span>
+<span class="sd">    within that sequence, returns a generator of all possible synonymous</span>
+<span class="sd">    cutsite regions.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    start: int</span>
+<span class="sd">        The starting location of the cutsite region within the sequence</span>
+
+<span class="sd">    end: int</span>
+<span class="sd">        The ending location of the cutsite region within the sequence</span>
+
+<span class="sd">    AA_change_sequence: string</span>
+<span class="sd">        The full candidate sequence with the desired amino acid change</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    A generator of sequences synonymous to the region within AA_change seq</span>
+<span class="sd">    specified by the start and end coordinates.</span>
+<span class="sd">    """</span>
+    <span class="n">start_frame</span> <span class="o">=</span> <span class="n">start</span> <span class="o">%</span> <span class="mi">3</span>
+    <span class="n">end_frame</span> <span class="o">=</span> <span class="n">end</span> <span class="o">%</span> <span class="mi">3</span>
+    <span class="n">in_frame_start</span> <span class="o">=</span> <span class="n">start</span> <span class="o">-</span> <span class="n">start_frame</span>
+    <span class="n">in_frame_end</span> <span class="o">=</span> <span class="n">end</span>
+    <span class="k">if</span> <span class="n">end_frame</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">in_frame_end</span> <span class="o">=</span> <span class="n">in_frame_end</span> <span class="o">+</span> <span class="mi">3</span> <span class="o">-</span> <span class="n">end_frame</span>
+    <span class="n">seqs</span> <span class="o">=</span> <span class="n">synonymous_seqs</span><span class="p">(</span><span class="n">AA_change_seq</span><span class="p">[</span><span class="n">in_frame_start</span><span class="p">:</span><span class="n">in_frame_end</span><span class="p">])</span>
+    <span class="k">for</span> <span class="n">seq</span> <span class="ow">in</span> <span class="n">seqs</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">seq</span><span class="p">[:</span><span class="n">start_frame</span><span class="p">]</span> <span class="o">==</span> <span class="n">AA_change_seq</span><span class="p">[</span><span class="n">in_frame_start</span><span class="p">:</span> <span class="n">start</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="n">seq</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">seq</span><span class="p">)</span> <span class="o">-</span> <span class="mi">3</span> <span class="o">+</span> <span class="n">end_frame</span><span class="p">:]</span> <span class="o">==</span> <span class="n">AA_change_seq</span><span class="p">[</span><span class="n">end</span><span class="p">:</span> <span class="n">in_frame_end</span><span class="p">]:</span>
+                <span class="k">yield</span> <span class="n">seq</span><span class="p">[</span><span class="n">start_frame</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">seq</span><span class="p">)</span> <span class="o">-</span><span class="mi">3</span> <span class="o">+</span> <span class="n">end_frame</span><span class="p">]</span>
+            <span class="k">elif</span> <span class="n">end_frame</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">yield</span> <span class="n">seq</span><span class="p">[</span><span class="n">start_frame</span><span class="p">:]</span></div>
+
+
+<div class="viewcode-block" id="get_restriction_sites">
+<a class="viewcode-back" href="../../autoapi/tiarsdesigner/utils/index.html#tiarsdesigner.utils.get_restriction_sites">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_restriction_sites</span><span class="p">(</span><span class="n">sequence</span><span class="p">,</span> <span class="n">Renzymes</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""</span>
+<span class="sd">    Given a sequence, returns a dictionary of restriction enzymes mapping</span>
+<span class="sd">    Restriction enzymes that would cut the sequence to locations in the</span>
+<span class="sd">    sequence that they would cut.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    sequence: string</span>
+<span class="sd">        A DNA nucleotide sequence. Must have all capital letters.</span>
+
+<span class="sd">    Renzymes: list</span>
+<span class="sd">        Optional enzyme list: a list of restriction enzymes to search for in the sequence.</span>
+<span class="sd">        The default list is the Bio.Restriction package's 'AllEnzymes'</span>
+<span class="sd">        module.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+
+<span class="sd">    Dictionary of restriction enzymes with recognition sites in sequence.</span>
+<span class="sd">    The keys are RE names and the values are their cutsite locations in</span>
+<span class="sd">    the sequence. NOTE: the cutsites use the convention that the first</span>
+<span class="sd">    nucleotide in the sequence is 1 not 0.</span>
+
+<span class="sd">    Example</span>
+<span class="sd">    -------</span>
+
+<span class="sd">    &gt;&gt;&gt; result =  get_restriction_sites('ATGCGA')</span>
+<span class="sd">    &gt;&gt;&gt; expected = {RlaI: [2], PsuGI: [2], BmeDI: [3, 5]}</span>
+<span class="sd">    &gt;&gt;&gt; assert result == expected</span>
+<span class="sd">    """</span>
+    <span class="n">seq</span> <span class="o">=</span> <span class="n">Seq</span><span class="p">(</span><span class="n">sequence</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">Renzymes</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">rb</span> <span class="o">=</span> <span class="n">AllEnzymes</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">rb</span> <span class="o">=</span> <span class="n">RestrictionBatch</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">Renzymes</span><span class="p">))</span>
+    <span class="n">ana</span> <span class="o">=</span> <span class="n">Analysis</span><span class="p">(</span><span class="n">rb</span><span class="p">,</span> <span class="n">seq</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">ana</span><span class="o">.</span><span class="n">with_sites</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="get_Rsite_dict">
+<a class="viewcode-back" href="../../autoapi/tiarsdesigner/utils/index.html#tiarsdesigner.utils.get_Rsite_dict">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_Rsite_dict</span><span class="p">(</span><span class="n">sequence</span><span class="p">,</span> <span class="n">Renzymes</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""</span>
+<span class="sd">    Given a sequence and either a list or a dictionary of restriction enzymes,</span>
+<span class="sd">    returns a dictionary mapping the restriction enzymes to coordinates of</span>
+<span class="sd">    their recognition sites in the sequence.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    sequence: string</span>
+<span class="sd">        A DNA nucleotide sequence. Must be all capital letters.</span>
+
+<span class="sd">    Renzymes: list or dict</span>
+<span class="sd">        Either a list of restriction enzyme or a dictionary with restriction</span>
+<span class="sd">        enzymes as keys. The restriction enzymes must be in the form of</span>
+<span class="sd">        Bio.Restriction restriction enzyme objects.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Dictionary of enzymes with recognition sites in 'sequence', with the</span>
+<span class="sd">    enzyme names as keys and tuples of the start and end sites of their</span>
+<span class="sd">    recognition sites in the sequence as values.</span>
+<span class="sd">    NOTE: the endsites correspond to the first nucleotide in the sequence after</span>
+<span class="sd">    the recognition site (e.g. recognition site  = sequence[start:end] NOT</span>
+<span class="sd">    sequence[start:(end + 1)]).</span>
+
+<span class="sd">    Example</span>
+<span class="sd">    -------</span>
+<span class="sd">    &gt;&gt;&gt; result = get_Rsite_dict('ATGCAC', {HpyCH4V: [4], CviRI: [4], RlaI: [2, 3], BmeDI: [3], Gba708II: [1]})</span>
+<span class="sd">    &gt;&gt;&gt; expected = {</span>
+<span class="sd">    ... HpyCH4V: [(1, 5)],</span>
+<span class="sd">    ... CviRI: [(1, 5)],</span>
+<span class="sd">    ... RlaI: [(1, 4), (2, 5)],</span>
+<span class="sd">    ... BmeDI: [(2, 3), (3, 4), (5, 6)],</span>
+<span class="sd">    ... Gba708II: [(0, 5)]}</span>
+<span class="sd">    &gt;&gt;&gt; assert result == expected, result</span>
+<span class="sd">    """</span>
+
+    <span class="c1">#Use the Renzyme dict or list to make a new dictionary with the recognition site coordinates</span>
+    <span class="n">Rcoords</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">Renzyme</span> <span class="ow">in</span> <span class="n">Renzymes</span><span class="p">:</span>
+        <span class="n">Rcoords</span><span class="p">[</span><span class="n">Renzyme</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="nb">tuple</span><span class="p">([</span><span class="n">n</span><span class="o">.</span><span class="n">start</span><span class="p">(),</span> <span class="n">n</span><span class="o">.</span><span class="n">start</span><span class="p">()</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">Renzyme</span><span class="o">.</span><span class="n">site</span><span class="p">)])</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">Renzyme</span><span class="o">.</span><span class="n">compsite</span><span class="o">.</span><span class="n">finditer</span><span class="p">(</span><span class="n">sequence</span><span class="p">)]</span>
+    <span class="k">return</span> <span class="n">Rcoords</span></div>
+
+
+<div class="viewcode-block" id="map_recognition_sites">
+<a class="viewcode-back" href="../../autoapi/tiarsdesigner/utils/index.html#tiarsdesigner.utils.map_recognition_sites">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">map_recognition_sites</span><span class="p">(</span><span class="n">sequence</span><span class="p">,</span> <span class="n">Renzyme</span><span class="p">,</span> <span class="n">num</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""</span>
+<span class="sd">    Given a sequence, a restriction enzyme that would cut the sequence, and</span>
+<span class="sd">    a nonzero integer ('num'), finds the locations of all the recognition sites</span>
+<span class="sd">    for that enzyme in the sequence and maps their locations.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    sequence: string</span>
+<span class="sd">        A DNA nucleotide sequence. All of the letters must be capitalized.</span>
+
+<span class="sd">    Renzyme: Bio.Restriction enzyme object</span>
+<span class="sd">        A restriction enzyme in the form of a Bio.Restriction enzyme object.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    List of 0's the length of sequence, with the 0's replaced with 'num' at</span>
+<span class="sd">    any point where the corresponding location in the sequence is part of</span>
+<span class="sd">    a recognition site in sequence.</span>
+
+<span class="sd">    Example</span>
+<span class="sd">    -------</span>
+<span class="sd">    #TaqI recognition site: 'TCGA'</span>
+<span class="sd">    &gt;&gt;&gt; map_recognition_sites('AGCTCGATG', TaqI, 1)</span>
+<span class="sd">    [0, 0, 0, 1, 1, 1, 1, 0, 0]</span>
+
+<span class="sd">    """</span>
+    <span class="n">Rsite_dict</span> <span class="o">=</span> <span class="n">get_Rsite_dict</span><span class="p">(</span><span class="n">sequence</span><span class="p">,</span> <span class="p">[</span><span class="n">Renzyme</span><span class="p">])</span>
+    <span class="n">num_list</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">sequence</span><span class="p">))]</span>
+    <span class="k">for</span> <span class="n">start</span><span class="p">,</span> <span class="n">stop</span> <span class="ow">in</span> <span class="n">Rsite_dict</span><span class="p">[</span><span class="n">Renzyme</span><span class="p">]:</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">stop</span><span class="p">):</span>
+            <span class="n">num_list</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+=</span> <span class="n">num</span>
+    <span class="k">return</span> <span class="n">num_list</span></div>
+
+
+
+<div class="viewcode-block" id="get_substitutions_Renzyme_depends_on">
+<a class="viewcode-back" href="../../autoapi/tiarsdesigner/utils/index.html#tiarsdesigner.utils.get_substitutions_Renzyme_depends_on">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_substitutions_Renzyme_depends_on</span><span class="p">(</span><span class="n">Renzyme</span><span class="p">,</span> <span class="n">endogenous_seq</span><span class="p">,</span> <span class="n">candidate_seq</span><span class="p">,</span> <span class="n">sub_dep_sites</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""</span>
+<span class="sd">    Given a restriction enzyme, an endogenous sequence, and a</span>
+<span class="sd">    candidate sequence, returns a list of tuples where each tuple corresponds to</span>
+<span class="sd">    a recognition site for the enzyme in the sequence and contains the locations of</span>
+<span class="sd">    synonymous substitutions in candidate_seq that that recognition site</span>
+<span class="sd">    depends on.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    Renzyme: Bio.Restriction enzyme object</span>
+<span class="sd">        A restriction enzyme in the form of a Bio.Restriction enzyme object.</span>
+
+<span class="sd">    endogenous_seq: string</span>
+<span class="sd">        A DNA nucleotide sequence. All letters must be capitalized.</span>
+
+<span class="sd">    candidate_seq: string</span>
+<span class="sd">        A candidate sequence based on the endogenous sequence. In other words, a sequence that's similar to the endogenous sequence, but it has one nonsynonymous substitution and a series of synonymous substitutions in the cutsite region.</span>
+
+<span class="sd">    sub_dep_sites: list</span>
+<span class="sd">        A list of tuples indicating start and end sites for substitution dependent recognition sites for Renzyme in candidate seq.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    ------</span>
+<span class="sd">    List of tuples where each tuple corresponds to a novel recognition site for</span>
+<span class="sd">    Renzyme (AKA a recognition site for Renzyme that is in the candidate</span>
+<span class="sd">    sequence but not the endogenous sequence due to substitutions to the</span>
+<span class="sd">    canidate sequence). The numbers in each tuple correspond to index locations</span>
+<span class="sd">    in the candidate sequence of substutions that are required to form its</span>
+<span class="sd">    corresponding recognition site.</span>
+
+<span class="sd">    Example</span>
+<span class="sd">    -------</span>
+<span class="sd">    &gt;&gt;&gt; get_substitutions_Renzyme_depends_on(Hpy188I, 'TTCTGCAGCCCTGGATGGGCTCTGCTGCTA', 'TTCTTCAGAGTTGGATGGGTTCTGCTGCTA',[(4,9)])</span>
+<span class="sd">    [(4, 8)]</span>
+<span class="sd">    """</span>
+    <span class="n">nucleotide_code</span> <span class="o">=</span> <span class="p">{</span><span class="s1">'N'</span><span class="p">:</span> <span class="p">[</span><span class="s1">'G'</span><span class="p">,</span> <span class="s1">'A'</span><span class="p">,</span> <span class="s1">'T'</span><span class="p">,</span> <span class="s1">'C'</span><span class="p">],</span>
+                       <span class="s1">'W'</span><span class="p">:</span> <span class="p">[</span><span class="s1">'A'</span><span class="p">,</span> <span class="s1">'T'</span><span class="p">],</span>
+                       <span class="s1">'S'</span><span class="p">:</span> <span class="p">[</span><span class="s1">'C'</span><span class="p">,</span> <span class="s1">'G'</span><span class="p">],</span>
+                       <span class="s1">'M'</span><span class="p">:</span> <span class="p">[</span><span class="s1">'A'</span><span class="p">,</span> <span class="s1">'C'</span><span class="p">],</span>
+                       <span class="s1">'K'</span><span class="p">:</span> <span class="p">[</span><span class="s1">'G'</span><span class="p">,</span> <span class="s1">'T'</span><span class="p">],</span>
+                       <span class="s1">'R'</span><span class="p">:</span> <span class="p">[</span><span class="s1">'A'</span><span class="p">,</span> <span class="s1">'G'</span><span class="p">],</span>
+                       <span class="s1">'Y'</span><span class="p">:</span> <span class="p">[</span><span class="s1">'C'</span><span class="p">,</span> <span class="s1">'T'</span><span class="p">],</span>
+                       <span class="s1">'B'</span><span class="p">:</span> <span class="p">[</span><span class="s1">'C'</span><span class="p">,</span> <span class="s1">'G'</span><span class="p">,</span> <span class="s1">'T'</span><span class="p">],</span>
+                       <span class="s1">'D'</span><span class="p">:</span> <span class="p">[</span><span class="s1">'A'</span><span class="p">,</span> <span class="s1">'G'</span><span class="p">,</span> <span class="s1">'T'</span><span class="p">],</span>
+                       <span class="s1">'H'</span><span class="p">:</span> <span class="p">[</span><span class="s1">'A'</span><span class="p">,</span> <span class="s1">'C'</span><span class="p">,</span> <span class="s1">'T'</span><span class="p">],</span>
+                       <span class="s1">'V'</span><span class="p">:</span> <span class="p">[</span><span class="s1">'A'</span><span class="p">,</span> <span class="s1">'C'</span><span class="p">,</span> <span class="s1">'G'</span><span class="p">]</span>
+                      <span class="p">}</span>
+
+    <span class="c1"># E.g., </span>
+    <span class="c1"># nuc_delta = [0000000100010000]</span>
+    <span class="c1"># where 1 indicates difference from endogenous</span>
+    <span class="n">nuc_delta</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">candidate_seq</span><span class="p">))]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">nuc_delta</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="n">endogenous_seq</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">!=</span> <span class="n">candidate_seq</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>
+            <span class="n">nuc_delta</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+
+
+    <span class="c1"># Each RE can have multiple sites; we'll be checking them all here and</span>
+    <span class="c1"># putting the info for each site in `all_sub_sites`</span>
+    <span class="n">all_sub_sites</span><span class="o">=</span> <span class="p">[]</span>
+    <span class="n">sites</span> <span class="o">=</span> <span class="n">sub_dep_sites</span>
+    <span class="k">for</span> <span class="n">start</span><span class="p">,</span> <span class="n">stop</span> <span class="ow">in</span> <span class="n">sites</span><span class="p">:</span>
+        <span class="n">sub_sites</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">stop</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">nuc_delta</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span>
+
+                <span class="c1"># If an RE has an ambiguous base, need to handle that here.</span>
+                <span class="c1"># For example, if a substitution was C to T, but the RE has</span>
+                <span class="c1"># a "Y" in it's site, then it shouldn't be considered</span>
+                <span class="c1"># a substitution from the point of view of the RE</span>
+                <span class="n">recognition_bp</span> <span class="o">=</span> <span class="n">Renzyme</span><span class="o">.</span><span class="n">site</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="n">start</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">recognition_bp</span> <span class="ow">in</span> <span class="n">nucleotide_code</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">endogenous_seq</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">nucleotide_code</span><span class="p">[</span><span class="n">recognition_bp</span><span class="p">]:</span>
+                        <span class="n">sub_sites</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">sub_sites</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+
+        <span class="n">all_sub_sites</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">sub_sites</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">all_sub_sites</span></div>
+
+
+<div class="viewcode-block" id="get_codon_frequency_dict">
+<a class="viewcode-back" href="../../autoapi/tiarsdesigner/utils/index.html#tiarsdesigner.utils.get_codon_frequency_dict">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_codon_frequency_dict</span><span class="p">(</span><span class="n">codon_usage_tsv</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    codon_usage_tsv: a tsv file of codons and their corresponding frequencies in the format [codon]&gt;[frequency] with one codon per line</span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    A dictionary of codons and the frequency at which they are used in</span>
+<span class="sd">    """</span>
+    <span class="n">codon_frequency_dict</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">open</span><span class="p">(</span><span class="n">codon_usage_tsv</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">'#'</span><span class="p">):</span>
+            <span class="n">linelist</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">'</span><span class="se">\t</span><span class="s1">'</span><span class="p">)</span>
+            <span class="n">codon</span> <span class="o">=</span> <span class="n">linelist</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">'U'</span><span class="p">,</span> <span class="s1">'T'</span><span class="p">)</span>
+            <span class="n">codon_frequency_dict</span><span class="p">[</span><span class="n">codon</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">linelist</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">codon_frequency_dict</span></div>
+
+
+<div class="viewcode-block" id="get_filter_function_dict">
+<a class="viewcode-back" href="../../autoapi/tiarsdesigner/utils/index.html#tiarsdesigner.utils.get_filter_function_dict">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_filter_function_dict</span><span class="p">(</span><span class="n">filter_list</span><span class="p">,</span> <span class="n">candidate</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""</span>
+<span class="sd">    Given a list of filters, return a dictionary with the filter names in the</span>
+<span class="sd">    filter list as keys and their corresponding filter functions as values.</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    filter_list: list</span>
+<span class="sd">        A list of filters to get corresponding functions for</span>
+<span class="sd">    candidate: candidate object</span>
+<span class="sd">        The candidate object to pull the methods from</span>
+<span class="sd">    """</span>
+    <span class="n">full_filter_dict</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">'no_sandwiched_cutsites'</span><span class="p">:</span> <span class="n">candidate</span><span class="o">.</span><span class="n">no_sandwiched_cutsites</span><span class="p">,</span>
+        <span class="s1">'no_endogenous_cutsites_within_Nnt_of_novel_cutsite'</span><span class="p">:</span> <span class="n">candidate</span><span class="o">.</span><span class="n">no_endogenous_cutsites_within_Nnt_of_novel_cutsite</span><span class="p">,</span>
+        <span class="s1">'novel_site_depends_on_at_least_two_substitutions'</span><span class="p">:</span> <span class="n">candidate</span><span class="o">.</span><span class="n">novel_site_depends_on_at_least_two_substitutions</span><span class="p">,</span>
+        <span class="s1">'num_recognition_sites_equals_num_cutsites'</span><span class="p">:</span> <span class="n">candidate</span><span class="o">.</span><span class="n">num_recognition_sites_equals_num_cutsites</span><span class="p">,</span>
+        <span class="s1">'no_unneeded_substitutions'</span><span class="p">:</span> <span class="n">candidate</span><span class="o">.</span><span class="n">no_unneeded_substitutions</span><span class="p">,</span>
+        <span class="s1">'at_least_one_has_endogenous_site'</span><span class="p">:</span> <span class="n">candidate</span><span class="o">.</span><span class="n">at_least_one_has_endogenous_site</span><span class="p">,</span>
+        <span class="s1">'both_have_endogenous_sites'</span><span class="p">:</span> <span class="n">candidate</span><span class="o">.</span><span class="n">both_have_endogenous_sites</span><span class="p">,</span>
+        <span class="s1">'compatible_polarity'</span><span class="p">:</span> <span class="n">candidate</span><span class="o">.</span><span class="n">compatible_polarity</span><span class="p">,</span>
+        <span class="s1">'both_Renzymes_depend_on_at_least_one_unique_substitution'</span><span class="p">:</span> <span class="n">candidate</span><span class="o">.</span><span class="n">both_Renzymes_depend_on_at_least_one_unique_substitution</span>
+    <span class="p">}</span>
+    <span class="k">return</span><span class="p">({</span><span class="n">filter_name</span><span class="p">:</span> <span class="n">filter_function</span> <span class="k">for</span> <span class="p">(</span><span class="n">filter_name</span><span class="p">,</span> <span class="n">filter_function</span><span class="p">)</span>
+            <span class="ow">in</span> <span class="n">full_filter_dict</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">filter_name</span> <span class="ow">in</span> <span class="n">filter_list</span><span class="p">})</span> </div>
+
+
+<div class="viewcode-block" id="get_codon_frequency_differences">
+<a class="viewcode-back" href="../../autoapi/tiarsdesigner/utils/index.html#tiarsdesigner.utils.get_codon_frequency_differences">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_codon_frequency_differences</span><span class="p">(</span><span class="n">seqA</span><span class="p">,</span> <span class="n">seqB</span><span class="p">,</span> <span class="n">codon_dict</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""</span>
+<span class="sd">    Given two sequences and a dictionary of usage frequences for all codons,</span>
+<span class="sd">    returns the total difference in codon frequency between the two</span>
+<span class="sd">    sequences.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    seqA: string</span>
+<span class="sd">        An in frame DNA nucleotide sequence</span>
+
+<span class="sd">    seqB: string</span>
+<span class="sd">        An in frame DNA nucleotide sequence of the same length as seqA</span>
+
+<span class="sd">    codon_dict: dict</span>
+<span class="sd">        A dictionary of codons and the frequency at which they are used</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    A float describing the total difference in usage frequency across codons</span>
+<span class="sd">    between the two input sequences.</span>
+<span class="sd">    """</span>
+
+    <span class="n">total_frequency_diff</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="c1"># iterate over the starting coordinates for each codon in the sequences and</span>
+    <span class="c1"># establish the codon frequency differences based on codon_dict</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">seqA</span><span class="p">)</span><span class="o">/</span><span class="mi">3</span><span class="p">))</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="n">seqA_codon</span> <span class="o">=</span> <span class="n">seqA</span><span class="p">[</span><span class="n">i</span> <span class="o">*</span> <span class="mi">3</span><span class="p">:</span> <span class="p">(</span><span class="n">i</span> <span class="o">*</span> <span class="mi">3</span><span class="p">)</span> <span class="o">+</span> <span class="mi">3</span><span class="p">]</span>
+        <span class="n">seqB_codon</span> <span class="o">=</span> <span class="n">seqB</span><span class="p">[</span><span class="n">i</span> <span class="o">*</span> <span class="mi">3</span><span class="p">:</span> <span class="p">(</span><span class="n">i</span> <span class="o">*</span> <span class="mi">3</span><span class="p">)</span> <span class="o">+</span> <span class="mi">3</span><span class="p">]</span>
+        <span class="n">frequency_diff</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">codon_dict</span><span class="p">[</span><span class="n">seqA_codon</span><span class="p">]</span> <span class="o">-</span> <span class="n">codon_dict</span><span class="p">[</span><span class="n">seqB_codon</span><span class="p">])</span>
+        <span class="n">total_frequency_diff</span> <span class="o">+=</span> <span class="n">frequency_diff</span>
+    <span class="k">return</span> <span class="n">total_frequency_diff</span></div>
+
+
+<div class="viewcode-block" id="add_sequence_to_doc">
+<a class="viewcode-back" href="../../autoapi/tiarsdesigner/utils/index.html#tiarsdesigner.utils.add_sequence_to_doc">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">add_sequence_to_doc</span><span class="p">(</span><span class="n">document</span><span class="p">,</span> <span class="n">sequence</span><span class="p">,</span> <span class="n">gRNA_start</span><span class="p">,</span> <span class="n">gRNA_end</span><span class="p">,</span> <span class="n">PAM_start</span><span class="p">,</span> <span class="n">AA_change_site</span><span class="p">,</span> <span class="n">Renzyme_list</span><span class="p">,</span> <span class="n">endogenous</span><span class="p">,</span> <span class="n">which_pam</span><span class="p">,</span> <span class="n">paired</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""A helper function for make_doc(). The make_doc function calls</span>
+<span class="sd">    it to one of the candidate sequences to the document with the Renzyme</span>
+<span class="sd">    recognition sites, synonymous substitutions, PAM and gRNA and</span>
+<span class="sd">    AA_change_site coordinates marked according to the key.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    document: docx.document</span>
+<span class="sd">        The document that the make_doc() function is creating when it calls</span>
+<span class="sd">        this function.</span>
+
+<span class="sd">    sequence: string</span>
+<span class="sd">        A candidate sequence to be evalutated as a possible repair oligo for</span>
+<span class="sd">        the endogenous sequence</span>
+
+<span class="sd">    gRNA_start: int</span>
+<span class="sd">        The location of the beginning of the gRNA target region in the</span>
+<span class="sd">        sequence.</span>
+
+<span class="sd">    gRNA_end: int</span>
+<span class="sd">        The location of the end of the gRNA target region in the sequence.</span>
+
+<span class="sd">    PAM_start: int</span>
+<span class="sd">        The location of the beginning of the PAM sequence in the sequence.</span>
+
+<span class="sd">    AA_change_site: int</span>
+<span class="sd">        The location of the beginning of the codon to be nonsynonymously</span>
+<span class="sd">        changed in the CRISPR/Cas9 sequence.</span>
+
+<span class="sd">    Renzyme_list: list</span>
+<span class="sd">        An enzyme or pair of enzymes that passed all of the filters for</span>
+<span class="sd">        sequence</span>
+
+<span class="sd">    endogenous: int</span>
+<span class="sd">        The endogenous sequence that the candidate sequence is based on</span>
+<span class="sd">    </span>
+<span class="sd">    which_pam: string</span>
+<span class="sd">        The sequence of the PAM site (for now 'CCN', 'NGG', 'TTTV', and 'BAAA'</span>
+<span class="sd">        are supported)</span>
+
+<span class="sd">    paired: bool</span>
+<span class="sd">        A boolean value indicating whether or not to run the function on single</span>
+<span class="sd">        enzymes or enzyme pairs. Default is enzyme pairs (AKA True)</span>
+<span class="sd">    """</span>
+    <span class="n">Rsite_dict</span> <span class="o">=</span> <span class="n">get_Rsite_dict</span><span class="p">(</span><span class="n">sequence</span><span class="p">,</span> <span class="n">Renzyme_list</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">paired</span><span class="p">:</span>
+        <span class="n">RenzymeA_sites</span> <span class="o">=</span> <span class="n">map_recognition_sites</span><span class="p">(</span><span class="n">sequence</span><span class="p">,</span> <span class="n">Renzyme_list</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">RenzymeB_sites</span> <span class="o">=</span> <span class="n">map_recognition_sites</span><span class="p">(</span><span class="n">sequence</span><span class="p">,</span> <span class="n">Renzyme_list</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">7</span><span class="p">)</span>
+        <span class="n">recognition_sites</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="o">+</span> <span class="n">y</span> <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">RenzymeA_sites</span><span class="p">,</span> <span class="n">RenzymeB_sites</span><span class="p">)]</span>
+        <span class="n">document</span><span class="o">.</span><span class="n">add_paragraph</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">Renzyme_list</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">+</span> <span class="s1">' ('</span> <span class="o">+</span> <span class="n">Renzyme_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">elucidate</span><span class="p">()</span> <span class="o">+</span> <span class="s1">') and '</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">Renzyme_list</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">+</span> <span class="s1">' ('</span> <span class="o">+</span> <span class="n">Renzyme_list</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">elucidate</span><span class="p">()</span> <span class="o">+</span> <span class="s1">')'</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">recognition_sites</span> <span class="o">=</span> <span class="n">map_recognition_sites</span><span class="p">(</span><span class="n">sequence</span><span class="p">,</span> <span class="n">Renzyme_list</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">document</span><span class="o">.</span><span class="n">add_paragraph</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">Renzyme_list</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">+</span> <span class="s1">'('</span> <span class="o">+</span> <span class="n">Renzyme_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">elucidate</span><span class="p">()</span> <span class="o">+</span> <span class="s1">')'</span><span class="p">)</span>
+<span class="c1"># start a new line for the sequence</span>
+    <span class="n">seq</span> <span class="o">=</span> <span class="n">document</span><span class="o">.</span><span class="n">add_paragraph</span><span class="p">()</span>
+
+<span class="c1"># add onto the sequence character by character</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">sequence</span><span class="p">)):</span>
+        <span class="n">run_i</span> <span class="o">=</span> <span class="n">seq</span><span class="o">.</span><span class="n">add_run</span><span class="p">(</span><span class="n">sequence</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">gRNA_start</span><span class="p">,</span> <span class="n">gRNA_end</span><span class="p">):</span>
+            <span class="n">run_i</span><span class="o">.</span><span class="n">font</span><span class="o">.</span><span class="n">highlight_color</span> <span class="o">=</span> <span class="n">WD_COLOR_INDEX</span><span class="o">.</span><span class="n">GRAY_25</span>
+        <span class="k">if</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">PAM_start</span><span class="p">,</span> <span class="n">PAM_start</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">which_pam</span><span class="p">)):</span>
+            <span class="n">run_i</span><span class="o">.</span><span class="n">font</span><span class="o">.</span><span class="n">highlight_color</span> <span class="o">=</span> <span class="n">WD_COLOR_INDEX</span><span class="o">.</span><span class="n">YELLOW</span>
+        <span class="k">if</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">AA_change_site</span><span class="p">,</span> <span class="n">AA_change_site</span> <span class="o">+</span> <span class="mi">3</span><span class="p">):</span>
+            <span class="n">run_i</span><span class="o">.</span><span class="n">bold</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">run_i</span><span class="o">.</span><span class="n">italic</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">if</span> <span class="n">recognition_sites</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>  <span class="ow">in</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]:</span>
+            <span class="n">run_i</span><span class="o">.</span><span class="n">font</span><span class="o">.</span><span class="n">color</span><span class="o">.</span><span class="n">rgb</span> <span class="o">=</span> <span class="n">RGBColor</span><span class="p">(</span><span class="mi">255</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">recognition_sites</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">7</span><span class="p">,</span> <span class="mi">14</span><span class="p">,</span> <span class="mi">21</span><span class="p">]</span> <span class="p">:</span>
+            <span class="n">run_i</span><span class="o">.</span><span class="n">font</span><span class="o">.</span><span class="n">color</span><span class="o">.</span><span class="n">rgb</span> <span class="o">=</span> <span class="n">RGBColor</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">255</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">recognition_sites</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">8</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">17</span><span class="p">,</span> <span class="mi">22</span><span class="p">,</span> <span class="mi">23</span><span class="p">,</span> <span class="mi">24</span><span class="p">]:</span>
+            <span class="n">run_i</span><span class="o">.</span><span class="n">font</span><span class="o">.</span><span class="n">color</span><span class="o">.</span><span class="n">rgb</span> <span class="o">=</span> <span class="n">RGBColor</span><span class="p">(</span><span class="mi">127</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">255</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">endogenous</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">sequence</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">!=</span> <span class="n">endogenous</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>
+                <span class="n">run_i</span><span class="o">.</span><span class="n">underline</span> <span class="o">=</span> <span class="n">WD_UNDERLINE</span><span class="o">.</span><span class="n">THICK</span></div>
+
+
+<div class="viewcode-block" id="make_doc">
+<a class="viewcode-back" href="../../autoapi/tiarsdesigner/utils/index.html#tiarsdesigner.utils.make_doc">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">make_doc</span><span class="p">(</span><span class="n">endogenous_sequence</span><span class="p">,</span> <span class="n">gRNA_start</span><span class="p">,</span> <span class="n">gRNA_end</span><span class="p">,</span> <span class="n">PAM_start</span><span class="p">,</span> <span class="n">AA_change_site</span><span class="p">,</span> <span class="n">candidate_df</span><span class="p">,</span> <span class="n">sample</span><span class="p">,</span> <span class="n">which_pam</span><span class="p">,</span> <span class="n">paired</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""</span>
+<span class="sd">    Makes a word document to visualize restriction sites</span>
+<span class="sd">    for each pair of enzymes (or single enzyme if paired != True) for each</span>
+<span class="sd">    candidate in candidate_dict</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    endogenous_sequence: string</span>
+<span class="sd">        A DNA nucleotide sequence. Must be all capital letters.</span>
+
+<span class="sd">    gRNA_start: int</span>
+<span class="sd">        The location of the beginning of the gRNA target region in the sequence.</span>
+
+<span class="sd">    gRNA_end: int</span>
+<span class="sd">        The location of the end of the gRNA target region in the sequence.</span>
+
+<span class="sd">    PAM_start:int</span>
+<span class="sd">        The location of the beginning of the PAM sequence in the sequence.</span>
+
+<span class="sd">    AA_change_site: int</span>
+<span class="sd">        The location of the beginning of the codon to be nonsynonymously</span>
+<span class="sd">        changed in the CRISPR/Cas9 sequence.</span>
+
+<span class="sd">    candidate_df: dataframe</span>
+<span class="sd">        Pandas dataframe of candidate with either single enzymes or enzyme pairs that passed all filters. If single enzymes, it should have the </span>
+<span class="sd">        following columns: {sequence, Renzyme, average distance to cas9 cut, codon frequency change, cutsite distance outside Rsite}. If paired, it</span>
+<span class="sd">        should have the following columns: {sequence, Renzyme pair, result, RenzymeA average distance to cas9 cut, RenzymeB average distance to cas9</span>
+<span class="sd">        cut, overall average distance to cas9 cut, codon_frequency_change}</span>
+
+<span class="sd">    sample: string</span>
+<span class="sd">        A unique identifier for this locus</span>
+
+<span class="sd">    which_pam: string</span>
+<span class="sd">        The sequence of the PAM site (for now 'CCN', 'NGG', 'TTTV', and 'BAAA'</span>
+<span class="sd">        are supported)</span>
+
+<span class="sd">    paired: bool</span>
+<span class="sd">        A boolean value indicating whether or not to run the function on single</span>
+<span class="sd">        enzymes or enzyme pairs. Default is enzyme pairs (AKA True)</span>
+<span class="sd">    """</span>
+    
+    <span class="n">doc</span> <span class="o">=</span> <span class="n">Document</span><span class="p">()</span>
+    <span class="n">key</span> <span class="o">=</span> <span class="n">doc</span><span class="o">.</span><span class="n">add_paragraph</span><span class="p">()</span><span class="o">.</span><span class="n">add_run</span><span class="p">(</span><span class="s1">'Key:'</span><span class="p">)</span>
+    <span class="n">key</span><span class="o">.</span><span class="n">bold</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">gRNA_key</span> <span class="o">=</span> <span class="n">doc</span><span class="o">.</span><span class="n">add_paragraph</span><span class="p">()</span><span class="o">.</span><span class="n">add_run</span><span class="p">(</span><span class="s1">'gRNA'</span><span class="p">)</span>
+    <span class="n">gRNA_key</span><span class="o">.</span><span class="n">font</span><span class="o">.</span><span class="n">highlight_color</span> <span class="o">=</span> <span class="n">WD_COLOR_INDEX</span><span class="o">.</span><span class="n">GRAY_25</span>
+    <span class="n">PAM_key</span> <span class="o">=</span> <span class="n">doc</span><span class="o">.</span><span class="n">add_paragraph</span><span class="p">()</span><span class="o">.</span><span class="n">add_run</span><span class="p">(</span><span class="s1">'PAM site'</span><span class="p">)</span>
+    <span class="n">PAM_key</span><span class="o">.</span><span class="n">font</span><span class="o">.</span><span class="n">highlight_color</span> <span class="o">=</span> <span class="n">WD_COLOR_INDEX</span><span class="o">.</span><span class="n">YELLOW</span>
+    <span class="n">AA_change_key</span> <span class="o">=</span> <span class="n">doc</span><span class="o">.</span><span class="n">add_paragraph</span><span class="p">()</span><span class="o">.</span><span class="n">add_run</span><span class="p">(</span><span class="s1">'Amino acid change'</span><span class="p">)</span>
+    <span class="n">AA_change_key</span><span class="o">.</span><span class="n">bold</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">AA_change_key</span><span class="o">.</span><span class="n">italic</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">if</span> <span class="n">paired</span><span class="p">:</span>
+        <span class="n">RenzymeA_key</span> <span class="o">=</span> <span class="n">doc</span><span class="o">.</span><span class="n">add_paragraph</span><span class="p">()</span><span class="o">.</span><span class="n">add_run</span><span class="p">(</span><span class="s1">'Renzyme A recognition site'</span><span class="p">)</span>
+        <span class="n">RenzymeA_key</span><span class="o">.</span><span class="n">font</span><span class="o">.</span><span class="n">color</span><span class="o">.</span><span class="n">rgb</span> <span class="o">=</span> <span class="n">RGBColor</span><span class="p">(</span><span class="mi">255</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">RenzymeB_key</span> <span class="o">=</span> <span class="n">doc</span><span class="o">.</span><span class="n">add_paragraph</span><span class="p">()</span><span class="o">.</span><span class="n">add_run</span><span class="p">(</span><span class="s1">'Renzyme B recognition site'</span><span class="p">)</span>
+        <span class="n">RenzymeB_key</span><span class="o">.</span><span class="n">font</span><span class="o">.</span><span class="n">color</span><span class="o">.</span><span class="n">rgb</span> <span class="o">=</span> <span class="n">RGBColor</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">255</span><span class="p">)</span>
+        <span class="n">overlapping_sites_key</span> <span class="o">=</span> <span class="n">doc</span><span class="o">.</span><span class="n">add_paragraph</span><span class="p">()</span><span class="o">.</span><span class="n">add_run</span><span class="p">(</span><span class="s1">'Overlapping Renzyme A and B recognition sites'</span><span class="p">)</span>
+        <span class="n">overlapping_sites_key</span><span class="o">.</span><span class="n">font</span><span class="o">.</span><span class="n">color</span><span class="o">.</span><span class="n">rgb</span> <span class="o">=</span> <span class="n">RGBColor</span><span class="p">(</span><span class="mi">127</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">255</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">Renzyme_key</span> <span class="o">=</span> <span class="n">doc</span><span class="o">.</span><span class="n">add_paragraph</span><span class="p">()</span><span class="o">.</span><span class="n">add_run</span><span class="p">(</span><span class="s1">'Renzyme recognition site'</span><span class="p">)</span>
+        <span class="n">Renzyme_key</span><span class="o">.</span><span class="n">font</span><span class="o">.</span><span class="n">color</span><span class="o">.</span><span class="n">rgb</span> <span class="o">=</span> <span class="n">RGBColor</span><span class="p">(</span><span class="mi">255</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">cutsite_key1</span> <span class="o">=</span> <span class="n">doc</span><span class="o">.</span><span class="n">add_paragraph</span><span class="p">()</span><span class="o">.</span><span class="n">add_run</span><span class="p">(</span><span class="s2">"^ = cut on (+) strand"</span><span class="p">)</span>
+    <span class="n">cutsite_key2</span> <span class="o">=</span> <span class="n">doc</span><span class="o">.</span><span class="n">add_paragraph</span><span class="p">()</span><span class="o">.</span><span class="n">add_run</span><span class="p">(</span><span class="s2">"_ = cut on (-) strand"</span><span class="p">)</span>
+    <span class="n">substitution_key</span> <span class="o">=</span> <span class="n">doc</span><span class="o">.</span><span class="n">add_paragraph</span><span class="p">()</span><span class="o">.</span><span class="n">add_run</span><span class="p">(</span><span class="s1">'base pair substitution'</span><span class="p">)</span>
+    <span class="n">substitution_key</span><span class="o">.</span><span class="n">underline</span> <span class="o">=</span> <span class="n">WD_UNDERLINE</span><span class="o">.</span><span class="n">THICK</span>
+    <span class="n">header</span> <span class="o">=</span> <span class="n">doc</span><span class="o">.</span><span class="n">add_paragraph</span><span class="p">()</span><span class="o">.</span><span class="n">add_run</span><span class="p">(</span><span class="s1">'Endogenous sequence:'</span><span class="p">)</span>
+    <span class="n">header</span><span class="o">.</span><span class="n">bold</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">Endogenous</span> <span class="o">=</span> <span class="n">doc</span><span class="o">.</span><span class="n">add_paragraph</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">endogenous_sequence</span><span class="p">)):</span>
+                <span class="n">run_i</span> <span class="o">=</span> <span class="n">Endogenous</span><span class="o">.</span><span class="n">add_run</span><span class="p">(</span><span class="n">endogenous_sequence</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+                <span class="k">if</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">gRNA_start</span><span class="p">,</span> <span class="n">gRNA_end</span><span class="p">):</span>
+                    <span class="n">run_i</span><span class="o">.</span><span class="n">font</span><span class="o">.</span><span class="n">highlight_color</span> <span class="o">=</span> <span class="n">WD_COLOR_INDEX</span><span class="o">.</span><span class="n">GRAY_25</span>
+                <span class="k">if</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">PAM_start</span><span class="p">,</span> <span class="n">PAM_start</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">which_pam</span><span class="p">)):</span>
+                    <span class="n">run_i</span><span class="o">.</span><span class="n">font</span><span class="o">.</span><span class="n">highlight_color</span> <span class="o">=</span> <span class="n">WD_COLOR_INDEX</span><span class="o">.</span><span class="n">YELLOW</span>
+    <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">candidate_df</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
+        <span class="n">header</span> <span class="o">=</span> <span class="n">doc</span><span class="o">.</span><span class="n">add_paragraph</span><span class="p">()</span><span class="o">.</span><span class="n">add_run</span><span class="p">(</span><span class="s1">'Option '</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">index</span><span class="p">)</span> <span class="o">+</span> <span class="s1">':'</span><span class="p">)</span>
+        <span class="n">header</span><span class="o">.</span><span class="n">bold</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">if</span> <span class="n">paired</span><span class="p">:</span>
+            <span class="n">Renzyme_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">RestrictionBatch</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">'Renzyme pair'</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">' and '</span><span class="p">)))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">Renzyme_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">RestrictionBatch</span><span class="p">([</span><span class="n">row</span><span class="p">[</span><span class="s1">'Renzyme'</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()]))</span>
+        <span class="n">add_sequence_to_doc</span><span class="p">(</span><span class="n">doc</span><span class="p">,</span> <span class="n">row</span><span class="p">[</span><span class="s1">'seq'</span><span class="p">],</span> <span class="n">gRNA_start</span><span class="p">,</span> <span class="n">gRNA_end</span><span class="p">,</span> <span class="n">PAM_start</span><span class="p">,</span> <span class="n">AA_change_site</span><span class="p">,</span> <span class="n">Renzyme_list</span><span class="p">,</span> <span class="n">endogenous_sequence</span><span class="p">,</span> <span class="n">which_pam</span><span class="p">,</span>  <span class="n">paired</span><span class="p">)</span>
+        <span class="n">doc</span><span class="o">.</span><span class="n">add_paragraph</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">paired</span><span class="p">:</span>
+        <span class="n">doc</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">sample</span> <span class="o">+</span> <span class="s1">'_Renzyme_pairs.docx'</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">doc</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">sample</span> <span class="o">+</span> <span class="s1">'_single_Renzymes.docx'</span><span class="p">)</span></div>
+
+
+</pre></div>
+
+          </div>
+              <div class="related bottom">
+                &nbsp;
+  <nav id="rellinks">
+    <ul>
+    </ul>
+  </nav>
+              </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">TIARS Oligo Designer</a></h1>
+
+
+
+
+
+
+
+
+
+<search id="searchbox" style="display: none" role="search">
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Search"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script><h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../output.html">Interpreting the output</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../filters.html">Filters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../scaling_up.html">Scaling up with Snakemake</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../autoapi/index.html">API Reference</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  <li><a href="../tiarsdesigner.html">tiarsdesigner</a><ul>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2026, Sydney Hertafeld.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 9.2.0</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

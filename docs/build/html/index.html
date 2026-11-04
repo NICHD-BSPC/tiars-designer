@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="./">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Welcome to TIARS Designer’s documentation! &#8212; TIARS Oligo Designer  documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="_static/basic.css?v=b08954a9" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css?v=27fed22d" />
+    <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
+    <script src="_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Getting Started" href="getting_started.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+              <div class="related top">
+                &nbsp;
+  <nav id="rellinks">
+    <ul>
+        <li>
+          <a href="getting_started.html" title="Next document">Getting Started</a>
+          &rarr;
+        </li>
+    </ul>
+  </nav>
+              </div>
+          
+
+          <div class="body" role="main">
+            
+  <section id="welcome-to-tiars-designer-s-documentation">
+<h1>Welcome to TIARS Designer’s documentation!<a class="headerlink" href="#welcome-to-tiars-designer-s-documentation" title="Link to this heading">¶</a></h1>
+<p>TIARS (Test for Added Recognition Sites) Designer generates a list of potential CRISPR repair oligo candidates for a provided locus that contain silent Restriction Fragment Length Polymorphisms (RFLP’s) for two distinct restriction enzymes in addition to the desired edit.  This allows users to:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Consider all viable combinations of synonymous edits and restriction enzymes to use in an easy to view word document</p></li>
+<li><p>Automate the process of filtering out inviable candidate sequences and restriction enzyme pairs</p></li>
+<li><p>Rank the outputted candidate sequence/Restriction enzyme combinations based on statistics such as the departure in codon frequency of the candidate sequence from the endogenous sequence</p></li>
+</ul>
+</div></blockquote>
+<section id="why-use-this-tool">
+<h2>Why use this tool?<a class="headerlink" href="#why-use-this-tool" title="Link to this heading">¶</a></h2>
+<p>An important part of any CRISPR/Cas homology-directed repair experiment is being able to verify that the experiment was successful and the desired edit was incorporated. Introducing RFLP’s to the repair via synonymous (AKA silent) substitutions to the repair oligo is one way to do so, as digestion with the enzymes that correspond to the RFLP’s would reveal whether or not the repair oligo containing the edit and novel restriction sites was incorporated. TIARS Designer automates the process of figuring out where best to introduce the silent RFLP’s, which is a time consuming and error prone process to do by hand.</p>
+</section>
+<section id="workflow">
+<h2>Workflow<a class="headerlink" href="#workflow" title="Link to this heading">¶</a></h2>
+<img alt="_images/workflow.png" src="_images/workflow.png" />
+<p>The tool runs three main steps:</p>
+<ol class="arabic simple">
+<li><p>Generates a list candidate sequences containing all possible combinations of silent mutations within 15 bp on either side of the Cas protein cutsite.</p></li>
+<li><p>For each candidate sequence, finds restriction enzymes that have a restriction site in the candidate sequence that’s not in the endogenous sequence, and filters out enzymes that would not work well with that sequence. Outputs all sequence + restriction enzyme combinations that passed all of the filters.</p></li>
+<li><p>For each candidate sequence, any enzymes that haven’t been filtered out are paired together in all possible combinations, and filtered on the enzyme pair level based on the compatibility of the pair with the sequence. Outputs all sequence + restriction enzyme pair combinations that passed all the pair filters as the final output.</p></li>
+</ol>
+<p>Continue through this documentation for an overview of the tool’s workflow, usage, and outputs</p>
+<div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting Started</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="getting_started.html#dependencies">Dependencies</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting_started.html#installing-tiars-designer">Installing TIARS Designer</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="usage.html#inputs">Inputs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage.html#example-usage">Example Usage</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="output.html">Interpreting the output</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="output.html#docx-figure-key">Docx Figure Key</a></li>
+<li class="toctree-l2"><a class="reference internal" href="output.html#single-enzyme-results">Single Enzyme results</a></li>
+<li class="toctree-l2"><a class="reference internal" href="output.html#enzyme-pair-results">Enzyme Pair results</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="filters.html">Filters</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="filters.html#figure-key">Figure Key</a></li>
+<li class="toctree-l2"><a class="reference internal" href="filters.html#single-restriction-enzyme-filters">Single Restriction Enzyme Filters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="filters.html#enzyme-pair-filters">Enzyme Pair Filters</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="scaling_up.html">Scaling up with Snakemake</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="scaling_up.html#sampletable-tsv">Sampletable.tsv</a></li>
+<li class="toctree-l2"><a class="reference internal" href="scaling_up.html#config-yaml">Config.yaml</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="autoapi/index.html">API Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="autoapi/tiarsdesigner/index.html">tiarsdesigner</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+</section>
+<section id="indices-and-tables">
+<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Link to this heading">¶</a></h1>
+<ul class="simple">
+<li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
+<li><p><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></p></li>
+<li><p><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></p></li>
+</ul>
+</section>
+
+
+          </div>
+              <div class="related bottom">
+                &nbsp;
+  <nav id="rellinks">
+    <ul>
+        <li>
+          <a href="getting_started.html" title="Next document">Getting Started</a>
+          &rarr;
+        </li>
+    </ul>
+  </nav>
+              </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="#">TIARS Oligo Designer</a></h1>
+
+
+
+
+
+
+
+
+
+<search id="searchbox" style="display: none" role="search">
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Search"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script><h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="output.html">Interpreting the output</a></li>
+<li class="toctree-l1"><a class="reference internal" href="filters.html">Filters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scaling_up.html">Scaling up with Snakemake</a></li>
+<li class="toctree-l1"><a class="reference internal" href="autoapi/index.html">API Reference</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="#">Documentation overview</a><ul>
+      <li>Next: <a href="getting_started.html" title="next chapter">Getting Started</a></li>
+  </ul></li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2026, Sydney Hertafeld.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 9.2.0</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
+      
+      |
+      <a href="_sources/index.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

@@ -1,0 +1,1021 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>tiarsdesigner &#8212; TIARS Oligo Designer  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="../../_static/basic.css?v=b08954a9" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css?v=27fed22d" />
+    <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
+    <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="tiarsdesigner.run_locus" href="run_locus/index.html" />
+    <link rel="prev" title="API Reference" href="../index.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+              <div class="related top">
+                &nbsp;
+  <nav id="rellinks">
+    <ul>
+        <li>
+          &larr;
+          <a href="../index.html" title="Previous document">API Reference</a>
+        </li>
+        <li>
+          <a href="run_locus/index.html" title="Next document">tiarsdesigner.run_locus</a>
+          &rarr;
+        </li>
+    </ul>
+  </nav>
+              </div>
+          
+
+          <div class="body" role="main">
+            
+  <section id="module-tiarsdesigner">
+<span id="tiarsdesigner"></span><h1>tiarsdesigner<a class="headerlink" href="#module-tiarsdesigner" title="Link to this heading">¶</a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="run_locus/index.html">tiarsdesigner.run_locus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="utils/index.html">tiarsdesigner.utils</a></li>
+</ul>
+</div>
+</section>
+<section id="attributes">
+<h2>Attributes<a class="headerlink" href="#attributes" title="Link to this heading">¶</a></h2>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#tiarsdesigner.__version__" title="tiarsdesigner.__version__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__version__</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="classes">
+<h2>Classes<a class="headerlink" href="#classes" title="Link to this heading">¶</a></h2>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#tiarsdesigner.Designer" title="tiarsdesigner.Designer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Designer</span></code></a></p></td>
+<td><p>The parent class for Endogenous and Candidate, which stores functions and</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#tiarsdesigner.Endogenous" title="tiarsdesigner.Endogenous"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Endogenous</span></code></a></p></td>
+<td><p>An Endogenous object is a subclass of the designer class, and an</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#tiarsdesigner.Candidate" title="tiarsdesigner.Candidate"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Candidate</span></code></a></p></td>
+<td><p>The parent class for Endogenous and Candidate, which stores functions and</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="package-contents">
+<h2>Package Contents<a class="headerlink" href="#package-contents" title="Link to this heading">¶</a></h2>
+<dl class="py data">
+<dt class="sig sig-object py" id="tiarsdesigner.__version__">
+<span class="sig-prename descclassname"><span class="pre">tiarsdesigner.</span></span><span class="sig-name descname"><span class="pre">__version__</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'0.1.5'</span></span><a class="headerlink" href="#tiarsdesigner.__version__" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="tiarsdesigner.Designer">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">tiarsdesigner.</span></span><span class="sig-name descname"><span class="pre">Designer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sequence</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cutsite</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Renzyme_list</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/tiarsdesigner.html#Designer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tiarsdesigner.Designer" title="Link to this definition">¶</a></dt>
+<dd><p>The parent class for Endogenous and Candidate, which stores functions and
+variables common to both</p>
+<section id="parameters">
+<h3>Parameters<a class="headerlink" href="#parameters" title="Link to this heading">¶</a></h3>
+<dl class="simple">
+<dt>sequence: string</dt><dd><p>An in frame sequence of DNA nucleotides of max length 273
+nucleotides. It should have a PAM sequence that makes it suitable
+for CRISPR/Cas9 activity.</p>
+</dd>
+<dt>cutsite: int</dt><dd><p>The index location of the CRISPR/Cas9 cutsite (3 nt after the PAM
+if it’s CCN, 3 before if it’s NGG).</p>
+</dd>
+<dt>Renzyme_list: list</dt><dd><p>Optional: provide a list of Renzymes to use. Default is
+Bio.Restriction AllEnzymes.</p>
+</dd>
+</dl>
+</section>
+<section id="id1">
+<h3>Attributes:<a class="headerlink" href="#id1" title="Link to this heading">¶</a></h3>
+<dl class="simple">
+<dt>sequence: string</dt><dd><p>The input sequence.</p>
+</dd>
+<dt>cutsite: int</dt><dd><p>The input cutsite</p>
+</dd>
+<dt>cutsite_region: string</dt><dd><p>a subset of sequence that extends 15 bp to either side of
+cutsite.</p>
+</dd>
+<dt>cutsite_frame: int</dt><dd><p>a number describing the frame of the cutsite region. ‘0’ means it’s
+in frame. ‘1’ means the second bp of the cutsite region is the
+first bp of the first codon, and ‘2’ means the third bp of the
+cutsite region is the first bp of the first codon.</p>
+</dd>
+<dt>Renzymes: dict</dt><dd><p>a dictionary of restriction enzymes with a recognition sites  in
+self.sequence, with re names as keys and their cutsite as the
+values.</p>
+</dd>
+<dt>splicing_hexamers: dict</dt><dd><p>a dictionary of splicing hexamers found in self.sequence with the
+hexamer sequences as keys and their locations in self.sequence as
+values. splicing hexamers, aka exonic splicing enhancers, are 6 nt
+sequences that enhance premrna splicing. the list of possible
+hexamers comes from rescue-ese
+(<a class="reference external" href="http://genes.mit.edu/burgelab/rescue-ese/">http://genes.mit.edu/burgelab/rescue-ese/</a>). This dictionary will
+help us filter out candidates that interfere with splicing by
+modifying any of the splicing enhancers</p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tiarsdesigner.Designer.sequence">
+<span class="sig-name descname"><span class="pre">sequence</span></span><a class="headerlink" href="#tiarsdesigner.Designer.sequence" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tiarsdesigner.Designer.cutsite">
+<span class="sig-name descname"><span class="pre">cutsite</span></span><a class="headerlink" href="#tiarsdesigner.Designer.cutsite" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tiarsdesigner.Designer.cutsite_region">
+<span class="sig-name descname"><span class="pre">cutsite_region</span></span><a class="headerlink" href="#tiarsdesigner.Designer.cutsite_region" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tiarsdesigner.Designer.cutsite_frame">
+<span class="sig-name descname"><span class="pre">cutsite_frame</span></span><a class="headerlink" href="#tiarsdesigner.Designer.cutsite_frame" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tiarsdesigner.Designer.Renzyme_list">
+<span class="sig-name descname"><span class="pre">Renzyme_list</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#tiarsdesigner.Designer.Renzyme_list" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tiarsdesigner.Designer.Renzymes">
+<span class="sig-name descname"><span class="pre">Renzymes</span></span><a class="headerlink" href="#tiarsdesigner.Designer.Renzymes" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tiarsdesigner.Designer.get_distance_from">
+<span class="sig-name descname"><span class="pre">get_distance_from</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pos</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/tiarsdesigner.html#Designer.get_distance_from"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tiarsdesigner.Designer.get_distance_from" title="Link to this definition">¶</a></dt>
+<dd><p>Takes all of the restriction enzymes in self.Renzymes and returns
+a dictionary with REnames as their values and their distances from
+<cite>pos</cite> as the values.</p>
+<section id="id2">
+<h4>Parameters<a class="headerlink" href="#id2" title="Link to this heading">¶</a></h4>
+<dl class="simple">
+<dt>pos: int</dt><dd><p>an integer in range(0, len(self.sequence))</p>
+</dd>
+</dl>
+</section>
+<section id="returns">
+<h4>Returns<a class="headerlink" href="#returns" title="Link to this heading">¶</a></h4>
+<p>A dictionary of Restriction enzymes that would cut the sequence, with
+the enzymes as keys and the distances between their cutsites and pos as
+values. A positive distance means that the REcutsite is later in
+the string than <cite>pos</cite>, while a negative distance means that the
+REcutsite appears before <cite>pos</cite> in the string.</p>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tiarsdesigner.Designer.get_splicing_hexamers">
+<span class="sig-name descname"><span class="pre">get_splicing_hexamers</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sequence</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/tiarsdesigner.html#Designer.get_splicing_hexamers"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tiarsdesigner.Designer.get_splicing_hexamers" title="Link to this definition">¶</a></dt>
+<dd><p>This function searches the input sequence for splicing hexamers (6 nt
+sequences that enhance premRNA splicing, AKA exonic splicing enhancers)
+from the list provided by RESCUE-ESE
+(<a class="reference external" href="http://genes.mit.edu/burgelab/rescue-ese/zebrafish">http://genes.mit.edu/burgelab/rescue-ese/zebrafish</a>). This list has
+been copied into ‘splicing_hexamers.txt’ with duplicate hexamers
+removed and returns a dictionary of splicing hexamers found in the
+input sequence and their locations in the sequence.</p>
+<section id="id3">
+<h4>Parameters<a class="headerlink" href="#id3" title="Link to this heading">¶</a></h4>
+<dl class="simple">
+<dt>sequence: string</dt><dd><p>A DNA nucleotide sequence. Must be all capital letters.</p>
+</dd>
+</dl>
+</section>
+<section id="id4">
+<h4>Returns<a class="headerlink" href="#id4" title="Link to this heading">¶</a></h4>
+<p>Dictionary of hexamers in the sequence with the hexamer sequences as
+keys and their locations in the input sequence as values</p>
+</section>
+</dd></dl>
+
+</section>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="tiarsdesigner.Endogenous">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">tiarsdesigner.</span></span><span class="sig-name descname"><span class="pre">Endogenous</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sequence</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gRNA_start</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gRNA_end</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">PAM_start</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">which_PAM</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">AA_change_site</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">new_codon</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Renzyme_list</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/tiarsdesigner.html#Endogenous"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tiarsdesigner.Endogenous" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#tiarsdesigner.Designer" title="tiarsdesigner.Designer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Designer</span></code></a></p>
+<p>An Endogenous object is a subclass of the designer class, and an
+Endogenous object is the endogenous sequence for a CRISPR/Cas9 experiment
+before any edits are made to the sequence</p>
+<section id="id5">
+<h3>Parameters<a class="headerlink" href="#id5" title="Link to this heading">¶</a></h3>
+<dl class="simple">
+<dt>sequence: string</dt><dd><p>The endogenous/wt dna sequence without any synonymous changes
+and without the desired CRISPR facilitated amino acid change. Max
+length is 273 bp, must be in frame.</p>
+</dd>
+<dt>gRNA_start: int</dt><dd><p>the index location in the sequence of the beginning of the
+region the CRISPR/Cas9 guide RNA will target.</p>
+</dd>
+<dt>gRNA_end: int</dt><dd><p>the index location in the sequence of the end of the region
+the CRISPR/Cas9 guide RNA will target.</p>
+</dd>
+<dt>PAM_start: int</dt><dd><p>The index location in the sequence of the beginning of the
+PAM site. For now, the PAM region has to be either ‘CCN’ or ‘NGG’.</p>
+</dd>
+<dt>which_PAM: string</dt><dd><p>The sequence of the PAM site (e.g. ‘NGG’ or ‘CCN’ for Cas9, or ‘TTTN’ or ‘BAAA’ for Cfp1)</p>
+</dd>
+<dt>AA_change_site: int</dt><dd><p>the index location in the sequence of the beginning of
+the codon that is to be nonsynonymously changed in the CRISPR/Cas9
+process</p>
+</dd>
+<dt>new_codon: string</dt><dd><p>the codon to replace the existing codon at the
+AA_change_site</p>
+</dd>
+</dl>
+</section>
+<section id="id6">
+<h3>Attributes<a class="headerlink" href="#id6" title="Link to this heading">¶</a></h3>
+<p>From Parent Class:</p>
+<p>sequence
+cutsite (determined based on the PAM location and whether it’s ‘CCN’ or
+‘NGG’)
+cutsite_region
+cutsite_frame
+Renzymes
+splicing_hexamers</p>
+<p>Unique to Endogenous Class:</p>
+<dl class="simple">
+<dt>gRNA_location: tuple</dt><dd><p>A tuple of the start and end coordinates of the region in sequence
+to be targeted by the guide RNA.</p>
+</dd>
+<dt>PAM_start: int</dt><dd><p>The index location of the beginning of the PAM site in sequence.
+For now, the PAM site has to be either ‘CCN’ or ‘NGG’.</p>
+</dd>
+<dt>cas9_cut_from_PAM: int</dt><dd><p>The location of the CRISPR/Cas9 cutsite in the sequence relative to
+the PAM_start site. For ‘CCN’ it will be 6, and for ‘NGG’ it will
+be -3. Since the value is different for each PAM, it is also useful
+for indicating whether the PAM sequence is ‘CCN’ or ‘NGG’.</p>
+</dd>
+<dt>AA_change_site: int</dt><dd><p>The index location in the sequence of the codon that is to be
+nonsynonymously changed in the CRISPR/Cas9 process.</p>
+</dd>
+<dt>AA_change_sequence:</dt><dd><p>A sequence identical to the endogenous sequence (self.sequence),
+but it has the new_codon substitution at the AA site.  In other
+words, it’s the endogenous sequence with the desired CRISPR/Cas9
+nonsynonymous substitution.</p>
+</dd>
+<dt>PAM_can_change: bool</dt><dd><p>a boolean value indicating whether or not the PAM site can be
+interrupted via only synonymous substitutions. This means that one
+or both of the non ‘N’ basepair’s in the PAM site can be changed to
+anything else without changing the resulting amino acid sequence.
+This value will also be True if the desired amino acid change
+interrupts the PAM.</p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tiarsdesigner.Endogenous.gRNA_location">
+<span class="sig-name descname"><span class="pre">gRNA_location</span></span><a class="headerlink" href="#tiarsdesigner.Endogenous.gRNA_location" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tiarsdesigner.Endogenous.PAM_start">
+<span class="sig-name descname"><span class="pre">PAM_start</span></span><a class="headerlink" href="#tiarsdesigner.Endogenous.PAM_start" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tiarsdesigner.Endogenous.which_PAM">
+<span class="sig-name descname"><span class="pre">which_PAM</span></span><a class="headerlink" href="#tiarsdesigner.Endogenous.which_PAM" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tiarsdesigner.Endogenous.cas9_cut_from_PAM">
+<span class="sig-name descname"><span class="pre">cas9_cut_from_PAM</span></span><a class="headerlink" href="#tiarsdesigner.Endogenous.cas9_cut_from_PAM" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tiarsdesigner.Endogenous.AA_change_site">
+<span class="sig-name descname"><span class="pre">AA_change_site</span></span><a class="headerlink" href="#tiarsdesigner.Endogenous.AA_change_site" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tiarsdesigner.Endogenous.AA_change_sequence">
+<span class="sig-name descname"><span class="pre">AA_change_sequence</span></span><a class="headerlink" href="#tiarsdesigner.Endogenous.AA_change_sequence" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tiarsdesigner.Endogenous.PAM_can_change">
+<span class="sig-name descname"><span class="pre">PAM_can_change</span></span><a class="reference internal" href="../../_modules/tiarsdesigner.html#Endogenous.PAM_can_change"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tiarsdesigner.Endogenous.PAM_can_change" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tiarsdesigner.Endogenous.get_filtered_candidates">
+<span class="sig-name descname"><span class="pre">get_filtered_candidates</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">locusname</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">single_enzyme_filters</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_Rsite_distance</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">get_filter_stats</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">codon_usage_tsv</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/tiarsdesigner.html#Endogenous.get_filtered_candidates"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tiarsdesigner.Endogenous.get_filtered_candidates" title="Link to this definition">¶</a></dt>
+<dd><p>Builds a generator of all potential repair oligo candidates with the
+desired nonsynonymous amino acid change and at least one synonymous
+substitution in self.cutsite_region. Before being run through the
+generator, however, each candidate-Renzyme combination is run through
+all of the single Renzyme filters, and only the combinations that pass
+all of them go through.</p>
+<section id="id7">
+<h4>Parameters<a class="headerlink" href="#id7" title="Link to this heading">¶</a></h4>
+<dl class="simple">
+<dt>locusname: string</dt><dd><p>A user created name for the locus for writing the filter stats to file</p>
+</dd>
+<dt>single_enzyme_filters: list</dt><dd><p>A list of filters to run for this locus (will run all filters if not specified)</p>
+</dd>
+<dt>min_Rsite_distance: int</dt><dd><p>An integer indicating the minimum allowable distance between any
+novel and endogenous site for a given restriction enzyme</p>
+</dd>
+<dt>get_filter_stats: bool</dt><dd><p>A boolean value indicating whether or not the function should
+generate filter stats in the form of a percentage of passing
+candidates for each filter.</p>
+</dd>
+<dt>codon_usage_tsv: tsv</dt><dd><p>A tsv mapping codons to their usage frequency for the organism
+used.</p>
+</dd>
+</dl>
+</section>
+<section id="id8">
+<h4>Returns<a class="headerlink" href="#id8" title="Link to this heading">¶</a></h4>
+<p>Generator of all the possible candidate sequence/Renzyme combinations
+that passed all of the single Renzyme filters. A candidate sequence is
+very similar to the endogenous sequence, but it has the amino acid
+change (could be any codon that corresponds to that amino acid) and
+anywhere from one to the maximum possible number of synonymous
+substitutions. If ‘get_filter_stats’, it will also write out a file
+called ‘[locusname]_filter_stats.tsv’ that includes a percentage of
+candidates that passed for each filter, along with the total number of
+candidates.</p>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tiarsdesigner.Endogenous.no_endogenous_cutsites_within_Nnt_of_primers">
+<span class="sig-name descname"><span class="pre">no_endogenous_cutsites_within_Nnt_of_primers</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Renzyme</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">N</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/tiarsdesigner.html#Endogenous.no_endogenous_cutsites_within_Nnt_of_primers"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tiarsdesigner.Endogenous.no_endogenous_cutsites_within_Nnt_of_primers" title="Link to this definition">¶</a></dt>
+<dd><p>Filters out Renzymes for all candidates that have endogenous sites
+within N nucleotides of the primers.</p>
+<section id="id9">
+<h4>Parameters<a class="headerlink" href="#id9" title="Link to this heading">¶</a></h4>
+<dl class="simple">
+<dt>Renzyme: Bio.Restriction enzyme object</dt><dd><p>A restriction enzyme in the form of a Bio.Restriction enzyme object</p>
+</dd>
+<dt>N: int</dt><dd><p>The desired minimum distance in nucleotides an endogenous site must
+be from the primers for the Renzyme to pass this filter. Default
+= 5</p>
+</dd>
+</dl>
+</section>
+<section id="id10">
+<h4>Returns<a class="headerlink" href="#id10" title="Link to this heading">¶</a></h4>
+<p>False if Renzyme has an endogenous site within Nnt of one of the
+primers, True otherwise. This function will be easier to write when
+we’ve fleshed out exactly what sequences we are giving to Endogenous
+and Candidate</p>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tiarsdesigner.Endogenous.does_not_exceed_max_cutsites">
+<span class="sig-name descname"><span class="pre">does_not_exceed_max_cutsites</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Renzyme</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">N</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/tiarsdesigner.html#Endogenous.does_not_exceed_max_cutsites"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tiarsdesigner.Endogenous.does_not_exceed_max_cutsites" title="Link to this definition">¶</a></dt>
+<dd><p>Filters out this Renzyme for all candidates it it has more than
+N cutsites in the endogenous sequence.</p>
+<section id="id11">
+<h4>Parameters<a class="headerlink" href="#id11" title="Link to this heading">¶</a></h4>
+<dl class="simple">
+<dt>N: int</dt><dd><p>The maximum number of endogenous cutsites Renzyme is allowed to
+have.</p>
+</dd>
+</dl>
+</section>
+<section id="id12">
+<h4>Returns<a class="headerlink" href="#id12" title="Link to this heading">¶</a></h4>
+<p>False if Renzyme has more than N cutsites in the endogenous sequence,
+True otherwise.</p>
+</section>
+</dd></dl>
+
+</section>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="tiarsdesigner.Candidate">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">tiarsdesigner.</span></span><span class="sig-name descname"><span class="pre">Candidate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">endogenous</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sequence</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/tiarsdesigner.html#Candidate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tiarsdesigner.Candidate" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#tiarsdesigner.Designer" title="tiarsdesigner.Designer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Designer</span></code></a></p>
+<p>The parent class for Endogenous and Candidate, which stores functions and
+variables common to both</p>
+<p>The Candidate class is a subclass of the designer class, and
+a candidate is a candidate repair oligo with synonymous substitutions
+to the endogenous sequence within 15 nt of the Cas9 cutsite.</p>
+<section id="id13">
+<h3>Parameters<a class="headerlink" href="#id13" title="Link to this heading">¶</a></h3>
+<dl class="simple">
+<dt>endogenous: Endogenou object</dt><dd><p>An Endogenous object, the wildtype sequence that the candidate is
+based on.</p>
+</dd>
+<dt>sequence: string</dt><dd><p>The candidate sequence, very similar to the endogenous object
+sequence but it has the desired CRISPR/cas9 nonsynonymous
+substitution, as well as a series of synonymous substitutions
+within the cutsite region.</p>
+</dd>
+</dl>
+</section>
+<section id="id14">
+<h3>Attributes<a class="headerlink" href="#id14" title="Link to this heading">¶</a></h3>
+<p>From Parent Class:</p>
+<p>sequence
+cutsite
+cutsite_region
+cutsite_frame
+Renzymes
+splicing_hexamers</p>
+<p>Unique to Candidate Class:</p>
+<dl class="simple">
+<dt>endogenous: Endogenous object</dt><dd><p>An Endogenous object, the wildtype sequence that the Candidate is
+based on.</p>
+</dd>
+<dt>sub_dep_Renzymes: dict</dt><dd><p>substitution dependent restriction enzymes, a dictionary of
+Restriction enzymes with cutsites that depend on synonymous
+substitutions in cutsite_region. This means that the bp
+substitutions in the Candidate sequence created recognition sites
+in the candidate sequence for these enzymes that aren’t in the
+endogenous sequence. In other words, this is a dictionary of
+enzymes with recognition sites that are in the Candidate sequence
+but not in the endogenous sequence.  If an enzyme has recognition
+sites in the endogenous sequence AND new additional substitution
+dependent sites in the candidate sequence, only the novel
+substitution dependent cutsites will be listed for that enzyme in
+this dictionary.</p>
+</dd>
+<dt>sub_dep_Renzyme_recognition_sites: dict</dt><dd><p>very similar to sub_dep_Renzymes, but the dictionary values are the
+coordinates of the enzyme recognition sites rather than the
+cutsites.</p>
+</dd>
+<dt>num_subs: int</dt><dd><p>the number of bp substitutions the candidate has compared to the
+wildtypes sequence (endogenous.sequence)</p>
+</dd>
+<dt>endogenous_matches: dict</dt><dd><p>a dictionary of the restriction enzymes with values describing the
+“polarity” of the endogenous site(s) compared to the substitution
+dependent site(s). This dictionary will assign ‘None’ restriction
+enzymes that have sandwiched endogenous or candidate sites (see
+method ‘no_sandwhiched_cutsites’ for more details. For polarity,
+‘0’ means that the restriction enzyme has no endogenous cutsites.
+A ‘+’ value means that the restriction enzyme has one or more
+endogenous sites after the substitution dependent cutsite(s) in the
+sequence string (and none before it). A ‘-’ value means that it has
+one or more endogenous cutsites before the substitution dependent
+cutsite(s) in the string (and none after it)</p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tiarsdesigner.Candidate.endogenous">
+<span class="sig-name descname"><span class="pre">endogenous</span></span><a class="headerlink" href="#tiarsdesigner.Candidate.endogenous" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tiarsdesigner.Candidate.sub_dep_Renzymes">
+<span class="sig-name descname"><span class="pre">sub_dep_Renzymes</span></span><a class="headerlink" href="#tiarsdesigner.Candidate.sub_dep_Renzymes" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tiarsdesigner.Candidate.sub_dep_Renzyme_recognition_sites">
+<span class="sig-name descname"><span class="pre">sub_dep_Renzyme_recognition_sites</span></span><a class="headerlink" href="#tiarsdesigner.Candidate.sub_dep_Renzyme_recognition_sites" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tiarsdesigner.Candidate.num_subs">
+<span class="sig-name descname"><span class="pre">num_subs</span></span><a class="headerlink" href="#tiarsdesigner.Candidate.num_subs" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tiarsdesigner.Candidate.endogenous_matches">
+<span class="sig-name descname"><span class="pre">endogenous_matches</span></span><a class="headerlink" href="#tiarsdesigner.Candidate.endogenous_matches" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tiarsdesigner.Candidate.get_hamming_distance">
+<span class="sig-name descname"><span class="pre">get_hamming_distance</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/tiarsdesigner.html#Candidate.get_hamming_distance"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tiarsdesigner.Candidate.get_hamming_distance" title="Link to this definition">¶</a></dt>
+<dd><p>Returns the hamming distance between the endogenous sequence and the
+candidate sequence, AKA the number of single character substitutions in
+the candidate (self.sequence) compared to the endogenous sequence
+(self.endogenous.sequence)</p>
+<section id="id15">
+<h4>Returns<a class="headerlink" href="#id15" title="Link to this heading">¶</a></h4>
+<p>Integer indicating the number of substitutions to the endogenous
+sequence are in the candidate sequence.</p>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tiarsdesigner.Candidate.get_substitution_dependent_Renzymes">
+<span class="sig-name descname"><span class="pre">get_substitution_dependent_Renzymes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/tiarsdesigner.html#Candidate.get_substitution_dependent_Renzymes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tiarsdesigner.Candidate.get_substitution_dependent_Renzymes" title="Link to this definition">¶</a></dt>
+<dd><p>Finds restriction enzyme cutsites that depend on synonymous
+substitutions in the cutsite region (AKA they are in the candidate
+sequence but not the endogenous sequence because one or more
+substitutions created their recognition site) and returns
+a dictionary mapping those cutsites to their enzymes.</p>
+<section id="id16">
+<h4>Returns<a class="headerlink" href="#id16" title="Link to this heading">¶</a></h4>
+<p>A dictionary with enzyme names as keys and their substitution dependent
+cutsites as values.  If an enzyme has multiple cutsites in the
+sequence, it will only return the cutsites that are unique to the
+candidate sequence (compared to the endogenous
+self.endogenous.sequence)</p>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tiarsdesigner.Candidate.get_endogenous_matches">
+<span class="sig-name descname"><span class="pre">get_endogenous_matches</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/tiarsdesigner.html#Candidate.get_endogenous_matches"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tiarsdesigner.Candidate.get_endogenous_matches" title="Link to this definition">¶</a></dt>
+<dd><p>This function will look at restriction enzymes with endogenous and
+substitution dependent sites, and it’ll return a dictionary of the
+restriction enzymes with values describing the “polarity” of the
+endogenous site(s) compared to the substitution dependent site(s).</p>
+<section id="id17">
+<h4>Returns<a class="headerlink" href="#id17" title="Link to this heading">¶</a></h4>
+<p>A dictionary with enzymes as keys and symbols indicating the polarity
+of their cutsites as values. A ‘0’ value means that the restriction
+enzyme has no endogenous cutsites. A ‘+’ value means that the
+restriction enzyme has one or more endogenous sites after the
+substitution dependent cutsite(s) in the sequence string (and none
+before it). A ‘-’ value means that it has one or more endogenous
+cutsites before the substitution dependent cutsite(s) in the string
+(and none after it). A value of None means that that enzyme either has
+novel site(s) sandwiched between endogenous sites, or endogenous
+site(s) sandwiched between novel sites.</p>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tiarsdesigner.Candidate.get_sub_dep_Renzyme_recognition_sites">
+<span class="sig-name descname"><span class="pre">get_sub_dep_Renzyme_recognition_sites</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/tiarsdesigner.html#Candidate.get_sub_dep_Renzyme_recognition_sites"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tiarsdesigner.Candidate.get_sub_dep_Renzyme_recognition_sites" title="Link to this definition">¶</a></dt>
+<dd><p>Finds restriction enzyme recognition sites within the candidate seq
+that depend on synonymous substitutions in the cutsite region (AKA they
+are in the candidate sequence but not the endogenous sequence because
+one or more substitutions created them) and returns a dictionary
+mapping those recognition site coordinates to their enzymes.</p>
+<section id="id18">
+<h4>Returns<a class="headerlink" href="#id18" title="Link to this heading">¶</a></h4>
+<p>A dictionary with enzyme names as keys and their substitution dependent
+recognition site coordinates as values.  If an enzyme has multiple
+recognition sites in the sequence, it will only return the recognition
+site coordinates that are unique to the candidate sequence (compared to
+the endogenous self.endogenous.sequence)</p>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tiarsdesigner.Candidate.get_average_distance_between_RE_cutsites_and_Cas9_cutsite">
+<span class="sig-name descname"><span class="pre">get_average_distance_between_RE_cutsites_and_Cas9_cutsite</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Renzyme</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/tiarsdesigner.html#Candidate.get_average_distance_between_RE_cutsites_and_Cas9_cutsite"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tiarsdesigner.Candidate.get_average_distance_between_RE_cutsites_and_Cas9_cutsite" title="Link to this definition">¶</a></dt>
+<dd><section id="id19">
+<h4>Returns<a class="headerlink" href="#id19" title="Link to this heading">¶</a></h4>
+<p>The average distance in nucleotides between novel cutsite and cas9
+cutsite for each novel cutsite for Renzyme in the candidate sequence.</p>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tiarsdesigner.Candidate.get_distance_from_nonsynonymous_codon_to_Renzyme_cutsite">
+<span class="sig-name descname"><span class="pre">get_distance_from_nonsynonymous_codon_to_Renzyme_cutsite</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Renzyme</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/tiarsdesigner.html#Candidate.get_distance_from_nonsynonymous_codon_to_Renzyme_cutsite"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tiarsdesigner.Candidate.get_distance_from_nonsynonymous_codon_to_Renzyme_cutsite" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tiarsdesigner.Candidate.more_than_one_substitution">
+<span class="sig-name descname"><span class="pre">more_than_one_substitution</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/tiarsdesigner.html#Candidate.more_than_one_substitution"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tiarsdesigner.Candidate.more_than_one_substitution" title="Link to this definition">¶</a></dt>
+<dd><p>Filters out candidates that have less than two substitutions.</p>
+<section id="id20">
+<h4>Returns<a class="headerlink" href="#id20" title="Link to this heading">¶</a></h4>
+<p>False if the candidate only has one substitution, True otherwise</p>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tiarsdesigner.Candidate.no_new_cutsites">
+<span class="sig-name descname"><span class="pre">no_new_cutsites</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/tiarsdesigner.html#Candidate.no_new_cutsites"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tiarsdesigner.Candidate.no_new_cutsites" title="Link to this definition">¶</a></dt>
+<dd><p>Filters out candidates for which the synonymous changes did not create
+any new enzyme recognition sites.</p>
+<section id="id21">
+<h4>Returns<a class="headerlink" href="#id21" title="Link to this heading">¶</a></h4>
+<p>False if the synonymous changes did not create
+any new enzyme recognition sites, True otherwise</p>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tiarsdesigner.Candidate.no_splicing_interference">
+<span class="sig-name descname"><span class="pre">no_splicing_interference</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/tiarsdesigner.html#Candidate.no_splicing_interference"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tiarsdesigner.Candidate.no_splicing_interference" title="Link to this definition">¶</a></dt>
+<dd><p>Filters out candidates for which the substitutions interferred with
+splicing hexamers.</p>
+<section id="id22">
+<h4>Returns<a class="headerlink" href="#id22" title="Link to this heading">¶</a></h4>
+<p>False if there are any differences between self.splicing_hexamers and
+self.endogenous.splicing_hexamers (which would indicate that the
+candidate’s synonymous changes interfered with the splicing hexamers),
+True otherwise.</p>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tiarsdesigner.Candidate.PAM_is_disrupted">
+<span class="sig-name descname"><span class="pre">PAM_is_disrupted</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/tiarsdesigner.html#Candidate.PAM_is_disrupted"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tiarsdesigner.Candidate.PAM_is_disrupted" title="Link to this definition">¶</a></dt>
+<dd><p>Filters out candidates for which the PAM site could be interrupted by
+a synonymous change or the desired AA change, but isn’t.</p>
+<section id="id23">
+<h4>Returns<a class="headerlink" href="#id23" title="Link to this heading">¶</a></h4>
+<p>False if the PAM site can be interrupted but isn’t, True otherwise.</p>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tiarsdesigner.Candidate.miRNA_target_interference">
+<span class="sig-name descname"><span class="pre">miRNA_target_interference</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/tiarsdesigner.html#Candidate.miRNA_target_interference"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tiarsdesigner.Candidate.miRNA_target_interference" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tiarsdesigner.Candidate.no_sandwiched_cutsites">
+<span class="sig-name descname"><span class="pre">no_sandwiched_cutsites</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Renzyme</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/tiarsdesigner.html#Candidate.no_sandwiched_cutsites"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tiarsdesigner.Candidate.no_sandwiched_cutsites" title="Link to this definition">¶</a></dt>
+<dd><p>Filters out Renzymes for this candidate that have either one or more
+substitution dependent sites sandwiched between endogenous sites, or
+one or more endogenous sites sandwiched between substitution dependent
+sites.</p>
+<section id="id24">
+<h4>Parameters<a class="headerlink" href="#id24" title="Link to this heading">¶</a></h4>
+<dl class="simple">
+<dt>Renzyme: Bio.Restriction enzyme object</dt><dd><p>A restriction enzyme in the form of a Bio.Restriction object.</p>
+</dd>
+</dl>
+</section>
+<section id="id25">
+<h4>Returns<a class="headerlink" href="#id25" title="Link to this heading">¶</a></h4>
+<p>False if the Renzyme has any sandwiched cutsites, True otherwise</p>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tiarsdesigner.Candidate.non_ambiguous_cutsites">
+<span class="sig-name descname"><span class="pre">non_ambiguous_cutsites</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Renzyme</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/tiarsdesigner.html#Candidate.non_ambiguous_cutsites"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tiarsdesigner.Candidate.non_ambiguous_cutsites" title="Link to this definition">¶</a></dt>
+<dd><p>Filters out enzymes for which the exact location of the cutsite is
+not fully known.</p>
+<section id="id26">
+<h4>Parameters<a class="headerlink" href="#id26" title="Link to this heading">¶</a></h4>
+<dl class="simple">
+<dt>Renzyme: Bio.Restriction enzyme object</dt><dd><p>A restriction enzyme in the form of a Bio.Restriction object.</p>
+</dd>
+</dl>
+</section>
+<section id="id27">
+<h4>Returns<a class="headerlink" href="#id27" title="Link to this heading">¶</a></h4>
+<p>False if Renzyme has an unknown/ambiguous cutsite, True otherwise.</p>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tiarsdesigner.Candidate.no_endogenous_cutsites_within_Nnt_of_novel_cutsite">
+<span class="sig-name descname"><span class="pre">no_endogenous_cutsites_within_Nnt_of_novel_cutsite</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Renzyme</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">N</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/tiarsdesigner.html#Candidate.no_endogenous_cutsites_within_Nnt_of_novel_cutsite"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tiarsdesigner.Candidate.no_endogenous_cutsites_within_Nnt_of_novel_cutsite" title="Link to this definition">¶</a></dt>
+<dd><p>Filters out Renzymes for this candidate that have endogenous cutsites
+within N nucleotides of a substitution dependent cutsite.</p>
+<section id="id28">
+<h4>Parameters<a class="headerlink" href="#id28" title="Link to this heading">¶</a></h4>
+<dl class="simple">
+<dt>Renzyme: Bio.Restriction enzyme object</dt><dd><p>A restriction enzyme in the form of a Bio.Restriction object.</p>
+</dd>
+<dt>N: int</dt><dd><p>The minimum distance in nucleotides any endogenous site can be from
+any substitution dependent site.</p>
+</dd>
+</dl>
+</section>
+<section id="id29">
+<h4>Returns<a class="headerlink" href="#id29" title="Link to this heading">¶</a></h4>
+<p>False if the Renzyme has an endogenous site within N nt of
+a novel site for this candidate, True otherwise.</p>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tiarsdesigner.Candidate.no_lost_endogenous_sites">
+<span class="sig-name descname"><span class="pre">no_lost_endogenous_sites</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Renzyme</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/tiarsdesigner.html#Candidate.no_lost_endogenous_sites"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tiarsdesigner.Candidate.no_lost_endogenous_sites" title="Link to this definition">¶</a></dt>
+<dd><p>Filters out Renzymes for this candidate that have endogenous sites that
+have been interrupted by substitutions, such that they only appear in
+the endogenous sequence and not in the candidate sequence.</p>
+<section id="id30">
+<h4>Parameters<a class="headerlink" href="#id30" title="Link to this heading">¶</a></h4>
+<dl class="simple">
+<dt>Renzyme: Bio.Restriction enzyme object</dt><dd><p>A restriction enzyme in the form of a Bio.Restriction object.</p>
+</dd>
+</dl>
+</section>
+<section id="id31">
+<h4>Returns<a class="headerlink" href="#id31" title="Link to this heading">¶</a></h4>
+<p>False if any endogenous cutsites for
+Renzyme are lost with the synonymous substitutions, True
+otherwise</p>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tiarsdesigner.Candidate.novel_site_depends_on_at_least_two_substitutions">
+<span class="sig-name descname"><span class="pre">novel_site_depends_on_at_least_two_substitutions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Renzyme</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/tiarsdesigner.html#Candidate.novel_site_depends_on_at_least_two_substitutions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tiarsdesigner.Candidate.novel_site_depends_on_at_least_two_substitutions" title="Link to this definition">¶</a></dt>
+<dd><p>Filters out Renzymes for this candidate that have substitution
+dependent recognition sites in the candidate sequence that depend on
+less than two substitutions.</p>
+<section id="id32">
+<h4>Parameters<a class="headerlink" href="#id32" title="Link to this heading">¶</a></h4>
+<dl class="simple">
+<dt>Renzyme: Bio.Restriction enzyme object</dt><dd><p>A restriction enzyme in the form of a Bio.Restriction object.</p>
+</dd>
+</dl>
+</section>
+<section id="id33">
+<h4>Returns<a class="headerlink" href="#id33" title="Link to this heading">¶</a></h4>
+<p>False if any of the substitution dependent recognition sites for this
+Renzyme in this candidate depend on less than two substitutions, True
+otherwise.</p>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tiarsdesigner.Candidate.num_recognition_sites_equals_num_cutsites">
+<span class="sig-name descname"><span class="pre">num_recognition_sites_equals_num_cutsites</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Renzyme</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/tiarsdesigner.html#Candidate.num_recognition_sites_equals_num_cutsites"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tiarsdesigner.Candidate.num_recognition_sites_equals_num_cutsites" title="Link to this definition">¶</a></dt>
+<dd><p>Filters out any Renzymes for this candidate for which the number of
+recognition sites in the whole sequence does not equal the number of
+cutsites for the whole sequence.</p>
+<section id="id34">
+<h4>Parameters<a class="headerlink" href="#id34" title="Link to this heading">¶</a></h4>
+<dl class="simple">
+<dt>Renzyme: Bio.Restriction enzyme object</dt><dd><p>A restriction enzyme in the form of a Bio.Restriction object.</p>
+</dd>
+</dl>
+</section>
+<section id="id35">
+<h4>Returns<a class="headerlink" href="#id35" title="Link to this heading">¶</a></h4>
+<p>False if there are a different number of
+cutsites from recognition sites for Renzyme (which could mean that the
+enzyme cuts outsite the recognitition site and the Renzyme is close
+enough to the edge that the cut would not appear in the sequence, or
+maybe the enzyme cuts twice), True otherwise</p>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tiarsdesigner.Candidate.at_least_one_has_endogenous_site">
+<span class="sig-name descname"><span class="pre">at_least_one_has_endogenous_site</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">RenzymeA</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">RenzymeB</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/tiarsdesigner.html#Candidate.at_least_one_has_endogenous_site"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tiarsdesigner.Candidate.at_least_one_has_endogenous_site" title="Link to this definition">¶</a></dt>
+<dd><p>Filters out Renzyme pairs for this candidate for which neither Renzyme
+in the pair has an endogenous site.</p>
+<section id="id36">
+<h4>Parameters<a class="headerlink" href="#id36" title="Link to this heading">¶</a></h4>
+<dl class="simple">
+<dt>RenzymeA: Bio.Restriction enzyme object</dt><dd><p>A restriction enzyme in the form of a Bio.Restriction object.</p>
+</dd>
+<dt>RenzymeB: Bio.Restriction enzyme object</dt><dd><p>A restriction enzyme other than RenzymeA, in the form of
+a Bio.Restriction object.</p>
+</dd>
+</dl>
+</section>
+<section id="id37">
+<h4>Returns<a class="headerlink" href="#id37" title="Link to this heading">¶</a></h4>
+<p>False if neither RenzymeA nor RenzymeB have
+any endogenous sites (AKA if both have polarities of ‘0’), True
+otherwise.</p>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tiarsdesigner.Candidate.both_have_endogenous_sites">
+<span class="sig-name descname"><span class="pre">both_have_endogenous_sites</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">RenzymeA</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">RenzymeB</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/tiarsdesigner.html#Candidate.both_have_endogenous_sites"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tiarsdesigner.Candidate.both_have_endogenous_sites" title="Link to this definition">¶</a></dt>
+<dd><p>A harsher version of ‘at_least_one_has_endogenous_site’, this filters
+out Renzyme pairs for this candidate for which at least one of the
+candidates in the pair does not have an endogenous site.</p>
+<section id="id38">
+<h4>Parameters<a class="headerlink" href="#id38" title="Link to this heading">¶</a></h4>
+<dl class="simple">
+<dt>RenzymeA: Bio.Restriction enzyme object</dt><dd><p>A restriction enzyme in the form of a Bio.Restriction object.</p>
+</dd>
+<dt>RenzymeB: Bio.Restriction enzyme object</dt><dd><p>A restriction enzyme other than RenzymeA, in the form of
+a Bio.Restriction object.</p>
+</dd>
+</dl>
+</section>
+<section id="id39">
+<h4>Returns<a class="headerlink" href="#id39" title="Link to this heading">¶</a></h4>
+<p>False unless both Renzymes have an endogenous site</p>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tiarsdesigner.Candidate.compatible_polarity">
+<span class="sig-name descname"><span class="pre">compatible_polarity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">RenzymeA</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">RenzymeB</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/tiarsdesigner.html#Candidate.compatible_polarity"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tiarsdesigner.Candidate.compatible_polarity" title="Link to this definition">¶</a></dt>
+<dd><p>Filters out Renzyme pairs for this candidates if they have endogenous
+sites on opposite sides of their novel sites with respect to the
+beginning of the sequence (AKA one of the primers).</p>
+<section id="id40">
+<h4>Parameters<a class="headerlink" href="#id40" title="Link to this heading">¶</a></h4>
+<dl class="simple">
+<dt>RenzymeA: Bio.Restriction enzyme object</dt><dd><p>A restriction enzyme in the form of a Bio.Restriction object.</p>
+</dd>
+<dt>RenzymeB: Bio.Restriction enzyme object</dt><dd><p>A restriction enzyme other than RenzymeA, in the form of
+a Bio.Restriction object.</p>
+</dd>
+</dl>
+</section>
+<section id="id41">
+<h4>Returns<a class="headerlink" href="#id41" title="Link to this heading">¶</a></h4>
+<p>This function will return False if Renzyme A and Renzyme B have
+incompatible polarities (e.g. if one has a ‘-’ polarity and the other
+has a ‘+’ polarity), True otherwise.</p>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tiarsdesigner.Candidate.different_recognition_sites">
+<span class="sig-name descname"><span class="pre">different_recognition_sites</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">RenzymeA</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">RenzymeB</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/tiarsdesigner.html#Candidate.different_recognition_sites"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tiarsdesigner.Candidate.different_recognition_sites" title="Link to this definition">¶</a></dt>
+<dd><p>Filters out Renzyme pairs for this candidate that have the same
+recognition site.</p>
+<section id="id42">
+<h4>Parameters<a class="headerlink" href="#id42" title="Link to this heading">¶</a></h4>
+<dl class="simple">
+<dt>RenzymeA: Bio.Restriction enzyme object</dt><dd><p>A restriction enzyme in the form of a Bio.Restriction object.</p>
+</dd>
+<dt>RenzymeB: Bio.Restriction enzyme object</dt><dd><p>A restriction enzyme other than RenzymeA, in the form of
+a Bio.Restriction object.</p>
+</dd>
+</dl>
+</section>
+<section id="id43">
+<h4>Returns<a class="headerlink" href="#id43" title="Link to this heading">¶</a></h4>
+<p>False if RenzymeA and RenzymeB have the same recognition site</p>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tiarsdesigner.Candidate.both_Renzymes_depend_on_at_least_one_unique_substitution">
+<span class="sig-name descname"><span class="pre">both_Renzymes_depend_on_at_least_one_unique_substitution</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">RenzymeA</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">RenzymeB</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/tiarsdesigner.html#Candidate.both_Renzymes_depend_on_at_least_one_unique_substitution"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tiarsdesigner.Candidate.both_Renzymes_depend_on_at_least_one_unique_substitution" title="Link to this definition">¶</a></dt>
+<dd><p>Filters out Renzyme pairs for this candidate for which both Renzymes
+depend on the exact same set of substitutions for their substitution
+dependent recognition sites.</p>
+<section id="id44">
+<h4>Parameters<a class="headerlink" href="#id44" title="Link to this heading">¶</a></h4>
+<dl class="simple">
+<dt>RenzymeA: Bio.Restriction enzyme object</dt><dd><p>A restriction enzyme in the form of a Bio.Restriction object.</p>
+</dd>
+<dt>RenzymeB: Bio.Restriction enzyme object</dt><dd><p>A restriction enzyme other than RenzymeA, in the form of
+a Bio.Restriction object.</p>
+</dd>
+</dl>
+</section>
+<section id="id45">
+<h4>Returns<a class="headerlink" href="#id45" title="Link to this heading">¶</a></h4>
+<p>True only if RenzymeA and RenzymeB each depend on at least one
+substitution that the other does not depend on, False otherwise.</p>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tiarsdesigner.Candidate.no_unneeded_substitutions">
+<span class="sig-name descname"><span class="pre">no_unneeded_substitutions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">RenzymeA</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">RenzymeB</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/tiarsdesigner.html#Candidate.no_unneeded_substitutions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tiarsdesigner.Candidate.no_unneeded_substitutions" title="Link to this definition">¶</a></dt>
+<dd><p>Filters out Renzyme pairs for this candidate if there are any
+synonymous substitutions that are not needed to create the novel sites
+for Renzyme A and B and the desired AA change. If the PAM site cannot
+be changed, it will not exclude candidates with unneeded substitutions
+that are within the gRNA target region as long as they have no unneeded
+substitutions outside the gRNA target region.”</p>
+<section id="id46">
+<h4>Parameters<a class="headerlink" href="#id46" title="Link to this heading">¶</a></h4>
+<dl class="simple">
+<dt>RenzymeA: Bio.Restriction enzyme object</dt><dd><p>A restriction enzyme in the form of a Bio.Restriction object.</p>
+</dd>
+<dt>RenzymeB: Bio.Restriction enzyme object</dt><dd><p>A restriction enzyme other than RenzymeA, in the form of
+a Bio.Restriction object. To run this filter only on RenzymeA, do
+not specify a RenzymeB</p>
+</dd>
+</dl>
+</section>
+<section id="id47">
+<h4>Returns<a class="headerlink" href="#id47" title="Link to this heading">¶</a></h4>
+<p>False if there are any unneeded substitutions (unless the PAM can’t be
+changed, in which case there can be unneeded substitutions as long as
+they are within the gRNA target region), True otherwise.</p>
+</section>
+</dd></dl>
+
+</section>
+</dd></dl>
+
+</section>
+</section>
+
+
+          </div>
+              <div class="related bottom">
+                &nbsp;
+  <nav id="rellinks">
+    <ul>
+        <li>
+          &larr;
+          <a href="../index.html" title="Previous document">API Reference</a>
+        </li>
+        <li>
+          <a href="run_locus/index.html" title="Next document">tiarsdesigner.run_locus</a>
+          &rarr;
+        </li>
+    </ul>
+  </nav>
+              </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">TIARS Oligo Designer</a></h1>
+
+
+
+
+
+
+
+
+
+<search id="searchbox" style="display: none" role="search">
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Search"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script><h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../output.html">Interpreting the output</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../filters.html">Filters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../scaling_up.html">Scaling up with Snakemake</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">API Reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">tiarsdesigner</a></li>
+</ul>
+</li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">API Reference</a><ul>
+      <li>Previous: <a href="../index.html" title="previous chapter">API Reference</a></li>
+      <li>Next: <a href="run_locus/index.html" title="next chapter">tiarsdesigner.run_locus</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2026, Sydney Hertafeld.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 9.2.0</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
+      
+      |
+      <a href="../../_sources/autoapi/tiarsdesigner/index.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

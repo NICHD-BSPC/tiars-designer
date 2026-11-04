@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="./">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Filters &#8212; TIARS Oligo Designer  documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="_static/basic.css?v=b08954a9" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css?v=27fed22d" />
+    <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
+    <script src="_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Scaling up with Snakemake" href="scaling_up.html" />
+    <link rel="prev" title="Interpreting the output" href="output.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+              <div class="related top">
+                &nbsp;
+  <nav id="rellinks">
+    <ul>
+        <li>
+          &larr;
+          <a href="output.html" title="Previous document">Interpreting the output</a>
+        </li>
+        <li>
+          <a href="scaling_up.html" title="Next document">Scaling up with Snakemake</a>
+          &rarr;
+        </li>
+    </ul>
+  </nav>
+              </div>
+          
+
+          <div class="body" role="main">
+            
+  <section id="filters">
+<h1>Filters<a class="headerlink" href="#filters" title="Link to this heading">¶</a></h1>
+<p>Each candidate goes through two rounds of filtering: first the single restriction enzyme filters and then the enzyme pair filters.</p>
+<section id="figure-key">
+<h2>Figure Key<a class="headerlink" href="#figure-key" title="Link to this heading">¶</a></h2>
+<p>Use this key to interpret the following figures.</p>
+<img alt="_images/figure_key.png" src="_images/figure_key.png" />
+</section>
+<section id="single-restriction-enzyme-filters">
+<h2>Single Restriction Enzyme Filters<a class="headerlink" href="#single-restriction-enzyme-filters" title="Link to this heading">¶</a></h2>
+<p>These filters take a candidate sequence and a single restriction enzyme as their inputs. They make up the first round of filtering.</p>
+<section id="novel-site-depends-on-at-least-two-substitutions">
+<h3>Novel site depends on at least two substitutions<a class="headerlink" href="#novel-site-depends-on-at-least-two-substitutions" title="Link to this heading">¶</a></h3>
+<p>Any novel, substitution dependent recognition site in the repair oligo should depend on at least two substitutions for the restriction enzyme to recognize it. In other words, at least two substitutions need to be made in the candidate oligo to create a novel recognition site for the restriction enzyme. If a recognition site depends on only one substitution, there’s a higher chance that its recognition site could be created by chance due to the mutagenic nature of CRISPR/Cas activity, yielding false positive results.</p>
+<img alt="_images/at_least_two_subs.png" src="_images/at_least_two_subs.png" />
+<p>See <span class="xref std std-ref">Figure Key</span></p>
+</section>
+<section id="no-endogenous-cutsites-within-n-nucleotides-of-a-novel-cutsite">
+<h3>No endogenous cutsites within N nucleotides of a novel cutsite<a class="headerlink" href="#no-endogenous-cutsites-within-n-nucleotides-of-a-novel-cutsite" title="Link to this heading">¶</a></h3>
+<p>For each enzyme there should be at least N nucleotides between any endogenous cutsites and novel cutsites, where N is the value is the value of the optional –min_Rsite_distance argument (default = 5bp). If a candidate has a novel site that’s too close to an endogenous site, the fragment created by digestion of the endogenous sequence would be very close in length to the fragment created by digestion of the candidate sequence. This would make it difficult to discern whether or not the CRISPR/Cas activity was sucessful.</p>
+<img alt="_images/5bp_between_cutsites.png" src="_images/5bp_between_cutsites.png" />
+<p>See <span class="xref std std-ref">Figure Key</span></p>
+</section>
+<section id="no-sandwiched-cutsites">
+<h3>No sandwiched cutsites<a class="headerlink" href="#no-sandwiched-cutsites" title="Link to this heading">¶</a></h3>
+<p>The candidate should not have endogenous cutsites on both sides of any novel cutsite. It also should not have novel cutsites on both sides of any endogenous sites. If a candidate has endogenous sites, they need to be distal to the novel cutsite(s) with respect to the labled primer (which can go on either strand). Otherwise, when the candidate is digested, the fragment with the labled primer will be cut off by the endogenous site before it reaches the novel site, and it will be impossible to tell whether the novel cut took place. If there are sandwiched cutsites, inevitably there will be an endogenous cutsite distal to a novel cutsite no matter what side the primer is on.</p>
+<img alt="_images/no_sandwiched_cutsites.png" src="_images/no_sandwiched_cutsites.png" />
+<p>see <span class="xref std std-ref">Figure Key</span></p>
+</section>
+<section id="number-of-recognition-sites-equals-number-of-cutsites">
+<h3>Number of recognition sites equals number of cutsites<a class="headerlink" href="#number-of-recognition-sites-equals-number-of-cutsites" title="Link to this heading">¶</a></h3>
+<p>The number of recognition sites an enzyme has in a candidate should be equal to the number of times that enzyme would cut the candidate sequence</p>
+<img alt="_images/num_cutsites_equals_num_recog_sites.png" src="_images/num_cutsites_equals_num_recog_sites.png" />
+<p>see <span class="xref std std-ref">Figure Key</span></p>
+</section>
+<section id="no-lost-endogenous-sites">
+<h3>No lost endogenous sites<a class="headerlink" href="#no-lost-endogenous-sites" title="Link to this heading">¶</a></h3>
+<p>There should be no Cases in which a substitution interrupts recognition site in the endogenous sequence for the enzyme in question, which would result in the endogenous sequence containing a recognition site that is not in the candidate.</p>
+<img alt="_images/no_lost_endog_sites.png" src="_images/no_lost_endog_sites.png" />
+<p>see <span class="xref std std-ref">Figure Key</span></p>
+</section>
+</section>
+<section id="enzyme-pair-filters">
+<h2>Enzyme Pair Filters<a class="headerlink" href="#enzyme-pair-filters" title="Link to this heading">¶</a></h2>
+<p>These filters take a candidate sequence and two restriction enzymes (both of which have passed all of the single enzyme filters for the candidate sequence) as their input. They make up the second round of filtering</p>
+<section id="compatible-polarity">
+<h3>Compatible Polarity<a class="headerlink" href="#compatible-polarity" title="Link to this heading">¶</a></h3>
+<p>If both enzymes have endogenous sites, they should be on the same side of the sequence relative to the novel sites. All endogenous sites for each enzyme must be distal to the novel site(s) relative to the labled primer. The labled primer can go on either either end, but if the endogenous sites for each enzyme are on opposite sides, the same Amplicon design could not be used on both enzymes because the labled primer would have to be on opposite sides for each enzyme.</p>
+<img alt="_images/compatible_polarity.png" src="_images/compatible_polarity.png" />
+<p>see <span class="xref std std-ref">Figure Key</span></p>
+</section>
+<section id="no-unneeded-substitutions">
+<h3>No unneeded substitutions<a class="headerlink" href="#no-unneeded-substitutions" title="Link to this heading">¶</a></h3>
+<p>If the PAM can be disrupted via synonymous substitutions, then the candidate should have no substitutions that aren’t needed to either create a new restriction site, disrupt the PAM site, or create the desired nonsynonymous substitution. If the PAM cannot be disrupted, a candidate can have unneeded substitutions within the gRNA, but no unneeded substitutions outside the gRNA target region.</p>
+<p>A candidate should have as few substitutions as possible while still creating the desired novel restriction sites and nonsynonymous substitution. However, the candidate should also have a way to prevent a second CRISPR/Cas cut from taking place. Ideally, this would be accomplished by interrupting the PAM site with a synonymous substitution (or the desired nonsynonymous substitution). If this is not possible, then the gRNA target region should have as many synonymous substitutions as possible in order to prevent the gRNA from recognizing the new sequence.</p>
+<img alt="_images/no_unnec_subs.png" src="_images/no_unnec_subs.png" />
+<p>see <span class="xref std std-ref">Figure Key</span></p>
+</section>
+<section id="both-enzymes-depend-on-at-least-one-unique-substitution">
+<h3>Both enzymes depend on at least one unique substitution<a class="headerlink" href="#both-enzymes-depend-on-at-least-one-unique-substitution" title="Link to this heading">¶</a></h3>
+<p>Each enzyme’s novel recognition site(s) must depend on at least one substitution that the other enzyme’s novel site(s) do not depend on.</p>
+<img alt="_images/unique_sub_dependency.png" src="_images/unique_sub_dependency.png" />
+<p>see <span class="xref std std-ref">Figure Key</span></p>
+</section>
+<section id="both-enzymes-have-endogenous-sites-at-least-one-enzyme-has-endogenous-site-s">
+<h3>Both enzymes have endogenous sites/at least one enzyme has endogenous site(s)<a class="headerlink" href="#both-enzymes-have-endogenous-sites-at-least-one-enzyme-has-endogenous-site-s" title="Link to this heading">¶</a></h3>
+<p>This filter is very sample dependent in its harshness, so there is a harher version and a less harsh version. The harsher version requires both enzymes in the pair to have at least one endogenous site. The less harsh version is used in cases where none of the candidate sequence/restriction enzyme pair combinations pass the harsher version. The less harsh version only requires one of the enzymes in the pair to have at least one endogenous site.</p>
+<img alt="_images/endog_site_present.png" src="_images/endog_site_present.png" />
+<p>see <span class="xref std std-ref">Figure Key</span></p>
+</section>
+</section>
+</section>
+
+
+          </div>
+              <div class="related bottom">
+                &nbsp;
+  <nav id="rellinks">
+    <ul>
+        <li>
+          &larr;
+          <a href="output.html" title="Previous document">Interpreting the output</a>
+        </li>
+        <li>
+          <a href="scaling_up.html" title="Next document">Scaling up with Snakemake</a>
+          &rarr;
+        </li>
+    </ul>
+  </nav>
+              </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">TIARS Oligo Designer</a></h1>
+
+
+
+
+
+
+
+
+
+<search id="searchbox" style="display: none" role="search">
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Search"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script><h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="output.html">Interpreting the output</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Filters</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#figure-key">Figure Key</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#single-restriction-enzyme-filters">Single Restriction Enzyme Filters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#enzyme-pair-filters">Enzyme Pair Filters</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="scaling_up.html">Scaling up with Snakemake</a></li>
+<li class="toctree-l1"><a class="reference internal" href="autoapi/index.html">API Reference</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="output.html" title="previous chapter">Interpreting the output</a></li>
+      <li>Next: <a href="scaling_up.html" title="next chapter">Scaling up with Snakemake</a></li>
+  </ul></li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2026, Sydney Hertafeld.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 9.2.0</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
+      
+      |
+      <a href="_sources/filters.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="./">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Scaling up with Snakemake &#8212; TIARS Oligo Designer  documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="_static/basic.css?v=b08954a9" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css?v=27fed22d" />
+    <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
+    <script src="_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="API Reference" href="autoapi/index.html" />
+    <link rel="prev" title="Filters" href="filters.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+              <div class="related top">
+                &nbsp;
+  <nav id="rellinks">
+    <ul>
+        <li>
+          &larr;
+          <a href="filters.html" title="Previous document">Filters</a>
+        </li>
+        <li>
+          <a href="autoapi/index.html" title="Next document">API Reference</a>
+          &rarr;
+        </li>
+    </ul>
+  </nav>
+              </div>
+          
+
+          <div class="body" role="main">
+            
+  <section id="scaling-up-with-snakemake">
+<h1>Scaling up with Snakemake<a class="headerlink" href="#scaling-up-with-snakemake" title="Link to this heading">¶</a></h1>
+<p>If you have multiple samples to run, you can run them all at once using the provided Snakefile. This will require consolidating the samples into a ‘sampletable.tsv’ file with a ‘config.yaml’ file for the less sample specific arguments. Template versions of these files can be found in the ‘scaling up’ folder of this repository. Once the Sampletable and Config file are set up, you can run the Snakefile with the following command:</p>
+<dl class="simple">
+<dt>Run Snakefile::</dt><dd><p>snakemake –cores N</p>
+</dd>
+</dl>
+<section id="sampletable-tsv">
+<h2>Sampletable.tsv<a class="headerlink" href="#sampletable-tsv" title="Link to this heading">¶</a></h2>
+<p>For the sampletable.tsv file, each row will represent a sample and will have the following columns. Descriptions for each of these columns can be found on the <span class="xref std std-ref">Required Inputs</span> page.</p>
+<ul class="simple">
+<li><p>sample</p></li>
+<li><p>AA_change_site</p></li>
+<li><p>new_codon</p></li>
+<li><p>PAM_start</p></li>
+<li><p>gRNA_start</p></li>
+<li><p>gRNA_end</p></li>
+<li><p>which_PAM</p></li>
+<li><p>sequence</p></li>
+</ul>
+<section id="example-sampletable-tsv">
+<h3>Example sampletable.tsv<a class="headerlink" href="#example-sampletable-tsv" title="Link to this heading">¶</a></h3>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>sample      AA_change_site  new_codon       PAM_start       gRNA_start      gRNA_end        which_PAM       sequence
+sample_A    69      TTA     48      48      71      CCN     GCTGGGGGCTCCACGGTGGTCAACATGAGCCATGCGGGCTGGTGGCCCCCAAATTGGTGGTGGTGGTGGTCACTCTGCAACACTCTTTACGTCAACTTCTGC
+sample_B    66      AGA     66      46      69      NGG     TTGCATTTTGTGTGACAGATGGCTGCGATTCGTAAGAAGCTTGTAATCGTTGGATGGTGGTGGTGGGGGTGGTGGTGGTTACTCATCGTTTTCAGTAAAGACC
+sample_C    66      ACC     51      51      76      TTTV    AGTGGGAAACAGAGACCGAACGGCACTGAGTTCATGCACTTCCTCCCCATGTTTCTCTGGTCTTGGCCCTGGTGGTGGTGTTGGTGGGTGTGGGTTTAAACAT
+</pre></div>
+</div>
+</section>
+</section>
+<section id="config-yaml">
+<h2>Config.yaml<a class="headerlink" href="#config-yaml" title="Link to this heading">¶</a></h2>
+<p>The config.yaml file will include the following arguments. Descriptions can be found on the <span class="xref std std-ref">Required Inputs</span> page.</p>
+<ul class="simple">
+<li><p>sampletable: path to ‘sampletable.tsv file’</p></li>
+<li><p>enzyme list: path to tsv file of desired enzymes. If default full enzyme list is desired write ‘default’</p></li>
+<li><p>codon_usage_tsv: path to tsv file of codon usage frequencies for organism used</p></li>
+<li><p>min_Rsite_distance</p></li>
+<li><p>single_enzyme_filters: list of desired single enzyme filters. To use all filters put ‘all’</p></li>
+<li><p>enzyme_pair_filters: list of desired enzyme pair filters. To use all filters put ‘all’</p></li>
+<li><p>verbose: boolean value</p></li>
+</ul>
+<section id="example-config-yaml">
+<h3>Example config.yaml<a class="headerlink" href="#example-config-yaml" title="Link to this heading">¶</a></h3>
+<div class="highlight-rest notranslate"><div class="highlight"><pre><span></span>sampletable: 'sampletable.tsv'
+
+enzyme_list: 'default'
+
+codon_usage_tsv: 'codon_frequency.tsv'
+
+min_Rsite_distance: 5
+
+single_enzyme_filters: 'all'
+
+enzyme_pair_filters:
+ - 'compatible_polarity'
+ <span class="m">-</span> 'both_Renzymes_depend_on_at_least_one_unique_substitution'
+ <span class="m">-</span> 'no_unneeded_substitutions'
+
+verbose: TRUE
+</pre></div>
+</div>
+</section>
+</section>
+</section>
+
+
+          </div>
+              <div class="related bottom">
+                &nbsp;
+  <nav id="rellinks">
+    <ul>
+        <li>
+          &larr;
+          <a href="filters.html" title="Previous document">Filters</a>
+        </li>
+        <li>
+          <a href="autoapi/index.html" title="Next document">API Reference</a>
+          &rarr;
+        </li>
+    </ul>
+  </nav>
+              </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">TIARS Oligo Designer</a></h1>
+
+
+
+
+
+
+
+
+
+<search id="searchbox" style="display: none" role="search">
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Search"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script><h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="output.html">Interpreting the output</a></li>
+<li class="toctree-l1"><a class="reference internal" href="filters.html">Filters</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Scaling up with Snakemake</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#sampletable-tsv">Sampletable.tsv</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#config-yaml">Config.yaml</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="autoapi/index.html">API Reference</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="filters.html" title="previous chapter">Filters</a></li>
+      <li>Next: <a href="autoapi/index.html" title="next chapter">API Reference</a></li>
+  </ul></li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2026, Sydney Hertafeld.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 9.2.0</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
+      
+      |
+      <a href="_sources/scaling_up.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

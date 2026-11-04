@@ -1,0 +1,423 @@
+tiarsdesigner.utils
+===================
+
+.. py:module:: tiarsdesigner.utils
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   tiarsdesigner.utils.reformat_codon_table
+   tiarsdesigner.utils.synonymous_seqs
+   tiarsdesigner.utils.get_endogenous_sequence_and_stats
+   tiarsdesigner.utils.generate_exon_seqs
+   tiarsdesigner.utils.get_restriction_sites
+   tiarsdesigner.utils.get_Rsite_dict
+   tiarsdesigner.utils.map_recognition_sites
+   tiarsdesigner.utils.get_substitutions_Renzyme_depends_on
+   tiarsdesigner.utils.get_codon_frequency_dict
+   tiarsdesigner.utils.get_filter_function_dict
+   tiarsdesigner.utils.get_codon_frequency_differences
+   tiarsdesigner.utils.add_sequence_to_doc
+   tiarsdesigner.utils.make_doc
+
+
+Module Contents
+---------------
+
+.. py:function:: reformat_codon_table(table=None)
+
+   Given a codon table, returns a dictionary mapping each codon to its other
+   possible synonymous codons. Each key is at considered a synonymous codon of
+   itself, so it is included in the list.
+
+   Parameters
+   ----------
+   table : dict
+       Dictionary mapping codon to amino acid. If None, then use
+       Bio.Data.CodonTable.standard_dna_table.forward_table
+
+   Returns
+   -------
+   Dictionary mapping each codon to the set of alternative codons (that does
+   not include itself).
+
+   Example
+   -------
+
+   >>> d = {'ATT': 'I', 'ATC': 'I', 'ATA': 'I', 'ATG': 'M'}
+   >>> expected = {
+   ... 'ATT': ['ATT', 'ATC', 'ATA'],
+   ... 'ATC': ['ATT', 'ATC', 'ATA'],
+   ... 'ATA': ['ATT', 'ATC', 'ATA'],
+   ... 'ATG': ['ATG'],
+   ... 'TAA': ['TAA'],
+   ... 'TGA': ['TGA'],
+   ... 'TAG': ['TAG']}
+   >>> reformat_codon_table(d) == expected
+   True
+
+
+.. py:function:: synonymous_seqs(seq, table=None)
+
+   Generator of all possible synonymous versions of the provided sequence
+   using the provided table.
+
+   Parameters
+   ----------
+   seq : str or Bio.Seq
+       Sequence containing codons from which synonymous versions will be
+       generated. Must be divisible by 3.
+
+   table : dict
+       Optional codon: amino acid dictionary passed to reformat_codon_table;
+       see that function for details.
+
+   Returns
+   -------
+
+   Generator of synonymous sequences (each one a string of same length as
+   original).
+
+   Example
+   -------
+
+   >>> list(synonymous_seqs('ATCCAATGG'))
+   ['ATTCAATGG', 'ATTCAGTGG', 'ATCCAATGG', 'ATCCAGTGG', 'ATACAATGG', 'ATACAGTGG']
+
+
+.. py:function:: get_endogenous_sequence_and_stats(full_seq, gRNA_start, gRNA_end, PAM_start, AA_change_site, which_PAM)
+
+   Given a full sequence and the locations of the gRNA, PAM, and AA change
+   site, returns a dictionary of the isolated 273 bp sequence that extends 155
+   nt upstream and 120 nt downstream (or as close to that as the sequence
+   extends) of the Cas9 cutsite and the adjusted gRNA, PAM, and AA change site
+   values that correspond to the isolated endogenous sequence.
+
+   Parameters
+   ----------
+   full_seq: string
+       The full DNA locus sequence, must extend at least 85 nt upstream and
+       50 nt downstream of the Cas9 cutsite.
+
+    gRNA_start: int
+       the index location in the sequence of the beginning of the
+       region the CRISPR/Cas9 guide RNA will target.
+
+   gRNA_end: int
+       the index location in the sequence of the end of the region
+       the CRISPR/Cas9 guide RNA will target.
+
+   PAM_start: int
+       The index location in the sequence of the beginning of the
+       PAM site. For now, the PAM region has to be either 'CCN' or 'NGG'.
+
+   AA_change_site: int
+       the index location in the sequence of the beginning of
+       the codon that is to be nonsynonymously changed in the CRISPR/Cas9
+       process
+
+   which_pam: string
+       The sequence of the PAM site (for now 'CCN', 'NGG', 'TTTV', and 'BAAA'
+       are supported)
+
+   Returns
+   -------
+   Dictionary of the isolated endogenous sequence and the adjusted gRNA, PAM,
+   and AA_change_site locations.
+
+
+.. py:function:: generate_exon_seqs(start, end, AA_change_seq)
+
+   Given a sequence, and start and end coordinates for the cutsite region
+   within that sequence, returns a generator of all possible synonymous
+   cutsite regions.
+
+   Parameters
+   ----------
+   start: int
+       The starting location of the cutsite region within the sequence
+
+   end: int
+       The ending location of the cutsite region within the sequence
+
+   AA_change_sequence: string
+       The full candidate sequence with the desired amino acid change
+
+   Returns
+   -------
+   A generator of sequences synonymous to the region within AA_change seq
+   specified by the start and end coordinates.
+
+
+.. py:function:: get_restriction_sites(sequence, Renzymes=None)
+
+   Given a sequence, returns a dictionary of restriction enzymes mapping
+   Restriction enzymes that would cut the sequence to locations in the
+   sequence that they would cut.
+
+   Parameters
+   ----------
+   sequence: string
+       A DNA nucleotide sequence. Must have all capital letters.
+
+   Renzymes: list
+       Optional enzyme list: a list of restriction enzymes to search for in the sequence.
+       The default list is the Bio.Restriction package's 'AllEnzymes'
+       module.
+
+   Returns
+   -------
+
+   Dictionary of restriction enzymes with recognition sites in sequence.
+   The keys are RE names and the values are their cutsite locations in
+   the sequence. NOTE: the cutsites use the convention that the first
+   nucleotide in the sequence is 1 not 0.
+
+   Example
+   -------
+
+   >>> result =  get_restriction_sites('ATGCGA')
+   >>> expected = {RlaI: [2], PsuGI: [2], BmeDI: [3, 5]}
+   >>> assert result == expected
+
+
+.. py:function:: get_Rsite_dict(sequence, Renzymes)
+
+   Given a sequence and either a list or a dictionary of restriction enzymes,
+   returns a dictionary mapping the restriction enzymes to coordinates of
+   their recognition sites in the sequence.
+
+   Parameters
+   ----------
+   sequence: string
+       A DNA nucleotide sequence. Must be all capital letters.
+
+   Renzymes: list or dict
+       Either a list of restriction enzyme or a dictionary with restriction
+       enzymes as keys. The restriction enzymes must be in the form of
+       Bio.Restriction restriction enzyme objects.
+
+   Returns
+   -------
+   Dictionary of enzymes with recognition sites in 'sequence', with the
+   enzyme names as keys and tuples of the start and end sites of their
+   recognition sites in the sequence as values.
+   NOTE: the endsites correspond to the first nucleotide in the sequence after
+   the recognition site (e.g. recognition site  = sequence[start:end] NOT
+   sequence[start:(end + 1)]).
+
+   Example
+   -------
+   >>> result = get_Rsite_dict('ATGCAC', {HpyCH4V: [4], CviRI: [4], RlaI: [2, 3], BmeDI: [3], Gba708II: [1]})
+   >>> expected = {
+   ... HpyCH4V: [(1, 5)],
+   ... CviRI: [(1, 5)],
+   ... RlaI: [(1, 4), (2, 5)],
+   ... BmeDI: [(2, 3), (3, 4), (5, 6)],
+   ... Gba708II: [(0, 5)]}
+   >>> assert result == expected, result
+
+
+.. py:function:: map_recognition_sites(sequence, Renzyme, num)
+
+   Given a sequence, a restriction enzyme that would cut the sequence, and
+   a nonzero integer ('num'), finds the locations of all the recognition sites
+   for that enzyme in the sequence and maps their locations.
+
+   Parameters
+   ----------
+   sequence: string
+       A DNA nucleotide sequence. All of the letters must be capitalized.
+
+   Renzyme: Bio.Restriction enzyme object
+       A restriction enzyme in the form of a Bio.Restriction enzyme object.
+
+   Returns
+   -------
+   List of 0's the length of sequence, with the 0's replaced with 'num' at
+   any point where the corresponding location in the sequence is part of
+   a recognition site in sequence.
+
+   Example
+   -------
+   #TaqI recognition site: 'TCGA'
+   >>> map_recognition_sites('AGCTCGATG', TaqI, 1)
+   [0, 0, 0, 1, 1, 1, 1, 0, 0]
+
+
+
+.. py:function:: get_substitutions_Renzyme_depends_on(Renzyme, endogenous_seq, candidate_seq, sub_dep_sites)
+
+   Given a restriction enzyme, an endogenous sequence, and a
+   candidate sequence, returns a list of tuples where each tuple corresponds to
+   a recognition site for the enzyme in the sequence and contains the locations of
+   synonymous substitutions in candidate_seq that that recognition site
+   depends on.
+
+   Parameters
+   ----------
+   Renzyme: Bio.Restriction enzyme object
+       A restriction enzyme in the form of a Bio.Restriction enzyme object.
+
+   endogenous_seq: string
+       A DNA nucleotide sequence. All letters must be capitalized.
+
+   candidate_seq: string
+       A candidate sequence based on the endogenous sequence. In other words, a sequence that's similar to the endogenous sequence, but it has one nonsynonymous substitution and a series of synonymous substitutions in the cutsite region.
+
+   sub_dep_sites: list
+       A list of tuples indicating start and end sites for substitution dependent recognition sites for Renzyme in candidate seq.
+
+   Returns
+   ------
+   List of tuples where each tuple corresponds to a novel recognition site for
+   Renzyme (AKA a recognition site for Renzyme that is in the candidate
+   sequence but not the endogenous sequence due to substitutions to the
+   canidate sequence). The numbers in each tuple correspond to index locations
+   in the candidate sequence of substutions that are required to form its
+   corresponding recognition site.
+
+   Example
+   -------
+   >>> get_substitutions_Renzyme_depends_on(Hpy188I, 'TTCTGCAGCCCTGGATGGGCTCTGCTGCTA', 'TTCTTCAGAGTTGGATGGGTTCTGCTGCTA',[(4,9)])
+   [(4, 8)]
+
+
+.. py:function:: get_codon_frequency_dict(codon_usage_tsv)
+
+   Parameters
+   ----------
+   codon_usage_tsv: a tsv file of codons and their corresponding frequencies in the format [codon]>[frequency] with one codon per line
+   Returns
+   -------
+   A dictionary of codons and the frequency at which they are used in
+
+
+.. py:function:: get_filter_function_dict(filter_list, candidate)
+
+   Given a list of filters, return a dictionary with the filter names in the
+   filter list as keys and their corresponding filter functions as values.
+
+   Parameters
+   ----------
+   filter_list: list
+       A list of filters to get corresponding functions for
+   candidate: candidate object
+       The candidate object to pull the methods from
+
+
+.. py:function:: get_codon_frequency_differences(seqA, seqB, codon_dict)
+
+   Given two sequences and a dictionary of usage frequences for all codons,
+   returns the total difference in codon frequency between the two
+   sequences.
+
+   Parameters
+   ----------
+   seqA: string
+       An in frame DNA nucleotide sequence
+
+   seqB: string
+       An in frame DNA nucleotide sequence of the same length as seqA
+
+   codon_dict: dict
+       A dictionary of codons and the frequency at which they are used
+
+   Returns
+   -------
+   A float describing the total difference in usage frequency across codons
+   between the two input sequences.
+
+
+.. py:function:: add_sequence_to_doc(document, sequence, gRNA_start, gRNA_end, PAM_start, AA_change_site, Renzyme_list, endogenous, which_pam, paired=True)
+
+   A helper function for make_doc(). The make_doc function calls
+   it to one of the candidate sequences to the document with the Renzyme
+   recognition sites, synonymous substitutions, PAM and gRNA and
+   AA_change_site coordinates marked according to the key.
+
+   Parameters
+   ----------
+   document: docx.document
+       The document that the make_doc() function is creating when it calls
+       this function.
+
+   sequence: string
+       A candidate sequence to be evalutated as a possible repair oligo for
+       the endogenous sequence
+
+   gRNA_start: int
+       The location of the beginning of the gRNA target region in the
+       sequence.
+
+   gRNA_end: int
+       The location of the end of the gRNA target region in the sequence.
+
+   PAM_start: int
+       The location of the beginning of the PAM sequence in the sequence.
+
+   AA_change_site: int
+       The location of the beginning of the codon to be nonsynonymously
+       changed in the CRISPR/Cas9 sequence.
+
+   Renzyme_list: list
+       An enzyme or pair of enzymes that passed all of the filters for
+       sequence
+
+   endogenous: int
+       The endogenous sequence that the candidate sequence is based on
+
+   which_pam: string
+       The sequence of the PAM site (for now 'CCN', 'NGG', 'TTTV', and 'BAAA'
+       are supported)
+
+   paired: bool
+       A boolean value indicating whether or not to run the function on single
+       enzymes or enzyme pairs. Default is enzyme pairs (AKA True)
+
+
+.. py:function:: make_doc(endogenous_sequence, gRNA_start, gRNA_end, PAM_start, AA_change_site, candidate_df, sample, which_pam, paired=True)
+
+   Makes a word document to visualize restriction sites
+   for each pair of enzymes (or single enzyme if paired != True) for each
+   candidate in candidate_dict
+
+   Parameters
+   ----------
+   endogenous_sequence: string
+       A DNA nucleotide sequence. Must be all capital letters.
+
+   gRNA_start: int
+       The location of the beginning of the gRNA target region in the sequence.
+
+   gRNA_end: int
+       The location of the end of the gRNA target region in the sequence.
+
+   PAM_start:int
+       The location of the beginning of the PAM sequence in the sequence.
+
+   AA_change_site: int
+       The location of the beginning of the codon to be nonsynonymously
+       changed in the CRISPR/Cas9 sequence.
+
+   candidate_df: dataframe
+       Pandas dataframe of candidate with either single enzymes or enzyme pairs that passed all filters. If single enzymes, it should have the 
+       following columns: {sequence, Renzyme, average distance to cas9 cut, codon frequency change, cutsite distance outside Rsite}. If paired, it
+       should have the following columns: {sequence, Renzyme pair, result, RenzymeA average distance to cas9 cut, RenzymeB average distance to cas9
+       cut, overall average distance to cas9 cut, codon_frequency_change}
+
+   sample: string
+       A unique identifier for this locus
+
+   which_pam: string
+       The sequence of the PAM site (for now 'CCN', 'NGG', 'TTTV', and 'BAAA'
+       are supported)
+
+   paired: bool
+       A boolean value indicating whether or not to run the function on single
+       enzymes or enzyme pairs. Default is enzyme pairs (AKA True)
+
+

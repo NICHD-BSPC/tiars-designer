@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="./">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Interpreting the output &#8212; TIARS Oligo Designer  documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="_static/basic.css?v=b08954a9" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css?v=27fed22d" />
+    <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
+    <script src="_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Filters" href="filters.html" />
+    <link rel="prev" title="Usage" href="usage.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+              <div class="related top">
+                &nbsp;
+  <nav id="rellinks">
+    <ul>
+        <li>
+          &larr;
+          <a href="usage.html" title="Previous document">Usage</a>
+        </li>
+        <li>
+          <a href="filters.html" title="Next document">Filters</a>
+          &rarr;
+        </li>
+    </ul>
+  </nav>
+              </div>
+          
+
+          <div class="body" role="main">
+            
+  <section id="interpreting-the-output">
+<h1>Interpreting the output<a class="headerlink" href="#interpreting-the-output" title="Link to this heading">¶</a></h1>
+<p>Each sample has its own output folder. In it, there is an excel spreadsheet and a word document for the single Renzyme filter results and an excel spreadsheet and a word document for the Renzyme pair filter results. The spreadsheets contain statistics such as ‘codon frequency change’ for each passing candidate-enzyme combination. These statistics can be used to sort the candidates and rank them in Cases where a lot of candidates made it to the final output. The word documents are for visualizing the passing candidates, and each candidate in the word document corresponds to a candidate in the spreadsheet with a matching candidate I.D. The documents are explained in further detail below.</p>
+<section id="docx-figure-key">
+<h2>Docx Figure Key<a class="headerlink" href="#docx-figure-key" title="Link to this heading">¶</a></h2>
+<p>Use this key to interperet the docx file example output figures</p>
+<img alt="_images/docx_key.png" src="_images/docx_key.png" />
+</section>
+<section id="single-enzyme-results">
+<h2>Single Enzyme results<a class="headerlink" href="#single-enzyme-results" title="Link to this heading">¶</a></h2>
+<section id="single-enzyme-excel-sheet">
+<h3>Single Enzyme Excel sheet<a class="headerlink" href="#single-enzyme-excel-sheet" title="Link to this heading">¶</a></h3>
+<ul>
+<li><p>Filename: [sample_name]_single_Renzymes.xlsx</p></li>
+<li><p>Description: An excel spreadsheet containing sortable statistics for ranking the passed candidate-enzyme combos. Each row represents one sequence and one enzyme that passed all of the single enzyme filters for that sequence.</p></li>
+<li><dl>
+<dt>Columns:</dt><dd><table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Column</p></th>
+<th class="head"><p>Name</p></th>
+<th class="head"><p>Desription</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>A</p></td>
+<td><p>Candidate I.D. number</p></td>
+<td><p>This number matches the number given to each candidate in the word document, so
+if you see a high ranking candidate in the spreadsheet, you can easily find it in
+the word doc by finding the matching option number.</p></td>
+</tr>
+<tr class="row-odd"><td><p>B</p></td>
+<td><p>Sequence</p></td>
+<td><p>This is the full candidate sequence, although it’s much easier to view it in the
+word doc.</p></td>
+</tr>
+<tr class="row-even"><td><p>C</p></td>
+<td><p>Renzyme</p></td>
+<td><p>This is a restriction enzyme that passed all of the single enzyme filters for that
+row’s sequence.</p></td>
+</tr>
+<tr class="row-odd"><td><p>D</p></td>
+<td><p>Average distance to Cas cut</p></td>
+<td><p>This is the distance in basepairs between the Cas cut and the cut resulting from
+the novel restriction site for this row’s Renzyme. If there’s more than one novel
+restriction site (which doesn’t appear to have happened very often), this value
+will be the average of their distances to the Cas cut.</p></td>
+</tr>
+<tr class="row-even"><td><p>E</p></td>
+<td><p>Codon frequency change</p></td>
+<td><p>This is the total difference in codon usage frequency between the candidate sequence
+and the endogenous sequence. For each codon, the absolute value of the difference in
+frequency between the two sequences was calculated. The codon frequency change is the
+sum of that absolute value across all the codons in the sequence.</p></td>
+</tr>
+<tr class="row-odd"><td><p>F</p></td>
+<td><p>Cutsite distance outside
+Rsite</p></td>
+<td><p>This is the distance outside the Renzyme’s recognition site that its cutsite falls.
+If this value is different for the + and - strand (e.g. if it cuts 3 bp outsite the
+recognition site on the + strand and 5 bp outside the recognition site on the -
+strand), this value takes the greater of the two. For example, BpuEI has the
+recognition site ‘CTTGAG’, but its cut actually looks like this
+‘CTTGAGNNNNNNNNNNNNNN_NN^N’ (‘^’ = + strand cut, ’_’ = - strand cut). In this Case,
+the cutsite distance outside the Rsite would be 17.</p></td>
+</tr>
+</tbody>
+</table>
+</dd>
+</dl>
+</li>
+</ul>
+</section>
+<section id="single-enzyme-word-document">
+<h3>Single Enzyme Word Document<a class="headerlink" href="#single-enzyme-word-document" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p>Filename: [sample_name]_single_Renzymes.docx</p></li>
+<li><p>Description: A word document for visualising all of the sequence-enzyme combinations that passed all of the single enzyme filters, with the PAM site, guideRNA, Restriction sites, and substitutions all mapped out. The option numbers in the word doc match the candidate IDs in the spreadsheet (column A) so you can easily find a candidate from the spreadsheeteven after sorting.</p></li>
+<li><p>example:</p></li>
+</ul>
+<img alt="_images/single_enzyme_docx.png" src="_images/single_enzyme_docx.png" />
+<p>See <span class="xref std std-ref">Docx Figure Key</span></p>
+</section>
+</section>
+<section id="enzyme-pair-results">
+<h2>Enzyme Pair results<a class="headerlink" href="#enzyme-pair-results" title="Link to this heading">¶</a></h2>
+<section id="enzyme-pair-excel-sheet">
+<h3>Enzyme Pair Excel sheet<a class="headerlink" href="#enzyme-pair-excel-sheet" title="Link to this heading">¶</a></h3>
+<ul>
+<li><p>Filename: [sample_name]_Renzyme_pairs.xlsx</p></li>
+<li><p>Description: an excel spreadsheet containing sortable statistics for ranking all of the passed candidate-enzyme pair combos. Each row represents a candidate sequence and a pair of enzymes that each passed all of the single enzyme filters and as a pair passed all of the enzyme pair filters for that sequence.</p></li>
+<li><dl>
+<dt>Columns:</dt><dd><table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Column</p></th>
+<th class="head"><p>Name</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>A</p></td>
+<td><p>candidate ID number</p></td>
+<td><p>See single enzyme spreadsheet column A description</p></td>
+</tr>
+<tr class="row-odd"><td><p>B</p></td>
+<td><p>sequence</p></td>
+<td><p>See single enzyme spreadsheet column B description</p></td>
+</tr>
+<tr class="row-even"><td><p>C</p></td>
+<td><p>Renzyme Pair</p></td>
+<td><p>A pair of restriction enzymes that passed all of the enzyme pair filters. The
+first enzyme listedis referred to as RenzymeA in later columns, and the second
+enzyme listed is RenzymeB (e.g. if it’s “FauI and HpyAV”, FauI is RenzymeA and
+HpyAV is RenzymeB)</p></td>
+</tr>
+<tr class="row-odd"><td><p>D</p></td>
+<td><p>RenzymeA avg distance to Cas cut</p></td>
+<td><p>See single enzyme spreadsheet column D description</p></td>
+</tr>
+<tr class="row-even"><td><p>E</p></td>
+<td><p>RenzymeA cutsite distance outsite
+Rsite</p></td>
+<td><p>See single enzyme spreadsheet column F description</p></td>
+</tr>
+<tr class="row-odd"><td><p>F</p></td>
+<td><p>RenzymeB avg distance to Cas cut</p></td>
+<td><p>See single enzyme spreadsheet column D description</p></td>
+</tr>
+<tr class="row-even"><td><p>G</p></td>
+<td><p>RenzymeB cutsite distance outsite
+Rsite</p></td>
+<td><p>See single enzyme spreadsheet column F description</p></td>
+</tr>
+<tr class="row-odd"><td><p>H</p></td>
+<td><p>Codon frequency change</p></td>
+<td><p>See single enzyme spreadsheet column E description</p></td>
+</tr>
+<tr class="row-even"><td><p>I</p></td>
+<td><p>Overall average distance from Cas
+cut</p></td>
+<td><p>The average of columns D and F</p></td>
+</tr>
+</tbody>
+</table>
+</dd>
+</dl>
+</li>
+</ul>
+</section>
+<section id="enzyme-pair-word-document">
+<h3>Enzyme Pair Word Document<a class="headerlink" href="#enzyme-pair-word-document" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p>Name: [sample_name]_Renzyme_pairs.docx</p></li>
+<li><p>Description: A word document for visualizing all of the sequence-enzyme pair combinations that passed all of the enzyme pair filters, with the PAM site, gRNA, Restriction sites, and substitutions all mapped out. The option numbers in the word doc match the candidate ID’s in the spreadsheet (column A) so you can easily find a candidate from the spreadsheet even after sorting.</p></li>
+<li><p>Example:</p></li>
+</ul>
+<img alt="_images/enzyme_pair_docx.png" src="_images/enzyme_pair_docx.png" />
+<p>See <span class="xref std std-ref">Docx figure key</span></p>
+</section>
+</section>
+</section>
+
+
+          </div>
+              <div class="related bottom">
+                &nbsp;
+  <nav id="rellinks">
+    <ul>
+        <li>
+          &larr;
+          <a href="usage.html" title="Previous document">Usage</a>
+        </li>
+        <li>
+          <a href="filters.html" title="Next document">Filters</a>
+          &rarr;
+        </li>
+    </ul>
+  </nav>
+              </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">TIARS Oligo Designer</a></h1>
+
+
+
+
+
+
+
+
+
+<search id="searchbox" style="display: none" role="search">
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Search"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script><h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Interpreting the output</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#docx-figure-key">Docx Figure Key</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#single-enzyme-results">Single Enzyme results</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#enzyme-pair-results">Enzyme Pair results</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="filters.html">Filters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scaling_up.html">Scaling up with Snakemake</a></li>
+<li class="toctree-l1"><a class="reference internal" href="autoapi/index.html">API Reference</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="usage.html" title="previous chapter">Usage</a></li>
+      <li>Next: <a href="filters.html" title="next chapter">Filters</a></li>
+  </ul></li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2026, Sydney Hertafeld.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 9.2.0</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
+      
+      |
+      <a href="_sources/output.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

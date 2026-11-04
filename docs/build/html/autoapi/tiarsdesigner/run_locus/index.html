@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>tiarsdesigner.run_locus &#8212; TIARS Oligo Designer  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/basic.css?v=b08954a9" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/alabaster.css?v=27fed22d" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+    <script src="../../../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="tiarsdesigner.utils" href="../utils/index.html" />
+    <link rel="prev" title="tiarsdesigner" href="../index.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+              <div class="related top">
+                &nbsp;
+  <nav id="rellinks">
+    <ul>
+        <li>
+          &larr;
+          <a href="../index.html" title="Previous document">tiarsdesigner</a>
+        </li>
+        <li>
+          <a href="../utils/index.html" title="Next document">tiarsdesigner.utils</a>
+          &rarr;
+        </li>
+    </ul>
+  </nav>
+              </div>
+          
+
+          <div class="body" role="main">
+            
+  <section id="module-tiarsdesigner.run_locus">
+<span id="tiarsdesigner-run-locus"></span><h1>tiarsdesigner.run_locus<a class="headerlink" href="#module-tiarsdesigner.run_locus" title="Link to this heading">¶</a></h1>
+<section id="functions">
+<h2>Functions<a class="headerlink" href="#functions" title="Link to this heading">¶</a></h2>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#tiarsdesigner.run_locus.get_enzyme_pair_stats_filtered" title="tiarsdesigner.run_locus.get_enzyme_pair_stats_filtered"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_enzyme_pair_stats_filtered</span></code></a>(passed_enzymes_df, ...)</p></td>
+<td><p>given the candidates with enzymes that passed all four</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#tiarsdesigner.run_locus.get_docx_single" title="tiarsdesigner.run_locus.get_docx_single"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_docx_single</span></code></a>(flat_passed_enzymes_df, ...)</p></td>
+<td><p>Given a dataframe containing all of the candidate-enzyme combos that</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#tiarsdesigner.run_locus.full_run" title="tiarsdesigner.run_locus.full_run"><code class="xref py py-obj docutils literal notranslate"><span class="pre">full_run</span></code></a>(endogenous_seq, gRNA_start, gRNA_end, ...[, ...])</p></td>
+<td><p>Given an endogenous sequence, desired edit + guideRNA, generates all the</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#tiarsdesigner.run_locus.main" title="tiarsdesigner.run_locus.main"><code class="xref py py-obj docutils literal notranslate"><span class="pre">main</span></code></a>()</p></td>
+<td><p>A wrapper for arparse that will take in all the command line user inputs and run them through 'full_run()'</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="module-contents">
+<h2>Module Contents<a class="headerlink" href="#module-contents" title="Link to this heading">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="tiarsdesigner.run_locus.get_enzyme_pair_stats_filtered">
+<span class="sig-prename descclassname"><span class="pre">tiarsdesigner.run_locus.</span></span><span class="sig-name descname"><span class="pre">get_enzyme_pair_stats_filtered</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">passed_enzymes_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">endogenous</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">locus</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">enzyme_pair_filters</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">codon_frequency_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/tiarsdesigner/run_locus.html#get_enzyme_pair_stats_filtered"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tiarsdesigner.run_locus.get_enzyme_pair_stats_filtered" title="Link to this definition">¶</a></dt>
+<dd><p>given the candidates with enzymes that passed all four
+enzyme level filters, runs another set of filters on every possible pair
+of enzymes remaining for each candidate.</p>
+<section id="parameters">
+<h3>Parameters<a class="headerlink" href="#parameters" title="Link to this heading">¶</a></h3>
+<dl class="simple">
+<dt>passed_enzymes_df: pandas dataframe</dt><dd><p>A pandas dataframe that contains the passed candidate-enzyme combos. It
+should have a sequence column, a Renzyme column, a codon frequency
+column and an average distance to cas9 cutsite column.</p>
+</dd>
+<dt>endogenous: __init__.Endogenous object</dt><dd><p>An endogenous object that all of the remaining candidates are based on.</p>
+</dd>
+<dt>locus: string</dt><dd><p>The name of the locus; to be used in the csv file name if verbose ==
+True</p>
+</dd>
+<dt>enzyme_pair_filters: list</dt><dd><p>A list of enzyme pair filters to use</p>
+</dd>
+<dt>codon_frequency_dict: dict</dt><dd><p>A dictionary with amino acid codons (e.g. ‘AGA’) as keys and the
+frequency with which they are used.</p>
+</dd>
+<dt>verbose: bool</dt><dd><p>A boolean value indicating whether or not to create a csv file from the
+output dataframe</p>
+</dd>
+</dl>
+</section>
+<section id="returns">
+<h3>Returns<a class="headerlink" href="#returns" title="Link to this heading">¶</a></h3>
+<p>A pandas dataframe with one row for each pair
+of passed enzymes for each candidate in passed_enzymes_df. The columns are
+‘seq’ (sequence), Renzyme pair (a  pair of Renzymes that each have at least
+one substitution dependent cutsite in its corresponding candidate
+sequence),
+result (boolean value indicating whether or not the Renzyme pair passed the
+filter for that row’s candidate), RenzymeA average distance to cas9 cut,
+RenzymeB average distance to cas9 cut, overall average distance to cas9 cut
+(average of previous 2), and codon frequency change. If the verbose option
+is selected, it will also create a csv called
+‘[locus]_pair_filter_stats’ from the dataframe</p>
+</section>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tiarsdesigner.run_locus.get_docx_single">
+<span class="sig-prename descclassname"><span class="pre">tiarsdesigner.run_locus.</span></span><span class="sig-name descname"><span class="pre">get_docx_single</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">flat_passed_enzymes_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">no_unneeded_substitutions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">endogenous</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">locus</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/tiarsdesigner/run_locus.html#get_docx_single"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tiarsdesigner.run_locus.get_docx_single" title="Link to this definition">¶</a></dt>
+<dd><p>Given a dataframe containing all of the candidate-enzyme combos that
+passed all of the filters, it further filters out any candidates with
+unneeded substitutions (if the filter is specified) and creates a docx file called
+‘[locus]_single_Renzymes.docx to visualize all of the remaining candidate
+sequences and enzyme pairs. It will also create an xlsx file with more
+in-depth statistics on each candidate-Renzyme combo.</p>
+<section id="id1">
+<h3>Parameters<a class="headerlink" href="#id1" title="Link to this heading">¶</a></h3>
+<dl class="simple">
+<dt>flat_passed_enzymes_df: pandas dataframe</dt><dd><p>A pandas dataframe that contains the passed candidate-enzyme pair
+combos, with each combo getting its own row. It should have a sequence
+column, a Renzyme pair column, an average distance to cas9 cut column,
+a codon frequency change column, and a no unnneeded sustitutions
+column.</p>
+</dd>
+<dt>no_unneeded_substitutions: bool</dt><dd><p>Indicates whether the no_unneeded substitutions filter should be applied.</p>
+</dd>
+<dt>endogenous: __init__.Endogenous object</dt><dd><p>An endogenous object that all of the remaining candidates are based on.</p>
+</dd>
+<dt>locus: string</dt><dd><p>The name of the locus; to be used in the tsv file name if verbose ==
+True</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tiarsdesigner.run_locus.full_run">
+<span class="sig-prename descclassname"><span class="pre">tiarsdesigner.run_locus.</span></span><span class="sig-name descname"><span class="pre">full_run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">endogenous_seq</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gRNA_start</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gRNA_end</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">PAM_start</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">which_PAM</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">AA_change_site</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">new_codon</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">locus</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">single_enzyme_filters</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">enzyme_pair_filters</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">codon_usage_tsv</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_Rsite_distance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Renzymes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/tiarsdesigner/run_locus.html#full_run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tiarsdesigner.run_locus.full_run" title="Link to this definition">¶</a></dt>
+<dd><p>Given an endogenous sequence, desired edit + guideRNA, generates all the
+possible synonymous candidates for that sequence and runs all of the
+filters on them to get the final docx and xlsx files (one of each for both
+single enzymes and enzyme pairs) using the above functions. This is the
+only function for which the users will directly input the parameters (via
+commandline argparse).</p>
+<section id="id2">
+<h3>Parameters<a class="headerlink" href="#id2" title="Link to this heading">¶</a></h3>
+<dl class="simple">
+<dt>endogenous_seq: string</dt><dd><p>The endogenous/wt dna sequence without any synonymous changes
+and without the desired CRISPR facilitated amino acid change. Max
+length is 273 bp, must be in frame.</p>
+</dd>
+<dt>gRNA_start: int</dt><dd><p>the index location in the sequence of the beginning of the
+region the CRISPR/Cas9 guide RNA will target.</p>
+</dd>
+<dt>gRNA_end: int</dt><dd><p>the index location in the sequence of the end of the region
+the CRISPR/Cas9 guide RNA will target.</p>
+</dd>
+<dt>PAM_start: int</dt><dd><p>The index location in the sequence of the beginning of the
+PAM site. For now, the PAM region has to be either ‘CCN’ or ‘NGG’.</p>
+</dd>
+<dt>which_PAM: string</dt><dd><p>The sequence of the PAM site (e.g. ‘NGG’ or ‘CCN’ for cas9, or ‘TTTV’ or ‘BAAA’ for Cfp1)</p>
+</dd>
+<dt>AA_change_site: int</dt><dd><p>the index location in the sequence of the beginning of
+the codon that is to be nonsynonymously changed in the CRISPR/Cas9
+process</p>
+</dd>
+<dt>new_codon: string</dt><dd><p>the codon to replace the existing codon at the
+AA_change_site</p>
+</dd>
+<dt>locus: string</dt><dd><p>The name of the locus; to be used in the csv file name if verbose ==
+True</p>
+</dd>
+<dt>single_enzyme_filters: list</dt><dd><p>The number of single enzyme filters an enzyme needs to pass in order to
+stay in the running</p>
+</dd>
+<dt>enzyme_pair_filters: list</dt><dd><p>The number of paired enzyme filters a pair of enzymes needs to pass in
+order to stay in the running.</p>
+</dd>
+<dt>codon_usage_tsv: tsv</dt><dd><p>A tsv mapping codons to their usage frequency for the organism used</p>
+</dd>
+<dt>min_Rsite_distance (optional): int</dt><dd><p>The minimum allowable distance between the novel restriction site for
+an enzyme and any endogenous restriction sites it may have. This is to
+avoid having the fragment lengths after digestion be too similar to
+detect the difference between a novel site cut and an endogenous site
+cut. Default is 5 bp.</p>
+</dd>
+<dt>enzymes: (optional) string</dt><dd><p>A string indicating the path to a tsv file containing a list of enzymes
+to consider for the list of candidates. Default is the Bio.Restriction
+‘AllEnzymes’ restriction batch.</p>
+</dd>
+<dt>verbose: (optional) bool</dt><dd><p>A boolean value indicating whether or not to create tsv files with filter statistics at each step. Default is False</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tiarsdesigner.run_locus.main">
+<span class="sig-prename descclassname"><span class="pre">tiarsdesigner.run_locus.</span></span><span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/tiarsdesigner/run_locus.html#main"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tiarsdesigner.run_locus.main" title="Link to this definition">¶</a></dt>
+<dd><p>A wrapper for arparse that will take in all the command line user inputs and run them through ‘full_run()’</p>
+</dd></dl>
+
+</section>
+</section>
+
+
+          </div>
+              <div class="related bottom">
+                &nbsp;
+  <nav id="rellinks">
+    <ul>
+        <li>
+          &larr;
+          <a href="../index.html" title="Previous document">tiarsdesigner</a>
+        </li>
+        <li>
+          <a href="../utils/index.html" title="Next document">tiarsdesigner.utils</a>
+          &rarr;
+        </li>
+    </ul>
+  </nav>
+              </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../index.html">TIARS Oligo Designer</a></h1>
+
+
+
+
+
+
+
+
+
+<search id="searchbox" style="display: none" role="search">
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Search"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script><h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../../getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../output.html">Interpreting the output</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../filters.html">Filters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../scaling_up.html">Scaling up with Snakemake</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../index.html">API Reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html">tiarsdesigner</a></li>
+</ul>
+</li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">API Reference</a><ul>
+  <li><a href="../index.html">tiarsdesigner</a><ul>
+      <li>Previous: <a href="../index.html" title="previous chapter">tiarsdesigner</a></li>
+      <li>Next: <a href="../utils/index.html" title="next chapter">tiarsdesigner.utils</a></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2026, Sydney Hertafeld.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 9.2.0</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
+      
+      |
+      <a href="../../../_sources/autoapi/tiarsdesigner/run_locus/index.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
