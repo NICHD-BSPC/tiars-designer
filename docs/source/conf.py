@@ -20,6 +20,7 @@ extensions = [
     'autoapi.extension',
     'sphinx.ext.viewcode',
     'sphinx.ext.doctest',
+    'sphinx.ext.napoleon'
 ]
 
 autosectionlabel_prefix_document = True

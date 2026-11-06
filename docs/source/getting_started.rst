@@ -30,7 +30,10 @@ To test whether installation was successful, run the tool without any inputs:
 
 If the tool was successfully installed you should see the following usage message:
 
-    usage: tiarsdesigner [-h] [--single-enzyme-filters SINGLE_ENZYME_FILTERS [SINGLE_ENZYME_FILTERS ...]] [--enzyme-pair-filters ENZYME_PAIR_FILTERS [ENZYME_PAIR_FILTERS ...]]
+.. code-block:: console
+   
+   $tiarsdesigner
+   usage: tiarsdesigner [-h] [--single-enzyme-filters SINGLE_ENZYME_FILTERS [SINGLE_ENZYME_FILTERS ...]] [--enzyme-pair-filters ENZYME_PAIR_FILTERS [ENZYME_PAIR_FILTERS ...]]
                      [--codon-usage-tsv CODON_USAGE_TSV] [--min-Rsite-distance MIN_RSITE_DISTANCE] [--enzymes ENZYMES] [--verbose]
                      endogenous_seq gRNA_start gRNA_end PAM_start which_PAM AA_change_site new_codon locus_name
 

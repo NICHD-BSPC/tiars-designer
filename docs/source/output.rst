@@ -4,6 +4,9 @@ Interpreting the output
 Each sample has its own output folder. In it, there is an excel spreadsheet and a word document for the single Renzyme filter results and an excel spreadsheet and a word document for the Renzyme pair filter results. The spreadsheets contain statistics such as ‘codon frequency change’ for each passing candidate-enzyme combination. These statistics can be used to sort the candidates and rank them in Cases where a lot of candidates made it to the final output. The word documents are for visualizing the passing candidates, and each candidate in the word document corresponds to a candidate in the spreadsheet with a matching candidate I.D. The documents are explained in further detail below.
 
 
+.. _docx-figure-key:
+
+
 Docx Figure Key
 ===============
 Use this key to interperet the docx file example output figures
@@ -60,7 +63,7 @@ Single Enzyme Word Document
 
 .. image:: images/single_enzyme_docx.png
 
-See :ref:`Docx Figure Key`
+See :ref:`Docx Figure Key <docx-figure-key>`
 
 Enzyme Pair results
 ===================
@@ -108,5 +111,5 @@ Enzyme Pair Word Document
 
 .. image:: images/enzyme_pair_docx.png
 
-See :ref:`Docx figure key`
+See :ref:`Docx Figure Key <docx-figure-key>`
 

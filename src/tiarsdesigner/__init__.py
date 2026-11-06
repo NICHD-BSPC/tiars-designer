@@ -9,64 +9,44 @@ class Designer():
     variables common to both"""
 
     def __init__(self, sequence, cutsite, Renzyme_list=None):
+
         """
         Parameters
         ----------
 
-        sequence: string
+        sequence : string
             An in frame sequence of DNA nucleotides of max length 273
             nucleotides. It should have a PAM sequence that makes it suitable
             for CRISPR/Cas9 activity.
 
-        cutsite: int
+        cutsite : int
             The index location of the CRISPR/Cas9 cutsite (3 nt after the PAM
             if it's CCN, 3 before if it's NGG).
-        Renzyme_list: list
+        Renzyme_list : list
             Optional: provide a list of Renzymes to use. Default is
             Bio.Restriction AllEnzymes.
 
-        Attributes:
-        ----------
-
-        sequence: string
-            The input sequence.
-
-        cutsite: int
-            The input cutsite
-
-        cutsite_region: string
-            a subset of sequence that extends 15 bp to either side of
-            cutsite.
-
-        cutsite_frame: int
-            a number describing the frame of the cutsite region. '0' means it's
-            in frame. '1' means the second bp of the cutsite region is the
-            first bp of the first codon, and '2' means the third bp of the
-            cutsite region is the first bp of the first codon.
-
-        Renzymes: dict
-            a dictionary of restriction enzymes with a recognition sites  in
-            self.sequence, with re names as keys and their cutsite as the
-            values.
-
-        splicing_hexamers: dict
-            a dictionary of splicing hexamers found in self.sequence with the
-            hexamer sequences as keys and their locations in self.sequence as
-            values. splicing hexamers, aka exonic splicing enhancers, are 6 nt
-            sequences that enhance premrna splicing. the list of possible
-            hexamers comes from rescue-ese
-            (http://genes.mit.edu/burgelab/rescue-ese/). This dictionary will
-            help us filter out candidates that interfere with splicing by
-            modifying any of the splicing enhancers
         """
 
         self.sequence = sequence
+        """string : The input sequence"""
         self.cutsite = cutsite
+        """int : The input cutsite"""
         self.cutsite_region = sequence[(cutsite - 15):(cutsite + 15)]
+        """string : A subset of sequence that extends 15 bp to either side of cutsite"""
         self.cutsite_frame = self.cutsite % 3
+        """int: A number describing the frame of the cutsite region. '0' means it's
+        in frame. '1' means the second bp of the cutsite region is the
+        first bp of the first codon, and '2' means the third bp of the
+        cutsite region is the first bp of the first codon.
+        """
         self.Renzyme_list = Renzyme_list
+        
         self.Renzymes = utils.get_restriction_sites(sequence, Renzyme_list)
-#        self.splicing_hexamers = self.get_splicing_hexamers(sequence)
+        """dict: A dictionary of restriction enzymes with a recognition sites  in
+        self.sequence, with re names as keys and their cutsite as the
+        values.
+        """
 
     def get_distance_from(self, pos=0):
         """
@@ -77,16 +57,19 @@ class Designer():
         Parameters
         ----------
 
-        pos: int
+        pos : int
             an integer in range(0, len(self.sequence))
 
         Returns
         -------
-        A dictionary of Restriction enzymes that would cut the sequence, with
-        the enzymes as keys and the distances between their cutsites and pos as
-        values. A positive distance means that the REcutsite is later in
-        the string than `pos`, while a negative distance means that the
-        REcutsite appears before `pos` in the string.
+        
+        dict
+            A dictionary of Restriction enzymes that would cut the sequence, with
+            the enzymes as keys and the distances between their cutsites and pos as
+            values. A positive distance means that the REcutsite is later in
+            the string than `pos`, while a negative distance means that the
+            REcutsite appears before `pos` in the string.
+
         """
         REdistances = {}
         for enzyme in self.Renzymes:
@@ -111,13 +94,15 @@ class Designer():
 
         Parameters
         ----------
-        sequence: string
+        sequence : string
             A DNA nucleotide sequence. Must be all capital letters.
 
         Returns
         -------
-        Dictionary of hexamers in the sequence with the hexamer sequences as
-        keys and their locations in the input sequence as values
+        dict
+            Dictionary of hexamers in the sequence with the hexamer sequences as
+            keys and their locations in the input sequence as values
+        
         """
         hexamers = [line[:6] for line in open('splicing_hexamers.txt')]
         seq_hexamers = [hexamer for hexamer in hexamers if hexamer in sequence]
@@ -132,7 +117,8 @@ class Designer():
 class Endogenous(Designer):
     """An Endogenous object is a subclass of the designer class, and an
     Endogenous object is the endogenous sequence for a CRISPR/Cas9 experiment
-    before any edits are made to the sequence"""
+    before any edits are made to the sequence
+    """
 
     def __init__(
         self,
@@ -149,81 +135,34 @@ class Endogenous(Designer):
         Parameters
         ----------
 
-        sequence: string
+        sequence : string
             The endogenous/wt dna sequence without any synonymous changes
             and without the desired CRISPR facilitated amino acid change. Max
             length is 273 bp, must be in frame.
 
-        gRNA_start: int
+        gRNA_start : int
             the index location in the sequence of the beginning of the
             region the CRISPR/Cas9 guide RNA will target.
 
-        gRNA_end: int
+        gRNA_end : int
             the index location in the sequence of the end of the region
             the CRISPR/Cas9 guide RNA will target.
 
-        PAM_start: int
+        PAM_start : int
             The index location in the sequence of the beginning of the
             PAM site. For now, the PAM region has to be either 'CCN' or 'NGG'.
         
-        which_PAM: string
+        which_PAM : string
             The sequence of the PAM site (e.g. 'NGG' or 'CCN' for Cas9, or 'TTTN' or 'BAAA' for Cfp1)
 
-        AA_change_site: int
+        AA_change_site : int
             the index location in the sequence of the beginning of
             the codon that is to be nonsynonymously changed in the CRISPR/Cas9
             process
 
-        new_codon: string
+        new_codon : string
             the codon to replace the existing codon at the
             AA_change_site
-
-        Attributes
-        ----------
-
-        From Parent Class:
-
-        sequence
-        cutsite (determined based on the PAM location and whether it's 'CCN' or
-        'NGG')
-        cutsite_region
-        cutsite_frame
-        Renzymes
-        splicing_hexamers
-
-        Unique to Endogenous Class:
-
-        gRNA_location: tuple
-            A tuple of the start and end coordinates of the region in sequence
-            to be targeted by the guide RNA.
-
-        PAM_start: int
-            The index location of the beginning of the PAM site in sequence.
-            For now, the PAM site has to be either 'CCN' or 'NGG'.
-
-        cas9_cut_from_PAM: int
-            The location of the CRISPR/Cas9 cutsite in the sequence relative to
-            the PAM_start site. For 'CCN' it will be 6, and for 'NGG' it will
-            be -3. Since the value is different for each PAM, it is also useful
-            for indicating whether the PAM sequence is 'CCN' or 'NGG'.
-
-        AA_change_site: int
-            The index location in the sequence of the codon that is to be
-            nonsynonymously changed in the CRISPR/Cas9 process.
-
-        AA_change_sequence:
-            A sequence identical to the endogenous sequence (self.sequence),
-            but it has the new_codon substitution at the AA site.  In other
-            words, it's the endogenous sequence with the desired CRISPR/Cas9
-            nonsynonymous substitution.
-
-        PAM_can_change: bool
-            a boolean value indicating whether or not the PAM site can be
-            interrupted via only synonymous substitutions. This means that one
-            or both of the non 'N' basepair's in the PAM site can be changed to
-            anything else without changing the resulting amino acid sequence.
-            This value will also be True if the desired amino acid change
-            interrupts the PAM.
         """
 
         # create dictionary with PAM startsites as keys and the locations of
@@ -235,17 +174,45 @@ class Endogenous(Designer):
             "BAAA": -23
         }
         self.gRNA_location = (gRNA_start, gRNA_end)
+        """tuple : A tuple of the start and end coordinates of the region in sequence
+        to be targeted by the guide RNA."""
+        
         self.PAM_start = PAM_start
+        """int : The index location of the beginning of the PAM site in sequence.
+        For now, the PAM site has to be either 'CCN' or 'NGG'."""
+        
         self.which_PAM = which_PAM
+        """string : The sequence of the PAM site (e.g. 'NGG' or 'CCN' for Cas9, or 'TTTN' or 'BAAA' for Cfp1)"""
+        
         self.cas9_cut_from_PAM = PAM_dict[which_PAM]
+        """int : The location of the CRISPR/Cas9 cutsite in the sequence relative to
+        the PAM_start site. For 'CCN' it will be 6, and for 'NGG' it will
+        be -3. Since the value is different for each PAM, it is also useful
+        for indicating whether the PAM sequence is 'CCN' or 'NGG'."""
         super().__init__(sequence, PAM_start + self.cas9_cut_from_PAM, Renzyme_list)
+        
         self.AA_change_site = AA_change_site
+        """int : The index location in the sequence of the codon that is to be
+        nonsynonymously changed in the CRISPR/Cas9 process."""
+
         self.AA_change_sequence = (
             self.sequence[:self.AA_change_site]
             + str(new_codon)
             + self.sequence[(self.AA_change_site + 3):]
         )
+        """string : A sequence identical to the endogenous sequence (self.sequence),
+        but it has the new_codon substitution at the AA site.  In other
+        words, it's the endogenous sequence with the desired CRISPR/Cas9
+        nonsynonymous substitution."""
+
         self.PAM_can_change = self.PAM_can_change()
+        """ bool : A boolean value indicating whether or not the PAM site can be
+        interrupted via only synonymous substitutions. This means that one
+        or both of the non 'N' basepair's in the PAM site can be changed to
+        anything else without changing the resulting amino acid sequence.
+        This value will also be True if the desired amino acid change
+        interrupts the PAM."""
+
 
     def PAM_can_change(self):
         """
@@ -257,7 +224,8 @@ class Endogenous(Designer):
 
         Returns
         -------
-        False if the PAM cannot be interrupted, True if it can
+        bool
+            False if the PAM cannot be interrupted, True if it can
         """
          
         PAM_start = self.PAM_start
@@ -382,31 +350,33 @@ class Endogenous(Designer):
 
         Parameters
         ----------
-        locusname: string
+        locusname : string
             A user created name for the locus for writing the filter stats to file
         single_enzyme_filters: list
             A list of filters to run for this locus (will run all filters if not specified)
-        min_Rsite_distance: int
+        min_Rsite_distance : int
             An integer indicating the minimum allowable distance between any
             novel and endogenous site for a given restriction enzyme
-        get_filter_stats: bool
+        get_filter_stats : bool
             A boolean value indicating whether or not the function should
             generate filter stats in the form of a percentage of passing
             candidates for each filter.
-        codon_usage_tsv: tsv
+        codon_usage_tsv : tsv
             A tsv mapping codons to their usage frequency for the organism
             used.
-        Returns
-        -------
-        Generator of all the possible candidate sequence/Renzyme combinations
-        that passed all of the single Renzyme filters. A candidate sequence is
-        very similar to the endogenous sequence, but it has the amino acid
-        change (could be any codon that corresponds to that amino acid) and
-        anywhere from one to the maximum possible number of synonymous
-        substitutions. If 'get_filter_stats', it will also write out a file
-        called '[locusname]_filter_stats.tsv' that includes a percentage of
-        candidates that passed for each filter, along with the total number of
-        candidates.
+        
+        Yields
+        ------
+        generator
+            Generator of all the possible candidate sequence/Renzyme combinations
+            that passed all of the single Renzyme filters. A candidate sequence is
+            very similar to the endogenous sequence, but it has the amino acid
+            change (could be any codon that corresponds to that amino acid) and
+            anywhere from one to the maximum possible number of synonymous
+            substitutions. If 'get_filter_stats', it will also write out a file
+            called '[locusname]_filter_stats.tsv' that includes a percentage of
+            candidates that passed for each filter, along with the total number of
+            candidates.
         """
         # base the candidates on the endogenous sequence with the desired amino
         # acid change
@@ -497,7 +467,7 @@ class Endogenous(Designer):
 
         Parameters
         ----------
-        Renzyme: Bio.Restriction enzyme object
+        Renzyme : Bio.Restriction enzyme object
             A restriction enzyme in the form of a Bio.Restriction enzyme object
 
         N: int
@@ -507,10 +477,13 @@ class Endogenous(Designer):
 
         Returns
         -------
-        False if Renzyme has an endogenous site within Nnt of one of the
-        primers, True otherwise. This function will be easier to write when
-        we've fleshed out exactly what sequences we are giving to Endogenous
-        and Candidate"""
+        bool
+            False if Renzyme has an endogenous site within Nnt of one of the
+            primers, True otherwise. This function will be easier to write when
+            we've fleshed out exactly what sequences we are giving to Endogenous
+            and Candidate
+
+        """
         pass
 
     def does_not_exceed_max_cutsites(self, Renzyme, N):
@@ -520,14 +493,15 @@ class Endogenous(Designer):
 
         Parameters
         ----------
-        N: int
+        N : int
             The maximum number of endogenous cutsites Renzyme is allowed to
             have.
 
         Returns
         -------
-        False if Renzyme has more than N cutsites in the endogenous sequence,
-        True otherwise.
+        bool
+            False if Renzyme has more than N cutsites in the endogenous sequence,
+            True otherwise.
         """
         if len(self.Renzymes[Renzyme]) > N:
             return False
@@ -536,89 +510,73 @@ class Endogenous(Designer):
 
 
 class Candidate(Designer):
+    """
+    The Candidate class is a subclass of the designer class, and
+    a candidate is a candidate repair oligo with synonymous substitutions
+    to the endogenous sequence within 15 nt of the Cas9 cutsite.
+    """
 
     def __init__(self, endogenous, sequence):
-        """The Candidate class is a subclass of the designer class, and
-        a candidate is a candidate repair oligo with synonymous substitutions
-        to the endogenous sequence within 15 nt of the Cas9 cutsite.
 
+        """
         Parameters
         ----------
 
-        endogenous: Endogenou object
+        endogenous : Endogenous object
             An Endogenous object, the wildtype sequence that the candidate is
             based on.
 
-        sequence: string
+        sequence : string
             The candidate sequence, very similar to the endogenous object
             sequence but it has the desired CRISPR/cas9 nonsynonymous
             substitution, as well as a series of synonymous substitutions
             within the cutsite region.
 
-        Attributes
-        ----------
-
-        From Parent Class:
-
-        sequence
-        cutsite
-        cutsite_region
-        cutsite_frame
-        Renzymes
-        splicing_hexamers
-
-        Unique to Candidate Class:
-
-        endogenous: Endogenous object
-            An Endogenous object, the wildtype sequence that the Candidate is
-            based on.
-
-        sub_dep_Renzymes: dict
-            substitution dependent restriction enzymes, a dictionary of
-            Restriction enzymes with cutsites that depend on synonymous
-            substitutions in cutsite_region. This means that the bp
-            substitutions in the Candidate sequence created recognition sites
-            in the candidate sequence for these enzymes that aren't in the
-            endogenous sequence. In other words, this is a dictionary of
-            enzymes with recognition sites that are in the Candidate sequence
-            but not in the endogenous sequence.  If an enzyme has recognition
-            sites in the endogenous sequence AND new additional substitution
-            dependent sites in the candidate sequence, only the novel
-            substitution dependent cutsites will be listed for that enzyme in
-            this dictionary.
-
-        sub_dep_Renzyme_recognition_sites: dict
-            very similar to sub_dep_Renzymes, but the dictionary values are the
-            coordinates of the enzyme recognition sites rather than the
-            cutsites.
-
-        num_subs: int
-            the number of bp substitutions the candidate has compared to the
-            wildtypes sequence (endogenous.sequence)
-
-        endogenous_matches: dict
-            a dictionary of the restriction enzymes with values describing the
-            "polarity" of the endogenous site(s) compared to the substitution
-            dependent site(s). This dictionary will assign 'None' restriction
-            enzymes that have sandwiched endogenous or candidate sites (see
-            method 'no_sandwhiched_cutsites' for more details. For polarity,
-            '0' means that the restriction enzyme has no endogenous cutsites.
-            A '+' value means that the restriction enzyme has one or more
-            endogenous sites after the substitution dependent cutsite(s) in the
-            sequence string (and none before it). A '-' value means that it has
-            one or more endogenous cutsites before the substitution dependent
-            cutsite(s) in the string (and none after it)
         """
+
         self.endogenous = endogenous
+        """Endogenous object : An Endogenous object, the wildtype sequence that the Candidate is
+        based on.
+        """
         super().__init__(
             sequence,
             self.endogenous.cutsite,
             self.endogenous.Renzyme_list
         )
         self.sub_dep_Renzymes = self.get_substitution_dependent_Renzymes()
+        """dict : A dictionary of Restriction enzymes with cutsites that
+        depend on synonymous substitutions in cutsite_region. This means
+        that the bp substitutions in the Candidate sequence created recognition
+        sites in the candidate sequence for these enzymes that aren't in the
+        endogenous sequence. In other words, this is a dictionary of
+        enzymes with recognition sites that are in the Candidate sequence
+        but not in the endogenous sequence.  If an enzyme has recognition
+        sites in the endogenous sequence AND new additional substitution
+        dependent sites in the candidate sequence, only the novel
+        substitution dependent cutsites will be listed for that enzyme in
+        this dictionary.
+        """
         self.sub_dep_Renzyme_recognition_sites = self.get_sub_dep_Renzyme_recognition_sites()
+        """ dict : very similar to sub_dep_Renzymes, but the dictionary values are the
+        coordinates of the enzyme recognition sites rather than the
+        cutsites."""
+
         self.num_subs = self.get_hamming_distance()
+        """int : the number of bp substitutions the candidate has compared to the
+        wildtypes sequence (endogenous.sequence)"""
+        
         self.endogenous_matches = self.get_endogenous_matches()
+        """dict : a dictionary of the restriction enzymes with values describing the
+        "polarity" of the endogenous site(s) compared to the substitution
+        dependent site(s). This dictionary will assign 'None' restriction
+        enzymes that have sandwiched endogenous or candidate sites (see
+        method 'no_sandwhiched_cutsites' for more details. For polarity,
+        '0' means that the restriction enzyme has no endogenous cutsites.
+        A '+' value means that the restriction enzyme has one or more
+        endogenous sites after the substitution dependent cutsite(s) in the
+        sequence string (and none before it). A '-' value means that it has
+        one or more endogenous cutsites before the substitution dependent
+        cutsite(s) in the string (and none after it)"""
 
     "METHODS THAT SET ATTRIBUTES"
 
@@ -631,8 +589,9 @@ class Candidate(Designer):
 
         Returns
         -------
-        Integer indicating the number of substitutions to the endogenous
-        sequence are in the candidate sequence.
+        int
+            Integer indicating the number of substitutions to the endogenous
+            sequence are in the candidate sequence.
         """
 
         return Levenshtein.distance(self.endogenous.sequence, self.sequence)
@@ -646,11 +605,12 @@ class Candidate(Designer):
 
         Returns
         -------
-        A dictionary with enzyme names as keys and their substitution dependent
-        cutsites as values.  If an enzyme has multiple cutsites in the
-        sequence, it will only return the cutsites that are unique to the
-        candidate sequence (compared to the endogenous
-        self.endogenous.sequence)
+        dict
+            A dictionary with enzyme names as keys and their substitution dependent
+            cutsites as values.  If an enzyme has multiple cutsites in the
+            sequence, it will only return the cutsites that are unique to the
+            candidate sequence (compared to the endogenous
+            self.endogenous.sequence)
         """
 
         sub_dep_Renzymes = {}
@@ -675,16 +635,17 @@ class Candidate(Designer):
 
         Returns
         -------
-        A dictionary with enzymes as keys and symbols indicating the polarity
-        of their cutsites as values. A '0' value means that the restriction
-        enzyme has no endogenous cutsites. A '+' value means that the
-        restriction enzyme has one or more endogenous sites after the
-        substitution dependent cutsite(s) in the sequence string (and none
-        before it). A '-' value means that it has one or more endogenous
-        cutsites before the substitution dependent cutsite(s) in the string
-        (and none after it). A value of None means that that enzyme either has
-        novel site(s) sandwiched between endogenous sites, or endogenous
-        site(s) sandwiched between novel sites.
+        dict
+            A dictionary with enzymes as keys and symbols indicating the polarity
+            of their cutsites as values. A '0' value means that the restriction
+            enzyme has no endogenous cutsites. A '+' value means that the
+            restriction enzyme has one or more endogenous sites after the
+            substitution dependent cutsite(s) in the sequence string (and none
+            before it). A '-' value means that it has one or more endogenous
+            cutsites before the substitution dependent cutsite(s) in the string
+            (and none after it). A value of None means that that enzyme either has
+            novel site(s) sandwiched between endogenous sites, or endogenous
+            site(s) sandwiched between novel sites.
         """
 
         endogenous_matches = {}
@@ -714,11 +675,12 @@ class Candidate(Designer):
 
         Returns
         -------
-        A dictionary with enzyme names as keys and their substitution dependent
-        recognition site coordinates as values.  If an enzyme has multiple
-        recognition sites in the sequence, it will only return the recognition
-        site coordinates that are unique to the candidate sequence (compared to
-        the endogenous self.endogenous.sequence)
+        dict
+            A dictionary with enzyme names as keys and their substitution dependent
+            recognition site coordinates as values.  If an enzyme has multiple
+            recognition sites in the sequence, it will only return the recognition
+            site coordinates that are unique to the candidate sequence (compared to
+            the endogenous self.endogenous.sequence)
         """
         unfiltered_candidate_dict = utils.get_Rsite_dict(
             self.sequence,
@@ -747,8 +709,9 @@ class Candidate(Designer):
         """
         Returns
         -------
-        The average distance in nucleotides between novel cutsite and cas9
-        cutsite for each novel cutsite for Renzyme in the candidate sequence.
+        float
+            The average distance in nucleotides between novel cutsite and cas9
+            cutsite for each novel cutsite for Renzyme in the candidate sequence.
         """
         REdistances = [
             abs(i - 1 - self.cutsite) for i in self.sub_dep_Renzymes[Renzyme]
@@ -776,7 +739,8 @@ class Candidate(Designer):
 
         Returns
         -------
-        False if the candidate only has one substitution, True otherwise
+        bool
+            False if the candidate only has one substitution, True otherwise
         """
         if self.num_subs == 1:
             return False
@@ -790,8 +754,9 @@ class Candidate(Designer):
 
         Returns
         -------
-        False if the synonymous changes did not create
-        any new enzyme recognition sites, True otherwise"""
+        bool
+            False if the synonymous changes did not create
+            any new enzyme recognition sites, True otherwise"""
         if len(self.sub_dep_Renzymes) == 0:
             return False
         else:
@@ -804,10 +769,11 @@ class Candidate(Designer):
 
         Returns
         -------
-        False if there are any differences between self.splicing_hexamers and
-        self.endogenous.splicing_hexamers (which would indicate that the
-        candidate's synonymous changes interfered with the splicing hexamers),
-        True otherwise.
+        bool
+            False if there are any differences between self.splicing_hexamers and
+            self.endogenous.splicing_hexamers (which would indicate that the
+            candidate's synonymous changes interfered with the splicing hexamers),
+            True otherwise.
         """
         if self.splicing_hexamers == self.endogenous.splicing_hexamers:
             return True
@@ -821,7 +787,8 @@ class Candidate(Designer):
 
         Returns
         -------
-        False if the PAM site can be interrupted but isn't, True otherwise.
+        bool
+            False if the PAM site can be interrupted but isn't, True otherwise.
         """
         PAM_start = self.endogenous.PAM_start
         which_PAM = self.endogenous.which_PAM
@@ -865,7 +832,8 @@ class Candidate(Designer):
 
         Returns
         -------
-        False if the Renzyme has any sandwiched cutsites, True otherwise
+        bool
+            False if the Renzyme has any sandwiched cutsites, True otherwise
         """
 
         if self.endogenous_matches[Renzyme] is not None:
@@ -885,7 +853,8 @@ class Candidate(Designer):
 
         Returns
         -------
-        False if Renzyme has an unknown/ambiguous cutsite, True otherwise.
+        bool
+            False if Renzyme has an unknown/ambiguous cutsite, True otherwise.
         """
         if '?' in Renzyme.elucidate():
             return False
@@ -908,8 +877,9 @@ class Candidate(Designer):
 
         Returns
         -------
-        False if the Renzyme has an endogenous site within N nt of
-        a novel site for this candidate, True otherwise.
+        bool
+            False if the Renzyme has an endogenous site within N nt of
+            a novel site for this candidate, True otherwise.
         """
         if Renzyme not in self.endogenous.Renzymes:
             return True
@@ -932,9 +902,11 @@ class Candidate(Designer):
 
         Returns
         -------
-        False if any endogenous cutsites for
-        Renzyme are lost with the synonymous substitutions, True
-        otherwise"""
+        bool
+            False if any endogenous cutsites for
+            Renzyme are lost with the synonymous substitutions, True
+            otherwise
+        """
         if Renzyme in self.endogenous.Renzymes:
             if Renzyme not in self.Renzymes:
                 return False
@@ -957,9 +929,10 @@ class Candidate(Designer):
 
         Returns
         -------
-        False if any of the substitution dependent recognition sites for this
-        Renzyme in this candidate depend on less than two substitutions, True
-        otherwise.
+        bool
+            False if any of the substitution dependent recognition sites for this
+            Renzyme in this candidate depend on less than two substitutions, True
+            otherwise.
         """
         # get the locations of the substitutions that each recognition site for
         # Renzyme depend on
@@ -993,11 +966,12 @@ class Candidate(Designer):
 
         Returns
         -------
-        False if there are a different number of
-        cutsites from recognition sites for Renzyme (which could mean that the
-        enzyme cuts outsite the recognitition site and the Renzyme is close
-        enough to the edge that the cut would not appear in the sequence, or
-        maybe the enzyme cuts twice), True otherwise"""
+        bool
+            False if there are a different number of
+            cutsites from recognition sites for Renzyme (which could mean that the
+            enzyme cuts outsite the recognitition site and the Renzyme is close
+            enough to the edge that the cut would not appear in the sequence, or
+            maybe the enzyme cuts twice), True otherwise"""
 
         full_Rsite_dict = utils.get_Rsite_dict(self.sequence, self.Renzymes)
         if Renzyme in self.Renzymes and Renzyme in full_Rsite_dict:
@@ -1023,9 +997,10 @@ class Candidate(Designer):
 
         Returns
         -------
-        False if neither RenzymeA nor RenzymeB have
-        any endogenous sites (AKA if both have polarities of '0'), True
-        otherwise.
+        bool
+            False if neither RenzymeA nor RenzymeB have
+            any endogenous sites (AKA if both have polarities of '0'), True
+            otherwise.
         """
         if (
             self.endogenous_matches[RenzymeA] == '0'
@@ -1052,7 +1027,8 @@ class Candidate(Designer):
 
         Returns
         -------
-        False unless both Renzymes have an endogenous site
+        bool
+            False unless both Renzymes have an endogenous site
         """
 
         if (
@@ -1080,9 +1056,10 @@ class Candidate(Designer):
 
         Returns
         -------
-        This function will return False if Renzyme A and Renzyme B have
-        incompatible polarities (e.g. if one has a '-' polarity and the other
-        has a '+' polarity), True otherwise.
+        bool
+            This function will return False if Renzyme A and Renzyme B have
+            incompatible polarities (e.g. if one has a '-' polarity and the other
+            has a '+' polarity), True otherwise.
         """
 
         if (
@@ -1116,7 +1093,8 @@ class Candidate(Designer):
 
         Returns
         -------
-        False if RenzymeA and RenzymeB have the same recognition site"""
+        bool
+            False if RenzymeA and RenzymeB have the same recognition site"""
         if RenzymeA.is_isoschizomer(RenzymeB):
             return False
         else:
@@ -1143,8 +1121,9 @@ class Candidate(Designer):
 
         Returns
         -------
-        True only if RenzymeA and RenzymeB each depend on at least one
-        substitution that the other does not depend on, False otherwise.
+        bool
+            True only if RenzymeA and RenzymeB each depend on at least one
+            substitution that the other does not depend on, False otherwise.
         """
         RenzymeA_subs = utils.get_substitutions_Renzyme_depends_on(
             RenzymeA,
@@ -1190,9 +1169,10 @@ class Candidate(Designer):
 
         Returns
         -------
-        False if there are any unneeded substitutions (unless the PAM can't be
-        changed, in which case there can be unneeded substitutions as long as
-        they are within the gRNA target region), True otherwise.
+        bool
+            False if there are any unneeded substitutions (unless the PAM can't be
+            changed, in which case there can be unneeded substitutions as long as
+            they are within the gRNA target region), True otherwise.
         """
 
         # get a flattened list of all the substitutions RenzymeA and Renzyme

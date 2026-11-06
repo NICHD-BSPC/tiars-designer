@@ -8,6 +8,9 @@ Inputs
 
 Once TIARS-Designer is installed, the following arguments are required to run the tool.
 
+.. _required-inputs:
+
+
 Required Inputs
 ~~~~~~~~~~~~~~~
 
@@ -49,7 +52,7 @@ Required Inputs
 |                        | - novel_site_depends_on_at_least_two_substitutions                                                                 |
 |                        | - num_recognition_sites_equals_num_cutsites                                                                        |
 |                        | - no_unneeded_substitutions                                                                                        |
-|                        | . See :ref:`Filters` for a complete description of the Filters.                                                    |
+|                        | . See :ref:`Filters` for a complete description of the filters.                                                    |
 +------------------------+--------------------------------------------------------------------------------------------------------------------+
 | --enzyme-pair-filters  | A list of enzyme pair filters to run. To run all of the enzyme-pair filters(recommended), input 'all'.             |
 |                        | The filter names that can be used are:                                                                             | 
@@ -57,31 +60,31 @@ Required Inputs
 |                        | - both_have_endogenous_sites                                                                                       |
 |                        | - compatible_polarity                                                                                              |
 |                        | - both_Renzymes_depend_on_at_least_one_unique_substitution                                                         |
-|                        | . See :ref:`Filters` for a complete description of the Filters.                                                    |
+|                        | . See :ref:`Filters` for a complete description of the filters.                                                    |
 +------------------------+--------------------------------------------------------------------------------------------------------------------+
 
 
-* NOTE: any time the 'location in the sequence' of an element is mentioned, this is referring to it coordinate in the sequence, where the first basepair in the sequence is considered 0, the second basepair is 1, the third is 2, etc. 
+* NOTE: any time the 'location in the sequence' of an element is mentioned, this is referring to its coordinate in the sequence, where the first basepair in the sequence is considered 0, the second basepair is 1, the third is 2, etc. 
 
 
 Optional Inputs
 ~~~~~~~~~~~~~~~
 
-The tool has the option to provide a custom list of desired restriction enzymes to use and to output passing percentages for each filter. 
+The tool has the following optional arguments to customize use: 
 
 +----------------------+---------------------------------------------------------------------------------------------------------------------------+
 | Argument             | Description                                                                                                               |
 +======================+===========================================================================================================================+
 | --min_Rsite_distance | The minimum allowable distance (in basepairs) between the novel restriction site and any endogenous restriction sites     |
-|                      | for a given enzyme. This is to avoid having fragment sizes that are too similar to be able to tell the difference between | 
-|                      | a novel site cut and and endogenous site cut. This is the value used in the 'no Endogenous Cutsites within 5Nt of Novel   |
+|                      | for a given enzyme. This is to avoid having fragment sizes that are too similar to be able to tell the difference between |
+|                      | a novel site cut and and endogenous site cut. This is the value used in the 'no Endogenous Cutsites within N nt of Novel  |
 |                      | Site' filter (see :ref: `Filters`). Default=5                                                                             |
 +----------------------+---------------------------------------------------------------------------------------------------------------------------+
 | --enzymes            | A tsv/txt file containing a list of restriction enzymes to use (must be in the Bio.Restriction database, case sensitive). |
 |                      | The list should have one enzyme per line                                                                                  |
 |                      | Default= Bio.Restriction 'CommonOnly' list of commonly used enzymes.                                                      |
 +----------------------+---------------------------------------------------------------------------------------------------------------------------+
-| --verbose            | If this flag is included, output tsv files with passing percentages for each filter as well as raw the total number of    |  
+| --verbose            | If this flag is included, output tsv files with passing percentages for each filter as well as raw the total number of    |
 |                      | candidates before and after filtering.                                                                                    |
 +----------------------+---------------------------------------------------------------------------------------------------------------------------+
 

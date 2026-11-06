@@ -1,8 +1,12 @@
+.. _Filters:
+
 =======
 Filters
 =======
 
 Each candidate goes through two rounds of filtering: first the single restriction enzyme filters and then the enzyme pair filters.
+
+.. _Figure-Key:
 
 Figure Key
 ----------
@@ -21,7 +25,8 @@ Any novel, substitution dependent recognition site in the repair oligo should de
 
 .. image:: images/at_least_two_subs.png
 
-See :ref:`Figure Key`
+
+See :ref:`Figure Key <Figure-Key>`
 
 No endogenous cutsites within N nucleotides of a novel cutsite
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -30,7 +35,8 @@ For each enzyme there should be at least N nucleotides between any endogenous cu
 
 .. image:: images/5bp_between_cutsites.png
 
-See :ref:`Figure Key`
+See :ref:`Figure Key <Figure-Key>`
+
 
 No sandwiched cutsites
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -39,7 +45,8 @@ The candidate should not have endogenous cutsites on both sides of any novel cut
 
 .. image:: images/no_sandwiched_cutsites.png
 
-see :ref:`Figure Key`
+See :ref:`Figure Key <Figure-Key>`
+
 
 Number of recognition sites equals number of cutsites
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -48,7 +55,8 @@ The number of recognition sites an enzyme has in a candidate should be equal to 
 
 .. image:: images/num_cutsites_equals_num_recog_sites.png
 
-see :ref:`Figure Key`
+See :ref:`Figure Key <Figure-Key>`
+
 
 No lost endogenous sites
 ~~~~~~~~~~~~~~~~~~~~~~~~
@@ -57,7 +65,7 @@ There should be no Cases in which a substitution interrupts recognition site in 
 
 .. image:: images/no_lost_endog_sites.png
 
-see :ref:`Figure Key`
+See :ref:`Figure Key <Figure-Key>`
 
 
 Enzyme Pair Filters
@@ -71,7 +79,9 @@ If both enzymes have endogenous sites, they should be on the same side of the se
 
 .. image:: images/compatible_polarity.png
 
-see :ref:`Figure Key`
+See :ref:`Figure Key <Figure-Key>`
+
+
 
 No unneeded substitutions
 ~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -82,7 +92,8 @@ A candidate should have as few substitutions as possible while still creating th
 
 .. image:: images/no_unnec_subs.png
 
-see :ref:`Figure Key`
+See :ref:`Figure Key <Figure-Key>`
+
 
 Both enzymes depend on at least one unique substitution
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -90,7 +101,8 @@ Each enzyme's novel recognition site(s) must depend on at least one substitution
 
 .. image:: images/unique_sub_dependency.png
 
-see :ref:`Figure Key`
+See :ref:`Figure Key <Figure-Key>`
+
 
 Both enzymes have endogenous sites/at least one enzyme has endogenous site(s)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -99,6 +111,7 @@ This filter is very sample dependent in its harshness, so there is a harher vers
 
 .. image:: images/endog_site_present.png
 
-see :ref:`Figure Key`
+See :ref:`Figure Key <Figure-Key>`
+
 
 
