@@ -1,4 +1,4 @@
-__version__='0.1.5'
+__version__='0.1.6'
 from Bio.Restriction import *
 import Levenshtein
 from . import utils
@@ -417,7 +417,7 @@ class Endogenous(Designer):
                     # if getting filter stats, add each filter's result to the tally
                     filter_results = []
                     for Filter in single_enzyme_filters:
-                        if Filter == 'no_endogenous_cutsites_within_Nnt_of_endogenous_cutsite':
+                        if Filter == 'no_endogenous_cutsites_within_Nnt_of_novel_cutsite':
                             filter_result = filter_functions[Filter](Renzyme, min_Rsite_distance)
                         else:
                             filter_result = filter_functions[Filter](Renzyme)

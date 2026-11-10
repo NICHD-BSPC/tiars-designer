@@ -59,6 +59,7 @@ Required Inputs
 |                        | - at_least_one_has_endogenous_site                                                                                 |
 |                        | - both_have_endogenous_sites                                                                                       |
 |                        | - compatible_polarity                                                                                              |
+|                        | - no_unneeded_substitutions                                                                                        | 
 |                        | - both_Renzymes_depend_on_at_least_one_unique_substitution                                                         |
 |                        | . See :ref:`Filters` for a complete description of the filters.                                                    |
 +------------------------+--------------------------------------------------------------------------------------------------------------------+

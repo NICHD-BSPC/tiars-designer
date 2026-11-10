@@ -49,6 +49,18 @@ The candidate should not have endogenous cutsites on both sides of any novel cut
 
 See :ref:`Figure Key <Figure-Key>`
 
+No unneeded substitutions
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+If the PAM can be disrupted via synonymous substitutions, then the candidate should have no substitutions that aren't needed to either create a new restriction site, disrupt the PAM site, or create the desired nonsynonymous substitution. If the PAM cannot be disrupted, a candidate can have unneeded substitutions within the gRNA, but no unneeded substitutions outside the gRNA target region.
+
+A candidate should have as few substitutions as possible while still creating the desired novel restriction sites and nonsynonymous substitution. However, the candidate should also have a way to prevent a second CRISPR/Cas cut from taking place. Ideally, this would be accomplished by interrupting the PAM site with a synonymous substitution (or the desired nonsynonymous substitution). If this is not possible, then the gRNA target region should have as many synonymous substitutions as possible in order to prevent the gRNA from recognizing the new sequence.
+
+This filter is unique in that it can be run as a single enzyme filter or an enzyme pair filter. If run as a single enzyme filter, it filters single-Renzyme/candidate pairs only after they branch off from the main workflow to be output in the single Renzyme results. The main workflow that continues on to pair filtering skips this filter until ezymes are paired up and all restriction sites can be considered when evaluating the necessity of the substitutions. This allows users who only want to consider single restriction enzyme options to have a fully filtered output to view.
+
+.. image:: images/no_unnec_subs.png
+
+See :ref:`Figure Key <Figure-Key>`
 
 Number of recognition sites equals number of cutsites
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -76,7 +88,7 @@ Enzyme Pair Filters
 -------------------
 These filters take a candidate sequence and two restriction enzymes (both of which have passed all of the single enzyme filters for the candidate sequence) as their input. They make up the second round of filtering
 
-Compatible Polarity
+Compatible polarity
 ~~~~~~~~~~~~~~~~~~~
 
 If both enzymes have endogenous sites, they should be on the same side of the sequence relative to the novel sites. All endogenous sites for each enzyme must be distal to the novel site(s) relative to the labled primer. The labled primer can go on either either end, but if the endogenous sites for each enzyme are on opposite sides, the same amplicon design could not be used on both enzymes because the labled primer would have to be on opposite sides for each enzyme.
@@ -86,18 +98,10 @@ If both enzymes have endogenous sites, they should be on the same side of the se
 See :ref:`Figure Key <Figure-Key>`
 
 
-
 No unneeded substitutions
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
-If the PAM can be disrupted via synonymous substitutions, then the candidate should have no substitutions that aren't needed to either create a new restriction site, disrupt the PAM site, or create the desired nonsynonymous substitution. If the PAM cannot be disrupted, a candidate can have unneeded substitutions within the gRNA, but no unneeded substitutions outside the gRNA target region.
-
-A candidate should have as few substitutions as possible while still creating the desired novel restriction sites and nonsynonymous substitution. However, the candidate should also have a way to prevent a second CRISPR/Cas cut from taking place. Ideally, this would be accomplished by interrupting the PAM site with a synonymous substitution (or the desired nonsynonymous substitution). If this is not possible, then the gRNA target region should have as many synonymous substitutions as possible in order to prevent the gRNA from recognizing the new sequence.
-
-.. image:: images/no_unnec_subs.png
-
-See :ref:`Figure Key <Figure-Key>`
-
+This filter can also be run on enyme pairs. See the single enzyme description of 'No Unneeded Substitutions' for more information. 
 
 Both enzymes depend on at least one unique substitution
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
