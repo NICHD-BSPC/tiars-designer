@@ -26,17 +26,17 @@ Workflow
 
 The tool runs three main steps:
 
-1. Generates a list candidate sequences containing all possible combinations of silent mutations within 15 bp on either side of the Cas protein cutsite.
+1. Generates a list of candidate sequences containing all possible combinations of silent mutations within 15 bp on either side of the Cas protein cutsite.
 
 
 
-2. For each candidate sequence, finds restriction enzymes that have a restriction site in the candidate sequence that's not in the endogenous sequence, and filters out enzymes that would not work well with that sequence. Outputs all sequence + restriction enzyme combinations that passed all of the filters.
+2. For each candidate sequence, finds restriction enzymes that have a restriction site in the candidate sequence that's not in the endogenous sequence, and filters out enzymes that would not work well with that sequence (see ref::`Single Enzyme Filters <Single-Enzyme-Filters>`). Before moving on it outputs all sequence + single restriction enzyme combinations that passed all of the filters.
 
 
 
-3. For each candidate sequence, any enzymes that haven't been filtered out are paired together in all possible combinations, and filtered on the enzyme pair level based on the compatibility of the pair with the sequence. Outputs all sequence + restriction enzyme pair combinations that passed all the pair filters as the final output.
+3. For each candidate sequence, any enzymes that haven't been filtered out are paired together in all possible combinations, and filtered on the enzyme pair level based on the compatibility of the pair with the sequence (see ref::`Enzyme Pair Filters <Enzyme-Pair-Filters>`. Outputs all sequence + restriction enzyme pair combinations that passed all the pair filters.
 
-.
+
 
 Continue through this documentation for an overview of the tool's workflow, usage, and outputs 
 

@@ -1,7 +1,7 @@
 Scaling up with Snakemake
 =========================
 
-If you have multiple samples to run, you can run them all at once using the provided Snakefile. This will require consolidating the samples into a 'sampletable.tsv' file with a 'config.yaml' file for the less sample specific arguments. Template versions of these files can be found in the 'scaling up' folder of this repository. Once the Sampletable and Config file are set up, you can run the Snakefile with the following command:
+If you have multiple samples to run, you can run them all at once using the provided Snakefile. This will require consolidating the sample information into a 'sampletable.tsv' file with a 'config.yaml' file for the less sample specific arguments. Template versions of these files can be found in the 'scaling up' folder of this repository. Once the sampletable and config file are set up, you can run the Snakefile with the following command:
 
 .. code-block:: 
 
@@ -40,7 +40,7 @@ The config.yaml file will include the following arguments. Descriptions can be f
 - sampletable: path to 'sampletable.tsv file'
 - enzyme list: path to tsv file of desired enzymes. If default full enzyme list is desired write 'default'
 - codon_usage_tsv: path to tsv file of codon usage frequencies for organism used
-- min_Rsite_distance
+- min_Rsite_distance: put '5' if you want to use the default
 - single_enzyme_filters: list of desired single enzyme filters. To use all filters put 'all'
 - enzyme_pair_filters: list of desired enzyme pair filters. To use all filters put 'all'
 - verbose: boolean value

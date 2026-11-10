@@ -1,7 +1,7 @@
 =======================
 Interpreting the output
 =======================
-Each sample has its own output folder. In it, there is an excel spreadsheet and a word document for the single Renzyme filter results and an excel spreadsheet and a word document for the Renzyme pair filter results. The spreadsheets contain statistics such as ‘codon frequency change’ for each passing candidate-enzyme combination. These statistics can be used to sort the candidates and rank them in Cases where a lot of candidates made it to the final output. The word documents are for visualizing the passing candidates, and each candidate in the word document corresponds to a candidate in the spreadsheet with a matching candidate I.D. The documents are explained in further detail below.
+Each sample has its own output folder. In it, there is an excel spreadsheet and a word document for the single Renzyme filter results and an excel spreadsheet and a word document for the Renzyme pair filter results. The spreadsheets contain statistics such as ‘codon frequency change’ for each passing candidate-enzyme combination. These statistics can be used to sort the candidates and rank them in cases where a lot of candidates made it to the final output. The word documents are for visualizing the passing candidates, and each candidate in the word document corresponds to a candidate in the spreadsheet with a matching candidate I.D. The documents are explained in further detail below.
 
 
 .. _docx-figure-key:
@@ -24,27 +24,27 @@ Single Enzyme Excel sheet
    +--------+-----------------------------+---------------------------------------------------------------------------------------+
    | Column | Name                        | Desription                                                                            |
    +========+=============================+=======================================================================================+
-   | A      | Candidate I.D. number       | This number matches the number given to each candidate in the word document, so       |
+   | A      | Candidate I.D. number       | This number matches ID the number given to each candidate in the word document, so    |
    |        |                             | if you see a high ranking candidate in the spreadsheet, you can easily find it in     |
    |        |                             | the word doc by finding the matching option number.                                   |
    +--------+-----------------------------+---------------------------------------------------------------------------------------+
-   | B      | Sequence                    | This is the full candidate sequence, although it’s much easier to view it in the      |
-   |        |                             | word doc.                                                                             |
+   | B      | Sequence                    | The full candidate sequence, although it’s much easier to view it in the word doc.    |
+   |        |                             |                                                                                       |
    +--------+-----------------------------+---------------------------------------------------------------------------------------+
-   | C      | Renzyme                     | This is a restriction enzyme that passed all of the single enzyme filters for that    |
-   |        |                             | row’s sequence.                                                                       |
+   | C      | Renzyme                     | A restriction enzyme that passed all of the single enzyme filters for that row's      |
+   |        |                             |                                                                                       |
    +--------+-----------------------------+---------------------------------------------------------------------------------------+
-   | D      | Average distance to Cas cut | This is the distance in basepairs between the Cas cut and the cut resulting from      |
+   | D      | Average distance to Cas cut | The distance in basepairs between the Cas cut and the cut resulting from              |
    |        |                             | the novel restriction site for this row’s Renzyme. If there’s more than one novel     |
    |        |                             | restriction site (which doesn’t appear to have happened very often), this value       |
    |        |                             | will be the average of their distances to the Cas cut.                                |
    +--------+-----------------------------+---------------------------------------------------------------------------------------+
-   | E      | Codon frequency change      | This is the total difference in codon usage frequency between the candidate sequence  |
+   | E      | Codon frequency change      | The total difference in codon usage frequency between the candidate sequence          |
    |        |                             | and the endogenous sequence. For each codon, the absolute value of the difference in  |
    |        |                             | frequency between the two sequences was calculated. The codon frequency change is the |
    |        |                             | sum of that absolute value across all the codons in the sequence.                     |
    +--------+-----------------------------+---------------------------------------------------------------------------------------+
-   | F      | Cutsite distance outside    | This is the distance outside the Renzyme’s recognition site that its cutsite falls.   |
+   | F      | Cutsite distance outside    | The distance outside the Renzyme’s recognition site that its cutsite falls.           |
    |        | Rsite                       | If this value is different for the + and - strand (e.g. if it cuts 3 bp outsite the   |
    |        |                             | recognition site on the + strand and 5 bp outside the recognition site on the -       |
    |        |                             | strand), this value takes the greater of the two. For example, BpuEI has the          |
@@ -59,6 +59,7 @@ Single Enzyme Word Document
 
 - Filename: [sample_name]_single_Renzymes.docx
 - Description: A word document for visualising all of the sequence-enzyme combinations that passed all of the single enzyme filters, with the PAM site, guideRNA, Restriction sites, and substitutions all mapped out. The option numbers in the word doc match the candidate IDs in the spreadsheet (column A) so you can easily find a candidate from the spreadsheeteven after sorting.
+
 - example:
 
 .. image:: images/single_enzyme_docx.png

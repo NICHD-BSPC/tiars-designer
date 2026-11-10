@@ -29,7 +29,7 @@ Required Inputs
 +------------------------+--------------------------------------------------------------------------------------------------------------------+
 | PAM_start              | The location in the sequence* of the beginning of the PAM site                                                     |
 +------------------------+--------------------------------------------------------------------------------------------------------------------+
-| which_PAM              | specifies which type of PAM your experiment uses. Right now Cas9 (CCN and NGG) and Cpf1 (TVVV and BAAA) are        |
+| which_PAM              | Specifies which type of PAM your experiment uses. Right now Cas9 (CCN and NGG) and Cpf1 (TVVV and BAAA) are        |
 |                        | supported. NOTE: put the generic sequence of the PAM rather than the exact one the sample uses (e.g. put NGG rather|
 |                        | than AGG)                                                                                                          |
 +------------------------+--------------------------------------------------------------------------------------------------------------------+
@@ -42,8 +42,8 @@ Required Inputs
 | sample_name            | The name of the locus/sample, which will be used to name the output folder and files                               |
 +------------------------+--------------------------------------------------------------------------------------------------------------------+
 | --codon-usage-tsv      | A tsv of codon usage frequency values for the organism used. The tsv should have one codon per line in the format: |
-|                        | [codon]>[frequency] (e.g. 'UGA>1.4') where '>' represents a tab. The default tsv is for zebrafish. Organism        |
-|                        | specific codon frequencies can be found at the `Kazusa Codon usage Database <http://kazusa.or.jp/codon>`_          |           
+|                        | [codon]>[frequency] (e.g. UGA>1.4) where '>' represents a tab. The tsv in the github repository is for zebrafish.  | 
+|                        | Organism specific codon frequencies can be found at the `Kazusa Codon usage Database <http://kazusa.or.jp/codon>`_ |           
 +------------------------+--------------------------------------------------------------------------------------------------------------------+
 | --single-enzyme-filters| A list of single enzyme filters to run. To run all of the single-enzyme filters (recommended), input 'all'.        |
 |                        | The filters names that can be used are:                                                                            |

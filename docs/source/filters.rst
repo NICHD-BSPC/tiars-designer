@@ -14,6 +14,8 @@ Use this key to interpret the following figures.
 
 .. image:: images/figure_key.png
 
+.. _Single-Enzyme-Filters:
+
 Single Restriction Enzyme Filters
 ---------------------------------
 These filters take a candidate sequence and a single restriction enzyme as their inputs. They make up the first round of filtering.
@@ -31,7 +33,7 @@ See :ref:`Figure Key <Figure-Key>`
 No endogenous cutsites within N nucleotides of a novel cutsite
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-For each enzyme there should be at least N nucleotides between any endogenous cutsites and novel cutsites, where N is the value is the value of the optional --min_Rsite_distance argument (default = 5bp). If a candidate has a novel site that's too close to an endogenous site, the fragment created by digestion of the endogenous sequence would be very close in length to the fragment created by digestion of the candidate sequence. This would make it difficult to discern whether or not the CRISPR/Cas activity was sucessful.
+For each enzyme there should be at least N nucleotides between any endogenous cutsites and novel cutsites, where N is the value of the optional --min_Rsite_distance argument (default = 5bp). If a candidate has a novel site that's too close to an endogenous site, the fragment created by digestion of the endogenous sequence would be very close in length to the fragment created by digestion of the candidate sequence. This would make it difficult to discern whether or not the CRISPR/Cas activity was sucessful.
 
 .. image:: images/5bp_between_cutsites.png
 
@@ -61,12 +63,14 @@ See :ref:`Figure Key <Figure-Key>`
 No lost endogenous sites
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-There should be no Cases in which a substitution interrupts recognition site in the endogenous sequence for the enzyme in question, which would result in the endogenous sequence containing a recognition site that is not in the candidate.
+There should be no cases in which a substitution interrupts a recognition site in the endogenous sequence for the enzyme in question, which would result in the endogenous sequence containing a recognition site that is not in the candidate.
 
 .. image:: images/no_lost_endog_sites.png
 
 See :ref:`Figure Key <Figure-Key>`
 
+
+.. _Enzyme-Pair-Filters:
 
 Enzyme Pair Filters
 -------------------
@@ -75,7 +79,7 @@ These filters take a candidate sequence and two restriction enzymes (both of whi
 Compatible Polarity
 ~~~~~~~~~~~~~~~~~~~
 
-If both enzymes have endogenous sites, they should be on the same side of the sequence relative to the novel sites. All endogenous sites for each enzyme must be distal to the novel site(s) relative to the labled primer. The labled primer can go on either either end, but if the endogenous sites for each enzyme are on opposite sides, the same Amplicon design could not be used on both enzymes because the labled primer would have to be on opposite sides for each enzyme.
+If both enzymes have endogenous sites, they should be on the same side of the sequence relative to the novel sites. All endogenous sites for each enzyme must be distal to the novel site(s) relative to the labled primer. The labled primer can go on either either end, but if the endogenous sites for each enzyme are on opposite sides, the same amplicon design could not be used on both enzymes because the labled primer would have to be on opposite sides for each enzyme.
 
 .. image:: images/compatible_polarity.png
 
