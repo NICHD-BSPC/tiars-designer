@@ -20,7 +20,7 @@ from .__init__ import *
 def get_enzyme_pair_stats_filtered(passed_enzymes_df, endogenous, locus, enzyme_pair_filters, codon_frequency_dict, verbose):
 
     """
-    given the candidates with enzymes that passed all four
+    Given the candidates with enzymes that passed all four
     enzyme level filters, runs another set of filters on every possible pair
     of enzymes remaining for each candidate.
 
@@ -394,7 +394,7 @@ def full_run(
 #    # Get a dictionary of the frequency for each codon for output stats
     codon_frequency_dict = utils.get_codon_frequency_dict(codon_usage_tsv)
 
-    # Get a prefiltered list of candidate obejects for this endogenous object
+    # Get a prefiltered list of candidate objects for this endogenous object
     flat_passed_enzymes_df = pd.DataFrame(endogenous.get_filtered_candidates(locus, single_enzyme_filters, min_Rsite_distance, verbose, codon_usage_tsv))
     # If no solutions were found, write out a no solutions error message to the output files
     SE_no_solutions_message = 'Unfortunately, no single enzyme solutions were found for this locus'

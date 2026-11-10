@@ -80,7 +80,8 @@ rule run_oligo_designer:
         sequence = lambda wildcards: sample_dict[wildcards.sample]['sequence'],
         single_enzyme_filters = single_enzyme_filters,
         enzyme_pair_filters = enzyme_pair_filters,
-        verbose=verbose
+        verbose=verbose,
+        min_Rsite_distance = min_rsite_distance
     shell:
-        "cd {wildcards.sample} && tiarsdesigner {params.sequence} {params.gRNA_start} {params.gRNA_end} {params.PAM_start} {params.which_PAM} {params.AA_change_site} {params.new_codon} {wildcards.sample} --single-enzyme-filters {params.single_enzyme_filters} --enzyme-pair-filters {params.enzyme_pair_filters} --codon-usage-tsv ../{input.codon_usage} {input.enzymes} {params.verbose}"
+        "cd {wildcards.sample} && tiarsdesigner {params.sequence} {params.gRNA_start} {params.gRNA_end} {params.PAM_start} {params.which_PAM} {params.AA_change_site} {params.new_codon} {wildcards.sample} --single-enzyme-filters {params.single_enzyme_filters} --enzyme-pair-filters {params.enzyme_pair_filters} --codon-usage-tsv ../{input.codon_usage} {input.enzymes} {params.verbose} --min-Rsite-distance {params.min_Rsite_distance}"
 
