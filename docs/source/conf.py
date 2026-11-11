@@ -60,6 +60,8 @@ autoapi_dirs = [
 # classes
 autoapi_python_class_content = 'both'
 
+#autoapi_keep_files= True
+
 html_theme_options = {
     'show_relbars': True,
 }

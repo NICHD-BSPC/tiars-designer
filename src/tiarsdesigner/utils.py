@@ -14,8 +14,8 @@ from docx.shared import RGBColor
 
 def reformat_codon_table(table=None):
     """
-    Given a codon table, returns a dictionary mapping each codon to its other
-    possible synonymous codons. Each key is at considered a synonymous codon of
+    Given a codon table, returns a dictionary mapping each codon to its other \
+    possible synonymous codons. Each key is at considered a synonymous codon of \
     itself, so it is included in the list.
 
     Parameters
@@ -26,8 +26,9 @@ def reformat_codon_table(table=None):
 
     Returns
     -------
-    Dictionary mapping each codon to the set of alternative codons (that does
-    not include itself).
+    dict
+        Dictionary mapping each codon to the set of alternative codons (that does
+        not include itself).
 
     Example
     -------
@@ -66,7 +67,7 @@ def reformat_codon_table(table=None):
 
 def synonymous_seqs(seq, table=None):
     """
-    Generator of all possible synonymous versions of the provided sequence
+    Generator of all possible synonymous versions of the provided sequence \
     using the provided table.
 
     Parameters
@@ -79,11 +80,11 @@ def synonymous_seqs(seq, table=None):
         Optional codon: amino acid dictionary passed to reformat_codon_table;
         see that function for details.
 
-    Returns
+    Yields
     -------
-
-    Generator of synonymous sequences (each one a string of same length as
-    original).
+    Generator
+        Generator of synonymous sequences (each one a string of same length as
+        original).
 
     Example
     -------
@@ -116,10 +117,10 @@ def get_endogenous_sequence_and_stats(
     which_PAM
 ):
     """
-    Given a full sequence and the locations of the gRNA, PAM, and AA change
-    site, returns a dictionary of the isolated 273 bp sequence that extends 155
-    nt upstream and 120 nt downstream (or as close to that as the sequence
-    extends) of the Cas9 cutsite and the adjusted gRNA, PAM, and AA change site
+    Given a full sequence and the locations of the gRNA, PAM, and AA change \
+    site, returns a dictionary of the isolated 273 bp sequence that extends 155 \
+    nt upstream and 120 nt downstream (or as close to that as the sequence \
+    extends) of the Cas9 cutsite and the adjusted gRNA, PAM, and AA change site \
     values that correspond to the isolated endogenous sequence.
 
     Parameters
@@ -151,8 +152,9 @@ def get_endogenous_sequence_and_stats(
 
     Returns
     -------
-    Dictionary of the isolated endogenous sequence and the adjusted gRNA, PAM,
-    and AA_change_site locations.
+    dict
+        Dictionary of the isolated endogenous sequence and the adjusted gRNA, PAM,
+        and AA_change_site locations.
     """
       
     # create dictionary with PAM startsites as keys and the locations of the
@@ -207,8 +209,8 @@ def get_endogenous_sequence_and_stats(
 
 def generate_exon_seqs(start, end, AA_change_seq):
     """
-    Given a sequence, and start and end coordinates for the cutsite region
-    within that sequence, returns a generator of all possible synonymous
+    Given a sequence, and start and end coordinates for the cutsite region \
+    within that sequence, returns a generator of all possible synonymous \
     cutsite regions.
 
     Parameters
@@ -222,10 +224,11 @@ def generate_exon_seqs(start, end, AA_change_seq):
     AA_change_sequence: string
         The full candidate sequence with the desired amino acid change
 
-    Returns
+    Yields
     -------
-    A generator of sequences synonymous to the region within AA_change seq
-    specified by the start and end coordinates.
+    generator
+        A generator of sequences synonymous to the region within AA_change seq
+        specified by the start and end coordinates.
     """
     start_frame = start % 3
     end_frame = end % 3
@@ -243,8 +246,8 @@ def generate_exon_seqs(start, end, AA_change_seq):
 
 def get_restriction_sites(sequence, Renzymes=None):
     """
-    Given a sequence, returns a dictionary of restriction enzymes mapping
-    Restriction enzymes that would cut the sequence to locations in the
+    Given a sequence, returns a dictionary of restriction enzymes mapping \
+    Restriction enzymes that would cut the sequence to locations in the \
     sequence that they would cut.
 
     Parameters
@@ -259,11 +262,11 @@ def get_restriction_sites(sequence, Renzymes=None):
 
     Returns
     -------
-
-    Dictionary of restriction enzymes with recognition sites in sequence.
-    The keys are RE names and the values are their cutsite locations in
-    the sequence. NOTE: the cutsites use the convention that the first
-    nucleotide in the sequence is 1 not 0.
+    dict
+        Dictionary of restriction enzymes with recognition sites in sequence.
+        The keys are RE names and the values are their cutsite locations in
+        the sequence. NOTE: the cutsites use the convention that the first
+        nucleotide in the sequence is 1 not 0.
 
     Example
     -------
@@ -282,8 +285,8 @@ def get_restriction_sites(sequence, Renzymes=None):
 
 def get_Rsite_dict(sequence, Renzymes):
     """
-    Given a sequence and either a list or a dictionary of restriction enzymes,
-    returns a dictionary mapping the restriction enzymes to coordinates of
+    Given a sequence and either a list or a dictionary of restriction enzymes, \
+    returns a dictionary mapping the restriction enzymes to coordinates of \
     their recognition sites in the sequence.
 
     Parameters
@@ -298,12 +301,13 @@ def get_Rsite_dict(sequence, Renzymes):
 
     Returns
     -------
-    Dictionary of enzymes with recognition sites in 'sequence', with the
-    enzyme names as keys and tuples of the start and end sites of their
-    recognition sites in the sequence as values.
-    NOTE: the endsites correspond to the first nucleotide in the sequence after
-    the recognition site (e.g. recognition site  = sequence[start:end] NOT
-    sequence[start:(end + 1)]).
+    dict
+        Dictionary of enzymes with recognition sites in 'sequence', with the
+        enzyme names as keys and tuples of the start and end sites of their
+        recognition sites in the sequence as values.
+        NOTE: the endsites correspond to the first nucleotide in the sequence after
+        the recognition site (e.g. recognition site  = sequence[start:end] NOT
+        sequence[start:(end + 1)])
 
     Example
     -------
@@ -325,9 +329,9 @@ def get_Rsite_dict(sequence, Renzymes):
 
 def map_recognition_sites(sequence, Renzyme, num):
     """
-    Given a sequence, a restriction enzyme that would cut the sequence, and
-    a nonzero integer ('num'), finds the locations of all the recognition sites
-    for that enzyme in the sequence and maps their locations.
+    Given a sequence, a restriction enzyme that would cut the sequence, and \
+    a nonzero integer ('num'), finds the locations of all the recognition sites \
+    for that enzyme in the sequence and maps their locations. 
 
     Parameters
     ----------
@@ -339,9 +343,11 @@ def map_recognition_sites(sequence, Renzyme, num):
 
     Returns
     -------
-    List of 0's the length of sequence, with the 0's replaced with 'num' at
-    any point where the corresponding location in the sequence is part of
-    a recognition site in sequence.
+    list
+        List of 0's the length of sequence, with the 0's replaced with 'num' at
+        any point where the corresponding location in the sequence is part of
+        a recognition site in sequence.
+
 
     Example
     -------
@@ -360,10 +366,10 @@ def map_recognition_sites(sequence, Renzyme, num):
 
 def get_substitutions_Renzyme_depends_on(Renzyme, endogenous_seq, candidate_seq, sub_dep_sites):
     """
-    Given a restriction enzyme, an endogenous sequence, and a
-    candidate sequence, returns a list of tuples where each tuple corresponds to
-    a recognition site for the enzyme in the sequence and contains the locations of
-    synonymous substitutions in candidate_seq that that recognition site
+    Given a restriction enzyme, an endogenous sequence, and a \
+    candidate sequence, returns a list of tuples where each tuple corresponds to \
+    a recognition site for the enzyme in the sequence and contains the locations of \
+    synonymous substitutions in candidate_seq that that recognition site \
     depends on.
 
     Parameters
@@ -382,12 +388,13 @@ def get_substitutions_Renzyme_depends_on(Renzyme, endogenous_seq, candidate_seq,
 
     Returns
     ------
-    List of tuples where each tuple corresponds to a novel recognition site for
-    Renzyme (AKA a recognition site for Renzyme that is in the candidate
-    sequence but not the endogenous sequence due to substitutions to the
-    canidate sequence). The numbers in each tuple correspond to index locations
-    in the candidate sequence of substutions that are required to form its
-    corresponding recognition site.
+    list
+        List of tuples where each tuple corresponds to a novel recognition site for
+        Renzyme (AKA a recognition site for Renzyme that is in the candidate
+        sequence but not the endogenous sequence due to substitutions to the
+        canidate sequence). The numbers in each tuple correspond to index locations
+        in the candidate sequence of substutions that are required to form its
+        corresponding recognition site.
 
     Example
     -------
@@ -441,13 +448,17 @@ def get_substitutions_Renzyme_depends_on(Renzyme, endogenous_seq, candidate_seq,
 
 def get_codon_frequency_dict(codon_usage_tsv):
     """
+    Takes in a codon usage frequency tsv and converts it into a dictionary
+
     Parameters
     ----------
     codon_usage_tsv: a tsv file of codons and their corresponding frequencies in the format [codon]>[frequency] with one codon per line
 
     Returns
     -------
-    A dictionary of codons and the frequency at which they are used in
+    dict
+        A dictionary of codons and the frequency at which they are used in
+
     """
     codon_frequency_dict = {}
     for line in open(codon_usage_tsv):
@@ -459,7 +470,7 @@ def get_codon_frequency_dict(codon_usage_tsv):
 
 def get_filter_function_dict(filter_list, candidate):
     """
-    Given a list of filters, return a dictionary with the filter names in the
+    Given a list of filters, return a dictionary with the filter names in the \
     filter list as keys and their corresponding filter functions as values.
     
     Parameters
@@ -468,7 +479,14 @@ def get_filter_function_dict(filter_list, candidate):
         A list of filters to get corresponding functions for
     candidate: candidate object
         The candidate object to pull the methods from
+    
+    Returns
+    -------
+    dict
+        A dictionary with the filter names in the
+        filter list as keys and their corresponding filter functions as values.
     """
+
     full_filter_dict = {
         'no_sandwiched_cutsites': candidate.no_sandwiched_cutsites,
         'no_endogenous_cutsites_within_Nnt_of_novel_cutsite': candidate.no_endogenous_cutsites_within_Nnt_of_novel_cutsite,
@@ -485,8 +503,8 @@ def get_filter_function_dict(filter_list, candidate):
 
 def get_codon_frequency_differences(seqA, seqB, codon_dict):
     """
-    Given two sequences and a dictionary of usage frequences for all codons,
-    returns the total difference in codon frequency between the two
+    Given two sequences and a dictionary of usage frequences for all codons, \
+    returns the total difference in codon frequency between the two \
     sequences.
 
     Parameters
@@ -502,8 +520,9 @@ def get_codon_frequency_differences(seqA, seqB, codon_dict):
 
     Returns
     -------
-    A float describing the total difference in usage frequency across codons
-    between the two input sequences.
+    float
+        A float describing the total difference in usage frequency across codons
+        between the two input sequences.
     """
 
     total_frequency_diff = 0
@@ -517,9 +536,9 @@ def get_codon_frequency_differences(seqA, seqB, codon_dict):
     return total_frequency_diff
 
 def add_sequence_to_doc(document, sequence, gRNA_start, gRNA_end, PAM_start, AA_change_site, Renzyme_list, endogenous, which_pam, paired = True):
-    """A helper function for make_doc(). The make_doc function calls
-    it to one of the candidate sequences to the document with the Renzyme
-    recognition sites, synonymous substitutions, PAM and gRNA and
+    """A helper function for make_doc(). The make_doc function calls \
+    it to one of the candidate sequences to the document with the Renzyme \
+    recognition sites, synonymous substitutions, PAM and gRNA and \
     AA_change_site coordinates marked according to the key.
 
     Parameters
@@ -595,8 +614,8 @@ def add_sequence_to_doc(document, sequence, gRNA_start, gRNA_end, PAM_start, AA_
 
 def make_doc(endogenous_sequence, gRNA_start, gRNA_end, PAM_start, AA_change_site, candidate_df, sample, which_pam, paired=True):
     """
-    Makes a word document to visualize restriction sites
-    for each pair of enzymes (or single enzyme if paired != True) for each
+    Makes a word document to visualize restriction sites \
+    for each pair of enzymes (or single enzyme if paired != True) for each \
     candidate in candidate_dict
 
     Parameters

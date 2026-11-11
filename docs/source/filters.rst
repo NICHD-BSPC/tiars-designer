@@ -33,7 +33,7 @@ See :ref:`Figure Key <Figure-Key>`
 No endogenous cutsites within N nucleotides of a novel cutsite
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-For each enzyme there should be at least N nucleotides between any endogenous cutsites and novel cutsites, where N is the value of the optional --min_Rsite_distance argument (default = 5bp). If a candidate has a novel site that's too close to an endogenous site, the fragment created by digestion of the endogenous sequence would be very close in length to the fragment created by digestion of the candidate sequence. This would make it difficult to discern whether or not the CRISPR/Cas activity was sucessful.
+For each enzyme there should be at least N nucleotides between any endogenous cutsites and novel cutsites, where N is the value of the optional --min-Rsite-distance argument (default = 5bp). If a candidate has a novel site that's too close to an endogenous site, the fragment created by digestion of the endogenous sequence would be very close in length to the fragment created by digestion of the candidate sequence. This would make it difficult to discern whether or not the CRISPR/Cas activity was sucessful.
 
 .. image:: images/5bp_between_cutsites.png
 
