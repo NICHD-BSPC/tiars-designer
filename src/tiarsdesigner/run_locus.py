@@ -20,9 +20,9 @@ from .__init__ import *
 def get_enzyme_pair_stats_filtered(passed_enzymes_df, endogenous, locus, enzyme_pair_filters, codon_frequency_dict, verbose):
 
     """
-    Given the candidates with enzymes that passed all four
-    enzyme level filters, runs another set of filters on every possible pair
-    of enzymes remaining for each candidate.
+    Given the candidates with enzymes that passed all four \
+    enzyme level filters, runs another set of filters on every possible pair \
+    of enzymes remaining for each candidate. 
 
     Parameters
     ----------
@@ -48,17 +48,18 @@ def get_enzyme_pair_stats_filtered(passed_enzymes_df, endogenous, locus, enzyme_
 
     Returns
     -------
-    A pandas dataframe with one row for each pair
-    of passed enzymes for each candidate in passed_enzymes_df. The columns are
-    'seq' (sequence), Renzyme pair (a  pair of Renzymes that each have at least
-    one substitution dependent cutsite in its corresponding candidate
-    sequence),
-    result (boolean value indicating whether or not the Renzyme pair passed the
-    filter for that row's candidate), RenzymeA average distance to cas9 cut,
-    RenzymeB average distance to cas9 cut, overall average distance to cas9 cut
-    (average of previous 2), and codon frequency change. If the verbose option
-    is selected, it will also create a csv called
-    '[locus]_pair_filter_stats' from the dataframe
+    dataframe:
+        A pandas dataframe with one row for each pair
+        of passed enzymes for each candidate in passed_enzymes_df. The columns are
+        'seq' (sequence), Renzyme pair (a  pair of Renzymes that each have at least
+        one substitution dependent cutsite in its corresponding candidate
+        sequence),
+        result (boolean value indicating whether or not the Renzyme pair passed the
+        filter for that row's candidate), RenzymeA average distance to cas9 cut,
+        RenzymeB average distance to cas9 cut, overall average distance to cas9 cut
+        (average of previous 2), and codon frequency change. If the verbose option
+        is selected, it will also create a csv called
+        '[locus]_pair_filter_stats' from the dataframe
     """
 
     passed_pairs = []
@@ -182,12 +183,12 @@ def get_enzyme_pair_stats_filtered(passed_enzymes_df, endogenous, locus, enzyme_
 def get_docx_single(flat_passed_enzymes_df, no_unneeded_substitutions, endogenous, locus):
 
     """
-    Given a dataframe containing all of the candidate-enzyme combos that
-    passed all of the filters, it further filters out any candidates with
-    unneeded substitutions (if the filter is specified) and creates a docx file called
-    '[locus]_single_Renzymes.docx to visualize all of the remaining candidate
-    sequences and enzyme pairs. It will also create an xlsx file with more
-    in-depth statistics on each candidate-Renzyme combo.
+    Given a dataframe containing all of the candidate-enzyme combos that \
+    passed all of the filters, it further filters out any candidates with \
+    unneeded substitutions (if the filter is specified) and creates a docx file called \
+    '[locus]_single_Renzymes.docx to visualize all of the remaining candidate \
+    sequences and enzyme pairs. It will also create an xlsx file with more \
+    in-depth statistics on each candidate-Renzyme combo. 
 
     Parameters
     ----------
@@ -264,11 +265,11 @@ def full_run(
     verbose=False
 ):
     """
-    Given an endogenous sequence, desired edit + guideRNA, generates all the
-    possible synonymous candidates for that sequence and runs all of the
-    filters on them to get the final docx and xlsx files (one of each for both
-    single enzymes and enzyme pairs) using the above functions. This is the
-    only function for which the users will directly input the parameters (via
+    Given an endogenous sequence, desired edit + guideRNA, generates all the \
+    possible synonymous candidates for that sequence and runs all of the \
+    filters on them to get the final docx and xlsx files (one of each for both \
+    single enzymes and enzyme pairs) using the above functions. This is the \
+    only function for which the users will directly input the parameters (via \
     commandline argparse).
 
     Parameters
@@ -479,7 +480,7 @@ def full_run(
 
 def main():
     """
-        A wrapper for arparse that will take in all the command line user inputs and run them through 'full_run()'
+        A wrapper for argparse that will take in all the command line user inputs and run them through 'full_run()'
 
     """
 

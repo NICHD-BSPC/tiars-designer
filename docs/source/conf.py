@@ -1,18 +1,6 @@
-# Configuration file for the Sphinx documentation builder.
-#
-# This file only contains a selection of the most common options. For a full
-# list see the documentation:
-# http://www.sphinx-doc.org/en/master/config
-
-# -- Path setup --------------------------------------------------------------
-
-# If extensions (or modules to document with autodoc) are in another directory,
-# add these directories to sys.path here. If the directory is relative to the
-# documentation root, use os.path.abspath to make it absolute, like shown here.
-#
-# import os
-# import sys
-# sys.path.insert(0, os.path.abspath('.'))
+import os
+import sys
+sys.path.insert(0, os.path.abspath('../../src'))
 
 
 # -- Project information -----------------------------------------------------
@@ -32,6 +20,7 @@ extensions = [
     'autoapi.extension',
     'sphinx.ext.viewcode',
     'sphinx.ext.doctest',
+    'sphinx.ext.napoleon'
 ]
 
 autosectionlabel_prefix_document = True
@@ -70,6 +59,8 @@ autoapi_dirs = [
 # Use both class-level and __init__-level docstrings when documenting
 # classes
 autoapi_python_class_content = 'both'
+
+#autoapi_keep_files= True
 
 html_theme_options = {
     'show_relbars': True,

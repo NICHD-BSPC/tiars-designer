@@ -460,32 +460,6 @@ class Endogenous(Designer):
 
     "ENDOGENOUS LEVEL ENZYME FILTERING METHODS"
 
-    def no_endogenous_cutsites_within_Nnt_of_primers(self, Renzyme, N=5):
-        """
-        Filters out Renzymes for all candidates that have endogenous sites
-        within N nucleotides of the primers.
-
-        Parameters
-        ----------
-        Renzyme : Bio.Restriction enzyme object
-            A restriction enzyme in the form of a Bio.Restriction enzyme object
-
-        N: int
-            The desired minimum distance in nucleotides an endogenous site must
-            be from the primers for the Renzyme to pass this filter. Default
-            = 5
-
-        Returns
-        -------
-        bool
-            False if Renzyme has an endogenous site within Nnt of one of the
-            primers, True otherwise. This function will be easier to write when
-            we've fleshed out exactly what sequences we are giving to Endogenous
-            and Candidate
-
-        """
-        pass
-
     def does_not_exceed_max_cutsites(self, Renzyme, N):
         """
         Filters out this Renzyme for all candidates it it has more than
