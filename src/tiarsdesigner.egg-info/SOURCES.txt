@@ -1,0 +1,12 @@
+LICENSE
+README.md
+pyproject.toml
+src/tiarsdesigner/__init__.py
+src/tiarsdesigner/run_locus.py
+src/tiarsdesigner/utils.py
+src/tiarsdesigner.egg-info/PKG-INFO
+src/tiarsdesigner.egg-info/SOURCES.txt
+src/tiarsdesigner.egg-info/dependency_links.txt
+src/tiarsdesigner.egg-info/entry_points.txt
+src/tiarsdesigner.egg-info/top_level.txt
+tests/test_suite.py

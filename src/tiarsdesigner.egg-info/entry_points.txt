@@ -1,0 +1,2 @@
+[console_scripts]
+tiarsdesigner = tiarsdesigner.run_locus:main
