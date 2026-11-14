@@ -76,7 +76,7 @@ def test_endogenous_class_with_CCN_PAM():
     
     assert endogenous.AA_change_sequence == seq_with_codon_change.upper()
     assert not endogenous.PAM_can_change
-    assert len(list(endogenous.get_filtered_candidates('test', single_enzyme_filters, 5, False,'codon_frequency.tsv'))) == 9
+    assert len(list(endogenous.get_filtered_candidates('test', single_enzyme_filters, 5, False,'tests/codon_frequency.tsv'))) == 9
 
     #out of frame PAM and cutsite region
     endogenous = tiarsdesigner.Endogenous(
@@ -90,8 +90,8 @@ def test_endogenous_class_with_CCN_PAM():
     )
     assert endogenous.PAM_can_change
 
-    endogenous.get_filtered_candidates('test2', single_enzyme_filters, 5, True, 'codon_frequency.tsv')
-    assert len(list(endogenous.get_filtered_candidates('test', single_enzyme_filters, 5,False, 'codon_frequency.tsv'))) == 104
+    endogenous.get_filtered_candidates('test2', single_enzyme_filters, 5, True, 'tests/codon_frequency.tsv')
+    assert len(list(endogenous.get_filtered_candidates('test', single_enzyme_filters, 5,False, 'tests/codon_frequency.tsv'))) == 104
 
 
     #last frame option for PAM and cutsite region
@@ -125,7 +125,7 @@ def test_endogenous_class_with_CCN_PAM():
         ],
     )
     assert endogenous.PAM_can_change
-    assert len(list(endogenous.get_filtered_candidates('test', single_enzyme_filters, 5, False, 'codon_frequency.tsv'))) == 96
+    assert len(list(endogenous.get_filtered_candidates('test', single_enzyme_filters, 5, False, 'tests/codon_frequency.tsv'))) == 96
 
 
 def test_endogenous_class_with_NGG_PAM():
@@ -167,7 +167,7 @@ def test_endogenous_class_with_NGG_PAM():
         ],
     )
     assert endogenous.AA_change_sequence == seq_with_codon_change.upper()
-    candidates = endogenous.get_filtered_candidates('test', single_enzyme_filters, 5, False, 'codon_frequency.tsv')
+    candidates = endogenous.get_filtered_candidates('test', single_enzyme_filters, 5, False, 'tests/codon_frequency.tsv')
     assert len(list(candidates)) == 32
 
 
@@ -192,7 +192,7 @@ def test_endogenous_class_with_NGG_PAM():
             'NmeA6CIII'
         ],
     )
-    candidates = endogenous.get_filtered_candidates('test', single_enzyme_filters, 5, False, 'codon_frequency.tsv')
+    candidates = endogenous.get_filtered_candidates('test', single_enzyme_filters, 5, False, 'tests/codon_frequency.tsv')
     assert len(list(candidates)) == 138
 
     #different frame
@@ -217,7 +217,7 @@ def test_endogenous_class_with_NGG_PAM():
             'Nan12227I'
         ],
     )
-    assert len(list(endogenous.get_filtered_candidates('test', single_enzyme_filters, 5, False, 'codon_frequency.tsv'))) == 186
+    assert len(list(endogenous.get_filtered_candidates('test', single_enzyme_filters, 5, False, 'tests/codon_frequency.tsv'))) == 186
 
 def test_endogenous_class_with_TTTV_PAM():
     # In frame PAM
@@ -263,7 +263,7 @@ def test_endogenous_class_with_TTTV_PAM():
     )
     assert endogenous.cutsite == 74
     assert endogenous.AA_change_sequence == seq_with_codon_change.upper()
-    candidates = endogenous.get_filtered_candidates('test', single_enzyme_filters, 5, False, 'codon_frequency.tsv')
+    candidates = endogenous.get_filtered_candidates('test', single_enzyme_filters, 5, False, 'tests/codon_frequency.tsv')
     assert len(list(candidates)) == 72
 
 #   New frame
@@ -309,7 +309,7 @@ def test_endogenous_class_with_TTTV_PAM():
     )
     assert endogenous.cutsite == 73
     assert endogenous.AA_change_sequence == seq_with_codon_change.upper()
-    candidates = endogenous.get_filtered_candidates('test', single_enzyme_filters, 5, False, 'codon_frequency.tsv')
+    candidates = endogenous.get_filtered_candidates('test', single_enzyme_filters, 5, False, 'tests/codon_frequency.tsv')
     assert len(list(candidates)) == 72
 
 #   New frame
@@ -355,7 +355,7 @@ def test_endogenous_class_with_TTTV_PAM():
     )
     assert endogenous.cutsite == 72
     assert endogenous.AA_change_sequence == seq_with_codon_change.upper()
-    candidates = endogenous.get_filtered_candidates('test', single_enzyme_filters, 5, False, 'codon_frequency.tsv')
+    candidates = endogenous.get_filtered_candidates('test', single_enzyme_filters, 5, False, 'tests/codon_frequency.tsv')
     assert len(list(candidates)) == 64
 
 def test_endogenous_class_with_BAAA_PAM():
@@ -398,7 +398,7 @@ def test_endogenous_class_with_BAAA_PAM():
     )
     assert endogenous.cutsite == 49
     assert endogenous.AA_change_sequence == seq_with_codon_change.upper()
-    candidates = endogenous.get_filtered_candidates('test', single_enzyme_filters, 5, False,'codon_frequency.tsv')
+    candidates = endogenous.get_filtered_candidates('test', single_enzyme_filters, 5, False,'tests/codon_frequency.tsv')
     assert len(list(candidates)) == 2
 
 #   New Frame
@@ -442,7 +442,7 @@ def test_endogenous_class_with_BAAA_PAM():
     )
     assert endogenous.cutsite == 48
     assert endogenous.AA_change_sequence == seq_with_codon_change.upper()
-    candidates = endogenous.get_filtered_candidates('test', single_enzyme_filters, 5, False, 'codon_frequency.tsv')
+    candidates = endogenous.get_filtered_candidates('test', single_enzyme_filters, 5, False, 'tests/codon_frequency.tsv')
     assert len(list(candidates)) == 3
 
 #   New Frame
@@ -487,7 +487,7 @@ def test_endogenous_class_with_BAAA_PAM():
     )
     assert endogenous.cutsite == 47
     assert endogenous.AA_change_sequence == seq_with_codon_change.upper()
-    candidates = endogenous.get_filtered_candidates('test', single_enzyme_filters, 5, False, 'codon_frequency.tsv')
+    candidates = endogenous.get_filtered_candidates('test', single_enzyme_filters, 5, False, 'tests/codon_frequency.tsv')
     assert len(list(candidates)) == 8
 
 def test_candidate_class():
@@ -901,7 +901,7 @@ def test_utils():
             'GGG':10.0,
     }
     
-    assert tiarsdesigner.utils.get_codon_frequency_dict('codon_frequency.tsv')==codon_dict
+    assert tiarsdesigner.utils.get_codon_frequency_dict('tests/codon_frequency.tsv')==codon_dict
     
 
     
