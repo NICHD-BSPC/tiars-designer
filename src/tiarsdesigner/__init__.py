@@ -1,4 +1,4 @@
-__version__='0.1.9'
+__version__='0.1.10'
 from Bio.Restriction import *
 import Levenshtein
 from . import utils
