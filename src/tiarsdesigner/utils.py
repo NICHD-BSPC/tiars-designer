@@ -311,14 +311,12 @@ def get_Rsite_dict(sequence, Renzymes):
 
     Example
     -------
-    >>> result = get_Rsite_dict('ATGCAC', {HpyCH4V: [4], CviRI: [4], RlaI: [2, 3], BmeDI: [3], Gba708II: [1]})
-    >>> expected = {
-    ... HpyCH4V: [(1, 5)],
-    ... CviRI: [(1, 5)],
-    ... RlaI: [(1, 4), (2, 5)],
-    ... BmeDI: [(2, 3), (3, 4), (5, 6)],
-    ... Gba708II: [(0, 5)]}
-    >>> assert result == expected, result
+    >>> get_Rsite_dict('ATGCAC', {HpyCH4V: [4], CviRI: [4], RlaI: [2, 3], BmeDI: [3], Gba708II: [1]})
+    {HpyCH4V: [(1, 5)],
+    CviRI: [(1, 5)],
+    RlaI: [(1, 4), (2, 5)],
+    BmeDI: [(2, 3), (3, 4), (5, 6)],
+    Gba708II: [(0, 5)]}
     """
 
     #Use the Renzyme dict or list to make a new dictionary with the recognition site coordinates
@@ -528,9 +526,11 @@ def get_codon_frequency_differences(seqA, seqB, codon_dict):
     total_frequency_diff = 0
     # iterate over the starting coordinates for each codon in the sequences and
     # establish the codon frequency differences based on codon_dict
-    for i in range(0, (int(len(seqA)/3)) - 1):
+    for i in range(0, (int(len(seqA)/3))):
         seqA_codon = seqA[i * 3: (i * 3) + 3]
+        print(seqA_codon)
         seqB_codon = seqB[i * 3: (i * 3) + 3]
+        print(seqB_codon)
         frequency_diff = abs(codon_dict[seqA_codon] - codon_dict[seqB_codon])
         total_frequency_diff += frequency_diff
     return total_frequency_diff

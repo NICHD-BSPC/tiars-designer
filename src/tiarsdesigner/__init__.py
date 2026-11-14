@@ -1,4 +1,4 @@
-__version__='0.1.6'
+__version__='0.1.9'
 from Bio.Restriction import *
 import Levenshtein
 from . import utils
@@ -444,6 +444,8 @@ class Endogenous(Designer):
                         else:
                             total_passing_cands +=1
                         yield passed_cand_dict
+        if total_cands==0:
+            raise ValueError("There are no viable candidates for the enzyme list provided. Try broadening the supplied enzyme list or using the default full Bio.restriction 'common only' list")
         if get_filter_stats:
             with open(locusname + '_filter_stats.tsv', 'w') as fout:
                 for filtername in filter_stats.keys():

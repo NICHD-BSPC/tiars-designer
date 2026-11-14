@@ -4,7 +4,7 @@ requires = ['setuptools']
 build-backend = 'setuptools.build_meta'
 [project]
 name='tiarsdesigner'
-version='0.1.6'
+version='0.1.9'
 authors= [{name='Sydney Hertafeld', email='shertafeld@gmail.com'}]
 description='A python package for designing CRISPR repair oligos'
 readme='README.md'
@@ -14,7 +14,20 @@ classifiers=[
     'Programming Language :: Python :: 3',
     'Operating System :: OS Independent'
     ]
+dependencies=[
+    'biopython',
+    'python-docx',
+    'matplotlib',
+    'numpy',
+    'pandas',
+    'xlwt',
+    'seaborn',
+    'openpyxl',
+    'levenshtein',
+    'snakemake'
+    ]
 [project.scripts]
 tiarsdesigner='tiarsdesigner.run_locus:main'
 [project.urls]
 url='https://github.com/NICHD-BSPC/tiars-designer'
+

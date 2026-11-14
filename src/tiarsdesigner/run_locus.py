@@ -347,6 +347,7 @@ def full_run(
             'at_least_one_has_endogenous_site',
             'both_have_endogenous_sites',
             'compatible_polarity',
+            'no_unneeded_substitutions',
             'both_Renzymes_depend_on_at_least_one_unique_substitution'
         ]
     Renzyme_list = None
@@ -496,7 +497,7 @@ def main():
     ap.add_argument('--single-enzyme-filters', nargs='+')
     ap.add_argument('--enzyme-pair-filters', nargs='+')
     ap.add_argument('--codon-usage-tsv')
-    ap.add_argument('--min-Rsite-distance', type=int)
+    ap.add_argument('--min-Rsite-distance', type=int, default=5)
     ap.add_argument(
         '--enzymes',
         help='name of file containing single column list of enzymes to use'

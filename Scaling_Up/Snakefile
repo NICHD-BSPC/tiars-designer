@@ -21,8 +21,6 @@ for sample in samples:
 codon_usage_tsv=config['codon_usage_tsv']
 
 
-
-
 min_rsite_distance = config['min_Rsite_distance']
 
 single_enzyme_filters = config['single_enzyme_filters']
@@ -43,8 +41,10 @@ if config['verbose']:
 
 if config['enzyme_list'] == 'default':
     enzyme_list = ([])
+    enzyme_param = ''
 else:
-    enzyme_list = '--enzymes ../' + config['enzyme_list']
+    enzyme_list= config['enzyme_list']
+    enzyme_param = '--enzymes ../' + enzyme_list
 
 if single_enzyme_filters == 'all':
     single_enzyme_filters = ['no_sandwiched_cutsites',
@@ -61,7 +61,7 @@ rule all:
         expand("{sample}/{sample}_single_Renzymes.docx", sample=samples),
         expand("{sample}/{sample}_single_Renzymes.xlsx", sample=samples)
 
-rule run_oligo_designer:
+rule run_tiars_designer:
     input:
         enzymes=enzyme_list,
         codon_usage=codon_usage_tsv
@@ -81,7 +81,8 @@ rule run_oligo_designer:
         single_enzyme_filters = single_enzyme_filters,
         enzyme_pair_filters = enzyme_pair_filters,
         verbose=verbose,
-        min_Rsite_distance = min_rsite_distance
+        min_Rsite_distance = min_rsite_distance,
+        enzymes=enzyme_param
     shell:
-        "cd {wildcards.sample} && tiarsdesigner {params.sequence} {params.gRNA_start} {params.gRNA_end} {params.PAM_start} {params.which_PAM} {params.AA_change_site} {params.new_codon} {wildcards.sample} --single-enzyme-filters {params.single_enzyme_filters} --enzyme-pair-filters {params.enzyme_pair_filters} --codon-usage-tsv ../{input.codon_usage} {input.enzymes} {params.verbose} --min-Rsite-distance {params.min_Rsite_distance}"
+        "cd {wildcards.sample} && tiarsdesigner {params.sequence} {params.gRNA_start} {params.gRNA_end} {params.PAM_start} {params.which_PAM} {params.AA_change_site} {params.new_codon} {wildcards.sample} --single-enzyme-filters {params.single_enzyme_filters} --enzyme-pair-filters {params.enzyme_pair_filters} --codon-usage-tsv ../{input.codon_usage} {params.enzymes} {params.verbose} --min-Rsite-distance {params.min_Rsite_distance}"
 

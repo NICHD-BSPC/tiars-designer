@@ -833,9 +833,8 @@ def test_utils():
     ]
 
     # test get_substitutions_Renzyme_depends_on
-    assert tiarsdesigner.utils.get_substitutions_Renzyme_depends_on(Hpy188I, 'TTCTGCAGCCCTGGATGGGCTCTGCTGCTA', 'TTCTTCAGAGTTGGATGGGTTCTGCTGCTA',[(4,9)])== [(4,8)]
-
-    assert tiarsdesigner.utils.get_codon_frequency_dict('codon_frequency.tsv')=={
+    assert tiarsdesigner.utils.get_substitutions_Renzyme_depends_on(Hpy188I, 'TTCTGCAGCCCTGGATGGGCTCTGCTGCTA', 'TTCTTCAGAGTTGGATGGGTTCTGCTGCTA',[(4,9)])== [(4,8)]                                                            
+    codon_dict= {
             'TTT':18.2,
             'TCT':16.9,
             'TAT':12.6,
@@ -902,6 +901,23 @@ def test_utils():
             'GGG':10.0,
     }
     
+    assert tiarsdesigner.utils.get_codon_frequency_dict('codon_frequency.tsv')==codon_dict
+    
+
+    
+    # test get_codon_frequency differences
+    seqA='CATTATTCC'
+    seqB='TTGACTATT'   
+
+    # test with higher total frequency for seqA
+    assert round(tiarsdesigner.utils.get_codon_frequency_differences(seqA, seqB, codon_dict), 1) == 4.6
+
+    # test with higher total frequency for seqB
+    assert round(tiarsdesigner.utils.get_codon_frequency_differences(seqB, seqA, codon_dict), 1)== 4.6
+
+
+
+
 
 
 

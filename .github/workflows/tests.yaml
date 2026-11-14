@@ -1,0 +1,38 @@
+name: Run Unit Tests
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.14"
+
+      - name: Install Tiarsdesigner and Dependencies
+        run: |
+          pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org.simple/ tiarsdesigner
+          pip install pytest
+
+      - name: Run tests
+        run: pytest
+
