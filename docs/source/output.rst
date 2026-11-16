@@ -18,40 +18,46 @@ Single Enzyme results
 
 Single Enzyme Excel sheet
 -------------------------
-- Filename: [sample_name]_single_Renzymes.xlsx
-- Description: An excel spreadsheet containing sortable statistics for ranking the passed candidate-enzyme combos. Each row represents one sequence and one enzyme that passed all of the single enzyme filters for that sequence.
-- Columns:
-   +--------+-----------------------------+---------------------------------------------------------------------------------------+
-   | Column | Name                        | Desription                                                                            |
-   +========+=============================+=======================================================================================+
-   | A      | Candidate I.D. number       | This number matches ID the number given to each candidate in the word document, so    |
-   |        |                             | if you see a high ranking candidate in the spreadsheet, you can easily find it in     |
-   |        |                             | the word doc by finding the matching option number.                                   |
-   +--------+-----------------------------+---------------------------------------------------------------------------------------+
-   | B      | Sequence                    | The full candidate sequence, although it’s much easier to view it in the word doc.    |
-   |        |                             |                                                                                       |
-   +--------+-----------------------------+---------------------------------------------------------------------------------------+
-   | C      | Renzyme                     | A restriction enzyme that passed all of the single enzyme filters for that row's      |
-   |        |                             |                                                                                       |
-   +--------+-----------------------------+---------------------------------------------------------------------------------------+
-   | D      | Average distance to Cas cut | The distance in basepairs between the Cas cut and the cut resulting from              |
-   |        |                             | the novel restriction site for this row’s Renzyme. If there’s more than one novel     |
-   |        |                             | restriction site (which doesn’t appear to have happened very often), this value       |
-   |        |                             | will be the average of their distances to the Cas cut.                                |
-   +--------+-----------------------------+---------------------------------------------------------------------------------------+
-   | E      | Codon frequency change      | The total difference in codon usage frequency between the candidate sequence          |
-   |        |                             | and the endogenous sequence. For each codon, the absolute value of the difference in  |
-   |        |                             | frequency between the two sequences was calculated. The codon frequency change is the |
-   |        |                             | sum of that absolute value across all the codons in the sequence.                     |
-   +--------+-----------------------------+---------------------------------------------------------------------------------------+
-   | F      | Cutsite distance outside    | The distance outside the Renzyme’s recognition site that its cutsite falls.           |
-   |        | Rsite                       | If this value is different for the + and - strand (e.g. if it cuts 3 bp outsite the   |
-   |        |                             | recognition site on the + strand and 5 bp outside the recognition site on the -       |
-   |        |                             | strand), this value takes the greater of the two. For example, BpuEI has the          |
-   |        |                             | recognition site ‘CTTGAG’, but its cut actually looks like this                       |
-   |        |                             | ‘CTTGAGNNNNNNNNNNNNNN_NN^N’ (‘^’ = + strand cut, ’_’ = - strand cut). In this Case,   |
-   |        |                             | the cutsite distance outside the Rsite would be 17.                                   |
-   +--------+-----------------------------+---------------------------------------------------------------------------------------+
+:Filename:
+  [sample_name]_single_Renzymes.xlsx
+:Description:
+  An excel spreadsheet containing sortable statistics for ranking the passed
+  candidate-enzyme combos. Each row represents one sequence and one enzyme that
+  passed all of the single enzyme filters for that sequence.
+
+:Columns:
+
++--------+-----------------------------+---------------------------------------------------------------------------------------+
+| Column | Name                        | Desription                                                                            |
++========+=============================+=======================================================================================+
+| A      | Candidate I.D. number       | This number matches ID the number given to each candidate in the word document, so    |
+|        |                             | if you see a high ranking candidate in the spreadsheet, you can easily find it in     |
+|        |                             | the word doc by finding the matching option number.                                   |
++--------+-----------------------------+---------------------------------------------------------------------------------------+
+| B      | Sequence                    | The full candidate sequence, although it’s much easier to view it in the word doc.    |
+|        |                             |                                                                                       |
++--------+-----------------------------+---------------------------------------------------------------------------------------+
+| C      | Renzyme                     | A restriction enzyme that passed all of the single enzyme filters for that row's      |
+|        |                             |                                                                                       |
++--------+-----------------------------+---------------------------------------------------------------------------------------+
+| D      | Average distance to Cas cut | The distance in basepairs between the Cas cut and the cut resulting from              |
+|        |                             | the novel restriction site for this row’s Renzyme. If there’s more than one novel     |
+|        |                             | restriction site (which doesn’t appear to have happened very often), this value       |
+|        |                             | will be the average of their distances to the Cas cut.                                |
++--------+-----------------------------+---------------------------------------------------------------------------------------+
+| E      | Codon frequency change      | The total difference in codon usage frequency between the candidate sequence          |
+|        |                             | and the endogenous sequence. For each codon, the absolute value of the difference in  |
+|        |                             | frequency between the two sequences was calculated. The codon frequency change is the |
+|        |                             | sum of that absolute value across all the codons in the sequence.                     |
++--------+-----------------------------+---------------------------------------------------------------------------------------+
+| F      | Cutsite distance outside    | The distance outside the Renzyme’s recognition site that its cutsite falls.           |
+|        | Rsite                       | If this value is different for the + and - strand (e.g. if it cuts 3 bp outsite the   |
+|        |                             | recognition site on the + strand and 5 bp outside the recognition site on the -       |
+|        |                             | strand), this value takes the greater of the two. For example, BpuEI has the          |
+|        |                             | recognition site ‘CTTGAG’, but its cut actually looks like this                       |
+|        |                             | ‘CTTGAGNNNNNNNNNNNNNN_NN^N’ (‘^’ = + strand cut, ’_’ = - strand cut). In this Case,   |
+|        |                             | the cutsite distance outside the Rsite would be 17.                                   |
++--------+-----------------------------+---------------------------------------------------------------------------------------+
 
 
 Single Enzyme Word Document
