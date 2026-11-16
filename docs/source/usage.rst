@@ -130,20 +130,20 @@ An example command to run this sample would be:
 
 .. code-block:: console
 
-   tiarsdesigner                                                          \
-   GCTGGTGGCCCCCAAATATTCAGGTTTAATGTTCACTCTGCAACACTCTTT                    \ # Endogenous Sequence 
-   11                                                                     \ # gRNA_start 
-   34                                                                     \ # gRNA_end 
-   11                                                                     \ # PAM_start
-   CCN                                                                    \ # Which_PAM
-   32                                                                     \ # AA_change_site
-   TTA                                                                    \ # new_codon
-   example_sequence                                                       \ # locus_name
-   --single-enzyme-filters all                                            \ # Run all single-enzyme filters
-   --enzyme-pair-filters both_have_endogenous_sites compatible_polarity   \ # only run two enzyme pair filters (to show usage)
-   --codon-usage-tsv /path/to/codon_usage.tsv                             \ # Codon usage file
-   --enzymes /path/to/enzymes.tsv                                         \ # Path to custom enzyme list
-   --verbose                                                              \ # Output filter stat tsvs
+   tiarsdesigner \
+      --endogenous_seq=GCTGGTGGCCCCCAAATATTCAGGTTTAATGTTCACTCTGCAACACTCTTT   \
+      --gRNA_start=11 \
+      --gRNA_end=34  \
+      --PAM_start=11 \
+      --which_PAM=CCN \
+      --AA_change_site=32 \
+      --new_codon=TTA \
+      --locus_name=example_sequence \
+      --single-enzyme-filters=all \
+      --enzyme-pair-filters both_have_endogenous_sites compatible_polarity \
+      --codon-usage-tsv /path/to/codon_usage.tsv \
+      --enzymes /path/to/enzymes.tsv \
+      --verbose
 
 
 Running Tiars Designer without Endogenous Sites
@@ -158,20 +158,19 @@ The usage example below demonstrates how to run the tool in this way.
 
 .. code-block:: console
 
-   tiarsdesigner                                             \
-   GCTGGTGGCCCCCAAATATTCAGGTTTAATGTTCACTCTGCAACACTCTTT       \ 
-   11                                                        \ 
-   34                                                        \ 
-   11                                                        \
-   CCN                                                       \
-   32                                                        \
-   TTA                                                       \
-   example_sequence                                          \
-   --single-enzyme-filters all                               \
-   --enzyme-pair-filters no_unneeded_substitutions           \ # Specify all enzyme pair filters to run except 'compatible polarity' 
-   both_Renzymes_depend_on_at_least_one_unique_substitution  \ # and '[at_least_one_has/both_have]_endogenous_site[s]' 
-   --codon-usage-tsv /path/to/codon_usage.tsv                \
-   --enzymes /path/to/enzymes.tsv                            \
-   --verbose                                                 \
-   --min-Rsite-distance 500                                  \ # Set the min Rsite distance to a number larger than the sequence length 
+   tiarsdesigner \
+     --endogenous_seq=GCTGGTGGCCCCCAAATATTCAGGTTTAATGTTCACTCTGCAACACTCTTT \
+     --gRNA_start=11 \
+     --gRNA_end=34 \
+     --PAM_start=11 \
+     --whic_PAM=CCN \
+     --AA_change_site=32 \
+     --new_codon=TTA \
+     --locus_name=example_sequence \
+     --single-enzyme-filters=all \
+     --enzyme-pair-filters no_unneeded_substitutions both_Renzymes_depend_on_at_least_one_unique_substitution \
+     --codon-usage-tsv /path/to/codon_usage.tsv  \
+     --enzymes /path/to/enzymes.tsv \
+     --verbose \
+     --min-Rsite-distance=500
 
