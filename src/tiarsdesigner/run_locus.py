@@ -1,4 +1,5 @@
 import argparse
+from textwrap import dedent
 import pandas as pd
 import csv
 from Bio import Restriction
@@ -486,22 +487,34 @@ def main():
     """
 
     ap = argparse.ArgumentParser()
-    ap.add_argument('endogenous_seq')
-    ap.add_argument('gRNA_start', type=int)
-    ap.add_argument('gRNA_end', type=int)
-    ap.add_argument('PAM_start', type=int)
-    ap.add_argument('which_PAM', type=str)
-    ap.add_argument('AA_change_site', type=int)
-    ap.add_argument('new_codon')
-    ap.add_argument('locus_name')
-    ap.add_argument('--single-enzyme-filters', nargs='+')
-    ap.add_argument('--enzyme-pair-filters', nargs='+')
-    ap.add_argument('--codon-usage-tsv')
-    ap.add_argument('--min-Rsite-distance', type=int, default=5)
     ap.add_argument(
-        '--enzymes',
-        help='name of file containing single column list of enzymes to use'
-    )    
+        "--endogenous_seq",
+        help=dedent(
+            """The full endogenous sequence to be edited. Must extend at least 85
+        nucleotides upstream (5') of the Cas protein cut and 50 nucleotides
+        downstream (3') of the Cas cut."""
+        ),
+    )
+    ap.add_argument(
+        "--gRNA_start",
+        type=int,
+        help="""The location in the sequence of the beginning of the guide RNA
+        (in this case the PAM site is considered to be part of the guide
+         RNA)""",
+    )
+    ap.add_argument("--gRNA_end", type=int)
+    ap.add_argument("--PAM_start", type=int)
+    ap.add_argument("--which_PAM", type=str)
+    ap.add_argument("--AA_change_site", type=int)
+    ap.add_argument("--new_codon")
+    ap.add_argument("--locus_name")
+    ap.add_argument("--single-enzyme-filters", nargs="+")
+    ap.add_argument("--enzyme-pair-filters", nargs="+")
+    ap.add_argument("--codon-usage-tsv")
+    ap.add_argument("--min-Rsite-distance", type=int, default=5)
+    ap.add_argument(
+        "--enzymes", help="name of file containing single column list of enzymes to use"
+    )
     ap.add_argument(
         '--verbose',
         help='if True, this will write csvs/tsvs for each step',
