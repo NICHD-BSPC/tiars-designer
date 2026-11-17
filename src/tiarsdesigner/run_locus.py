@@ -498,27 +498,122 @@ def main():
     ap.add_argument(
         "--gRNA_start",
         type=int,
-        help="""The location in the sequence of the beginning of the guide RNA
+        help=dedent(
+            """The zero-indexed location in the sequence of the beginning of the guide RNA
         (in this case the PAM site is considered to be part of the guide
-         RNA)""",
+         RNA)"""
+        ),
     )
-    ap.add_argument("--gRNA_end", type=int)
-    ap.add_argument("--PAM_start", type=int)
-    ap.add_argument("--which_PAM", type=str)
-    ap.add_argument("--AA_change_site", type=int)
-    ap.add_argument("--new_codon")
-    ap.add_argument("--locus_name")
-    ap.add_argument("--single-enzyme-filters", nargs="+")
-    ap.add_argument("--enzyme-pair-filters", nargs="+")
-    ap.add_argument("--codon-usage-tsv")
-    ap.add_argument("--min-Rsite-distance", type=int, default=5)
     ap.add_argument(
-        "--enzymes", help="name of file containing single column list of enzymes to use"
+        "--gRNA_end",
+        type=int,
+        help=dedent(
+            """The zero-indexed location in the sequence of the end of the guide RNA (again,
+        PAM is considered part of the guideRNA). This should correspond to the location of the 
+        first bp after the last bp of the guide RNA, such that slicing the string
+        in python (e.g. endogenous_seq[gRNA_start: gRNA_end]) would yield the full gRNA )"""
+        ),
+    )
+    ap.add_argument(
+        "--PAM_start",
+        type=int,
+        help= dedent(
+            """The zero-indexed location in the sequence of the beginning of the PAM site"""
+        ),
+    )
+    ap.add_argument(
+        "--which_PAM", 
+        type=str,
+        help=dedent(
+            """Specifies which type of PAM your experiment uses. Right now Cas9 (``CCN`` and
+        ``NGG``) and Cpf1 (``TVVV`` and ``BAAA``) are supported. NOTE: put the generic sequence
+        of the PAM rather than the exact one the sample uses (e.g. put ``NGG`` rather than ``AGG``)"""
+        ),
+    )
+    ap.add_argument(
+        "--AA_change_site",
+        type=int,
+        help=dedent(
+            """The zero-indexed location in the sequence of the codon that will contain desired CRISPR edit 
+        (even if the actual edit changes the second or third basepair in the codon, this value should 
+        still correspond to the first basepair in the codon)"""
+        ),
+    )
+
+    ap.add_argument(
+        "--new_codon",
+        type=str,
+        help=dedent(
+            """ The basepair sequence of the new codon containing the edit (for example, if you wanted to 
+        change a GGA glycine to an AGA arginine, you would put AGA) """
+        ),
+    )
+
+    ap.add_argument(
+        "--locus_name",
+        type=str,
+        help="The name of the locus/sample, which will be used to name the output folder and files "
+    )
+    ap.add_argument(
+        "--single-enzyme-filters",
+        nargs="+",
+        help=dedent(
+            """" A list of single enzyme filters to run. To run all of the single-enzyme filters (recommended), input 'all'.
+            The filters names that can be used are: 
+                -  ``no_sandwiched_cutsites``
+                -  ``no_endogenous_cutsites_within_Nnt_of_novel_cutsite``
+                -  ``novel_site_depends_on_at_least_two_substitutions``
+                -  ``num_recognition_sites_equals_num_cutsites``
+                -  ``no_unneeded_substitutions`` """
+        ),
+    )
+    ap.add_argument(
+        "--enzyme-pair-filters",
+        nargs="+",
+        help=dedent(
+            """ A list of single enzyme filters to run. To run all of the single-enzyme filters (recommended), input 'all'.
+        The filters names that can be used are: 
+            -  ``no_sandwiched_cutsites``
+            -  ``no_endogenous_cutsites_within_Nnt_of_novel_cutsite``
+            - ``novel_site_depends_on_at_least_two_substitutions``
+            -  ``num_recognition_sites_equals_num_cutsites``
+            -  ``no_unneeded_substitutions`` """
+        ),
+    )
+    ap.add_argument(
+        "--codon-usage-tsv",
+        help=dedent(
+            """ A tsv of codon usage frequency values for the organism used. The tsv should have one codon per line in the format:
+        [codon]>[frequency] (e.g. ``UGA>1.4``) where '>' represents a tab. The tsv in the github repository is for zebrafish.
+        Organism specific codon frequencies can be found at the `Kazusa Codon usage Database <http://kazusa.or.jp/codon>`_  """
+        ),
+    )
+    ap.add_argument(
+        "--min-Rsite-distance",
+        type=int,
+        default=5,
+        help=dedent(
+            """The minimum allowable distance (in basepairs) between the novel restriction site and any endogenous restriction sites
+        for a given enzyme. This is to avoid having fragment sizes that are too similar to be able to tell the difference between a
+        novel site cut and and endogenous site cut. This is the value used in the 'no Endogenous Cutsites within N nt of Novel Site'
+        filter. (Default: 5)"""
+        ),
+    )
+    ap.add_argument(
+        "--enzymes", 
+        help=dedent(
+            """A tsv/txt file containing a list of restriction enzymes to use (must be in the Bio.Restriction database, case sensitive)
+        The list should have one enzyme per line. (Default: Bio.Restriction 'CommonOnly' list of commonly used enzymes). """
+        ),
     )
     ap.add_argument(
         '--verbose',
-        help='if True, this will write csvs/tsvs for each step',
-        action="store_true")
+        help=dedent(
+            """If True, this will write out tsv files with passing percentages for each filter as well as raw the total number of
+        candidates before and after filtering."""
+        ),
+        action="store_true"
+    )
     args = ap.parse_args()
     full_run(
         args.endogenous_seq,
@@ -540,3 +635,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
