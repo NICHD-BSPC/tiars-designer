@@ -1,15 +1,17 @@
-__version__='0.1.10'
-from Bio.Restriction import *
-import Levenshtein
-from . import utils
+__version__ = "0.1.10"
 import re
 
-class Designer():
+import Levenshtein
+from Bio.Restriction import *
+
+from . import utils
+
+
+class Designer:
     """The parent class for Endogenous and Candidate, which stores functions and
     variables common to both"""
 
     def __init__(self, sequence, cutsite, Renzyme_list=None):
-
         """
         Parameters
         ----------
@@ -32,7 +34,7 @@ class Designer():
         """string : The input sequence"""
         self.cutsite = cutsite
         """int : The input cutsite"""
-        self.cutsite_region = sequence[(cutsite - 15):(cutsite + 15)]
+        self.cutsite_region = sequence[(cutsite - 15) : (cutsite + 15)]
         """string : A subset of sequence that extends 15 bp to either side of cutsite"""
         self.cutsite_frame = self.cutsite % 3
         """int: A number describing the frame of the cutsite region. '0' means it's
@@ -41,7 +43,7 @@ class Designer():
         cutsite region is the first bp of the first codon.
         """
         self.Renzyme_list = Renzyme_list
-        
+
         self.Renzymes = utils.get_restriction_sites(sequence, Renzyme_list)
         """dict: A dictionary of restriction enzymes with a recognition sites  in
         self.sequence, with re names as keys and their cutsite as the
@@ -62,7 +64,7 @@ class Designer():
 
         Returns
         -------
-        
+
         dict
             A dictionary of Restriction enzymes that would cut the sequence, with
             the enzymes as keys and the distances between their cutsites and pos as
@@ -76,9 +78,7 @@ class Designer():
             # subtract 1 from the cutsites because they consider the first
             # bp in the sequence to be 1 rather than 0
 
-            REdistances[enzyme] = [
-                i - 1 - pos for i in self.Renzymes[enzyme]
-            ]
+            REdistances[enzyme] = [i - 1 - pos for i in self.Renzymes[enzyme]]
 
         return REdistances
 
@@ -102,15 +102,16 @@ class Designer():
         dict
             Dictionary of hexamers in the sequence with the hexamer sequences as
             keys and their locations in the input sequence as values
-        
+
         """
-        hexamers = [line[:6] for line in open('splicing_hexamers.txt')]
-        seq_hexamers = [hexamer for hexamer in hexamers if hexamer in sequence]
-        seq_hexamer_sites = {}
-        for hexamer in seq_hexamers:
-            seq_hexamer_sites[hexamer] = (
-                [x.start() for x in re.finditer(hexamer, sequence)]
-            )
+        with open("splicing_hexamers.txt") as file:
+            hexamers = [line[:6] for line in file]
+            seq_hexamers = [hexamer for hexamer in hexamers if hexamer in sequence]
+            seq_hexamer_sites = {}
+            for hexamer in seq_hexamers:
+                seq_hexamer_sites[hexamer] = [
+                    x.start() for x in re.finditer(hexamer, sequence)
+                ]
         return seq_hexamer_sites
 
 
@@ -129,7 +130,7 @@ class Endogenous(Designer):
         which_PAM,
         AA_change_site,
         new_codon,
-        Renzyme_list=None
+        Renzyme_list=None,
     ):
         """
         Parameters
@@ -151,7 +152,7 @@ class Endogenous(Designer):
         PAM_start : int
             The index location in the sequence of the beginning of the
             PAM site. For now, the PAM region has to be either 'CCN' or 'NGG'.
-        
+
         which_PAM : string
             The sequence of the PAM site (e.g. 'NGG' or 'CCN' for Cas9, or 'TTTN' or 'BAAA' for Cfp1)
 
@@ -167,38 +168,33 @@ class Endogenous(Designer):
 
         # create dictionary with PAM startsites as keys and the locations of
         # the CRISPR cutsites relative to the PAM startsites as values
-        PAM_dict = {
-            "CCN": 6,
-            "NGG": -3,
-            "TTTV": 23,
-            "BAAA": -23
-        }
+        PAM_dict = {"CCN": 6, "NGG": -3, "TTTV": 23, "BAAA": -23}
         self.gRNA_location = (gRNA_start, gRNA_end)
         """tuple : A tuple of the start and end coordinates of the region in sequence
         to be targeted by the guide RNA."""
-        
+
         self.PAM_start = PAM_start
         """int : The index location of the beginning of the PAM site in sequence.
         For now, the PAM site has to be either 'CCN' or 'NGG'."""
-        
+
         self.which_PAM = which_PAM
         """string : The sequence of the PAM site (e.g. 'NGG' or 'CCN' for Cas9, or 'TTTN' or 'BAAA' for Cfp1)"""
-        
+
         self.cas9_cut_from_PAM = PAM_dict[which_PAM]
         """int : The location of the CRISPR/Cas9 cutsite in the sequence relative to
         the PAM_start site. For 'CCN' it will be 6, and for 'NGG' it will
         be -3. Since the value is different for each PAM, it is also useful
         for indicating whether the PAM sequence is 'CCN' or 'NGG'."""
         super().__init__(sequence, PAM_start + self.cas9_cut_from_PAM, Renzyme_list)
-        
+
         self.AA_change_site = AA_change_site
         """int : The index location in the sequence of the codon that is to be
         nonsynonymously changed in the CRISPR/Cas9 process."""
 
         self.AA_change_sequence = (
-            self.sequence[:self.AA_change_site]
+            self.sequence[: self.AA_change_site]
             + str(new_codon)
-            + self.sequence[(self.AA_change_site + 3):]
+            + self.sequence[(self.AA_change_site + 3) :]
         )
         """string : A sequence identical to the endogenous sequence (self.sequence),
         but it has the new_codon substitution at the AA site.  In other
@@ -213,7 +209,6 @@ class Endogenous(Designer):
         This value will also be True if the desired amino acid change
         interrupts the PAM."""
 
-
     def PAM_can_change(self):
         """
         This function will return a boolean value indicating whether or not
@@ -227,119 +222,108 @@ class Endogenous(Designer):
         bool
             False if the PAM cannot be interrupted, True if it can
         """
-         
+
         PAM_start = self.PAM_start
         PAM_frame = PAM_start % 3
         AA_change_seq = self.AA_change_sequence
         # if PAM site is 'CCN'
-        if self.which_PAM == 'CCN':
+        if self.which_PAM == "CCN":
             if PAM_frame == 0:
                 syn_seqs = list(
-                    utils.synonymous_seqs(
-                        AA_change_seq[PAM_start:PAM_start + 3]
-                    )
+                    utils.synonymous_seqs(AA_change_seq[PAM_start : PAM_start + 3])
                 )
                 for seq in syn_seqs:
-                    if seq[0:2] != 'CC':
+                    if seq[0:2] != "CC":
                         return True
                 return False
             if PAM_frame == 1:
                 syn_seqs = list(
-                    utils.synonymous_seqs(
-                        AA_change_seq[PAM_start - 1: PAM_start + 2]
-                    )
+                    utils.synonymous_seqs(AA_change_seq[PAM_start - 1 : PAM_start + 2])
                 )
                 for seq in syn_seqs:
-                    if seq[1:] != 'CC':
+                    if seq[1:] != "CC":
                         return True
                 return False
             else:
                 syn_seqs = list(
-                    utils.synonymous_seqs(
-                        AA_change_seq[PAM_start - 2: PAM_start + 4]
-                    )
+                    utils.synonymous_seqs(AA_change_seq[PAM_start - 2 : PAM_start + 4])
                 )
                 for seq in syn_seqs:
-                    if seq[2:4] != 'CC':
+                    if seq[2:4] != "CC":
                         return True
                 return False
         # if PAM is 'NGG'
-        if self.which_PAM == 'NGG':
+        if self.which_PAM == "NGG":
             if PAM_frame == 0:
                 syn_seqs = list(
-                    utils.synonymous_seqs(
-                        AA_change_seq[PAM_start:PAM_start + 3]
-                    )
+                    utils.synonymous_seqs(AA_change_seq[PAM_start : PAM_start + 3])
                 )
                 for seq in syn_seqs:
-                    if seq[1:] != 'GG':
+                    if seq[1:] != "GG":
                         return True
                 return False
             if PAM_frame == 1:
                 syn_seqs = list(
-                    utils.synonymous_seqs(
-                        AA_change_seq[PAM_start - 1: PAM_start + 5]
-                    )
+                    utils.synonymous_seqs(AA_change_seq[PAM_start - 1 : PAM_start + 5])
                 )
                 for seq in syn_seqs:
-                    if seq[2:4] != 'GG':
+                    if seq[2:4] != "GG":
                         return True
                 return False
             else:
-                syn_seqs = list(utils.synonymous_seqs(
-                    AA_change_seq[PAM_start + 1: PAM_start + 4])
+                syn_seqs = list(
+                    utils.synonymous_seqs(AA_change_seq[PAM_start + 1 : PAM_start + 4])
                 )
                 for seq in syn_seqs:
-                    if seq[0:2] != 'GG':
+                    if seq[0:2] != "GG":
                         return True
                 return False
-        if self.which_PAM == 'TTTV' or self.which_PAM == 'BAAA':
+        if self.which_PAM == "TTTV" or self.which_PAM == "BAAA":
             if PAM_frame == 0:
                 syn_seqs = list(
-                    utils.synonymous_seqs(
-                        AA_change_seq[PAM_start:PAM_start + 6]
-                    )
+                    utils.synonymous_seqs(AA_change_seq[PAM_start : PAM_start + 6])
                 )
                 for seq in syn_seqs:
-                    if self.which_PAM == 'TTTV':
-                        if seq[0:3] != 'TTT' or seq[3] == 'T':
+                    if self.which_PAM == "TTTV":
+                        if seq[0:3] != "TTT" or seq[3] == "T":
                             return True
                     else:
-                        if seq[1:4] != 'AAA' or seq[0] == 'A':
+                        if seq[1:4] != "AAA" or seq[0] == "A":
                             return True
                 return False
             if PAM_frame == 1:
                 syn_seqs = list(
-                    utils.synonymous_seqs(
-                        AA_change_seq[PAM_start - 1: PAM_start + 5]
-                    )
+                    utils.synonymous_seqs(AA_change_seq[PAM_start - 1 : PAM_start + 5])
                 )
                 for seq in syn_seqs:
-                    if self.which_PAM == 'TTTV':
-                        if seq[1:4] != 'TTT' or seq[4] == 'T':
+                    if self.which_PAM == "TTTV":
+                        if seq[1:4] != "TTT" or seq[4] == "T":
                             return True
                     else:
-                        if seq[2:5] != 'AAA' or seq[1] == 'A':
+                        if seq[2:5] != "AAA" or seq[1] == "A":
                             return True
                 return False
             else:
                 syn_seqs = list(
-                    utils.synonymous_seqs(
-                        AA_change_seq[PAM_start -2: PAM_start + 4]
-                    )
+                    utils.synonymous_seqs(AA_change_seq[PAM_start - 2 : PAM_start + 4])
                 )
                 for seq in syn_seqs:
-                    if self.which_PAM == 'TTTV': 
-                        if seq[2:5] != 'TTT' or seq[5] == 'T':
+                    if self.which_PAM == "TTTV":
+                        if seq[2:5] != "TTT" or seq[5] == "T":
                             return True
                     else:
-                        if seq[3:] != 'AAA' or seq[2] == 'A':
+                        if seq[3:] != "AAA" or seq[2] == "A":
                             return True
                 return False
 
-
-
-    def get_filtered_candidates(self, locusname, single_enzyme_filters, min_Rsite_distance, get_filter_stats, codon_usage_tsv):
+    def get_filtered_candidates(
+        self,
+        locusname,
+        single_enzyme_filters,
+        min_Rsite_distance,
+        get_filter_stats,
+        codon_usage_tsv,
+    ):
         """
         Builds a generator of all potential repair oligo candidates with the
         desired nonsynonymous amino acid change and at least one synonymous
@@ -364,7 +348,7 @@ class Endogenous(Designer):
         codon_usage_tsv : tsv
             A tsv mapping codons to their usage frequency for the organism
             used.
-        
+
         Yields
         ------
         generator
@@ -385,11 +369,8 @@ class Endogenous(Designer):
         cutsite = self.cutsite
         # Generate a list of synonymous cutsite regions
         alt_cutsite_regions = utils.generate_exon_seqs(
-            cutsite - 15,
-            cutsite + 15,
-            AA_change_seq
+            cutsite - 15, cutsite + 15, AA_change_seq
         )
-
 
         if get_filter_stats:
             filter_stats = {filter_name: 0 for filter_name in single_enzyme_filters}
@@ -402,63 +383,84 @@ class Endogenous(Designer):
             # restrict it back to 30 bp so no substitutions outsite the 30
             # bp cutsite_region are included.
             candidate_full_seq = (
-                AA_change_seq[:cutsite-15]
+                AA_change_seq[: cutsite - 15]
                 + alt_cutsite_region
-                + AA_change_seq[cutsite + 15:]
+                + AA_change_seq[cutsite + 15 :]
             )
             # make the sequence into a Candidate object and add it to the
             # list!
             candidate = Candidate(self, candidate_full_seq)
-            if candidate.PAM_is_disrupted() or candidate.endogenous.which_PAM in ['TTTV', 'BAAA']:
-
-                filter_functions = utils.get_filter_function_dict(single_enzyme_filters, candidate)
+            if candidate.PAM_is_disrupted() or candidate.endogenous.which_PAM in [
+                "TTTV",
+                "BAAA",
+            ]:
+                filter_functions = utils.get_filter_function_dict(
+                    single_enzyme_filters, candidate
+                )
                 for Renzyme in candidate.sub_dep_Renzymes:
-                                       
                     # if getting filter stats, add each filter's result to the tally
                     filter_results = []
                     for Filter in single_enzyme_filters:
-                        if Filter == 'no_endogenous_cutsites_within_Nnt_of_novel_cutsite':
-                            filter_result = filter_functions[Filter](Renzyme, min_Rsite_distance)
+                        if (
+                            Filter
+                            == "no_endogenous_cutsites_within_Nnt_of_novel_cutsite"
+                        ):
+                            filter_result = filter_functions[Filter](
+                                Renzyme, min_Rsite_distance
+                            )
                         else:
                             filter_result = filter_functions[Filter](Renzyme)
                         if get_filter_stats:
                             filter_stats[Filter] += filter_result
-                        if Filter != 'no_unneeded_substitutions':
+                        if Filter != "no_unneeded_substitutions":
                             filter_results.append(filter_result)
                     total_cands += 1
                     # if a candidate passed all the filters, create a candidate
                     # object for it and yield it
                     if all(filter_results):
                         passed_cand_dict = {
-                            'seq': candidate.sequence,
-                            'Renzyme': str(Renzyme),
-                            'codon frequency change': utils.get_codon_frequency_differences(candidate.endogenous.sequence, candidate.sequence, codon_freq_dict),
-                            'average distance to Cas cut': candidate.get_average_distance_between_RE_cutsites_and_Cas9_cutsite(Renzyme),
-                                                        'cutsite distance outside Rsite': len(Renzyme.elucidate()) - 2 - len(Renzyme.site),
-                            'distance to Amino Acid change': candidate.get_distance_from_nonsynonymous_codon_to_Renzyme_cutsite(Renzyme)
+                            "seq": candidate.sequence,
+                            "Renzyme": str(Renzyme),
+                            "codon frequency change": utils.get_codon_frequency_differences(
+                                candidate.endogenous.sequence,
+                                candidate.sequence,
+                                codon_freq_dict,
+                            ),
+                            "average distance to Cas cut": candidate.get_average_distance_between_RE_cutsites_and_Cas9_cutsite(
+                                Renzyme
+                            ),
+                            "cutsite distance outside Rsite": len(Renzyme.elucidate())
+                            - 2
+                            - len(Renzyme.site),
+                            "distance to Amino Acid change": candidate.get_distance_from_nonsynonymous_codon_to_Renzyme_cutsite(
+                                Renzyme
+                            ),
                         }
-                        if 'no_unneeded_substitutions' in single_enzyme_filters:
-                            passed_cand_dict['no unneeded substitutions']= candidate.no_unneeded_substitutions(Renzyme)
-                            if filter_functions['no_unneeded_substitutions'](Renzyme): 
+                        if "no_unneeded_substitutions" in single_enzyme_filters:
+                            passed_cand_dict["no unneeded substitutions"] = (
+                                candidate.no_unneeded_substitutions(Renzyme)
+                            )
+                            if filter_functions["no_unneeded_substitutions"](Renzyme):
                                 total_passing_cands += 1
                         else:
-                            total_passing_cands +=1
+                            total_passing_cands += 1
                         yield passed_cand_dict
-        if total_cands==0:
-            raise ValueError("There are no viable candidates for the enzyme list provided. Try broadening the supplied enzyme list or using the default full Bio.restriction 'common only' list")
+        if total_cands == 0:
+            raise ValueError(
+                "There are no viable candidates for the enzyme list provided. Try broadening \
+                the supplied enzyme list or using the default full Bio.restriction 'common only' list"
+            )
         if get_filter_stats:
-            with open(locusname + '_filter_stats.tsv', 'w') as fout:
-                for filtername in filter_stats.keys():
-                    fout.write(
-                        filtername
-                        + '\t'
-                        + str(round((filter_stats[filtername]/total_cands) * 100, 2))
-                        + '\n'
-                    )
-                fout.write('total_candidates\t' + str(total_cands) + '\n')
-                fout.write('total_passing_candidates\t' + str(total_passing_cands))
-
-
+            with open(locusname + "_filter_stats.tsv", "w") as fout:
+                fout.writelines(
+                    filtername
+                    + "\t"
+                    + str(round((filter_stats[filtername] / total_cands) * 100, 2))
+                    + "\n"
+                    for filtername in filter_stats
+                )
+                fout.write("total_candidates\t" + str(total_cands) + "\n")
+                fout.write("total_passing_candidates\t" + str(total_passing_cands))
 
     "ENDOGENOUS LEVEL ENZYME FILTERING METHODS"
 
@@ -479,10 +481,7 @@ class Endogenous(Designer):
             False if Renzyme has more than N cutsites in the endogenous sequence,
             True otherwise.
         """
-        if len(self.Renzymes[Renzyme]) > N:
-            return False
-        else:
-            return True
+        return not len(self.Renzymes[Renzyme]) > N
 
 
 class Candidate(Designer):
@@ -493,7 +492,6 @@ class Candidate(Designer):
     """
 
     def __init__(self, endogenous, sequence):
-
         """
         Parameters
         ----------
@@ -515,9 +513,7 @@ class Candidate(Designer):
         based on.
         """
         super().__init__(
-            sequence,
-            self.endogenous.cutsite,
-            self.endogenous.Renzyme_list
+            sequence, self.endogenous.cutsite, self.endogenous.Renzyme_list
         )
         self.sub_dep_Renzymes = self.get_substitution_dependent_Renzymes()
         """dict : A dictionary of Restriction enzymes with cutsites that
@@ -532,7 +528,9 @@ class Candidate(Designer):
         substitution dependent cutsites will be listed for that enzyme in
         this dictionary.
         """
-        self.sub_dep_Renzyme_recognition_sites = self.get_sub_dep_Renzyme_recognition_sites()
+        self.sub_dep_Renzyme_recognition_sites = (
+            self.get_sub_dep_Renzyme_recognition_sites()
+        )
         """ dict : very similar to sub_dep_Renzymes, but the dictionary values are the
         coordinates of the enzyme recognition sites rather than the
         cutsites."""
@@ -540,7 +538,7 @@ class Candidate(Designer):
         self.num_subs = self.get_hamming_distance()
         """int : the number of bp substitutions the candidate has compared to the
         wildtypes sequence (endogenous.sequence)"""
-        
+
         self.endogenous_matches = self.get_endogenous_matches()
         """dict : a dictionary of the restriction enzymes with values describing the
         "polarity" of the endogenous site(s) compared to the substitution
@@ -593,8 +591,9 @@ class Candidate(Designer):
         for Renzyme in self.Renzymes:
             if Renzyme in self.endogenous.Renzymes:
                 candidate_unique_sites = list(
-                    set(self.Renzymes[Renzyme])
-                    .difference(self.endogenous.Renzymes[Renzyme])
+                    set(self.Renzymes[Renzyme]).difference(
+                        self.endogenous.Renzymes[Renzyme]
+                    )
                 )
                 if len(candidate_unique_sites) > 0:
                     sub_dep_Renzymes[Renzyme] = candidate_unique_sites
@@ -603,7 +602,6 @@ class Candidate(Designer):
         return sub_dep_Renzymes
 
     def get_endogenous_matches(self):
-
         """This function will look at restriction enzymes with endogenous and
         substitution dependent sites, and it'll return a dictionary of the
         restriction enzymes with values describing the "polarity" of the
@@ -627,17 +625,15 @@ class Candidate(Designer):
         endogenous_matches = {}
         for Renzyme in self.sub_dep_Renzymes:
             if Renzyme not in self.endogenous.Renzymes:
-                endogenous_matches[Renzyme] = '0'
-            elif (
-                max(self.sub_dep_Renzymes[Renzyme])
-                < min(self.endogenous.Renzymes[Renzyme])
+                endogenous_matches[Renzyme] = "0"
+            elif max(self.sub_dep_Renzymes[Renzyme]) < min(
+                self.endogenous.Renzymes[Renzyme]
             ):
-                endogenous_matches[Renzyme] = '+'
-            elif (
-                min(self.sub_dep_Renzymes[Renzyme])
-                > max(self.endogenous.Renzymes[Renzyme])
+                endogenous_matches[Renzyme] = "+"
+            elif min(self.sub_dep_Renzymes[Renzyme]) > max(
+                self.endogenous.Renzymes[Renzyme]
             ):
-                endogenous_matches[Renzyme] = '-'
+                endogenous_matches[Renzyme] = "-"
             else:
                 endogenous_matches[Renzyme] = None
         return endogenous_matches
@@ -659,12 +655,10 @@ class Candidate(Designer):
             the endogenous self.endogenous.sequence)
         """
         unfiltered_candidate_dict = utils.get_Rsite_dict(
-            self.sequence,
-            self.sub_dep_Renzymes
+            self.sequence, self.sub_dep_Renzymes
         )
         endogenous_dict = utils.get_Rsite_dict(
-            self.endogenous.sequence,
-            self.sub_dep_Renzymes
+            self.endogenous.sequence, self.sub_dep_Renzymes
         )
         filtered_dict = {}
         for Renzyme in unfiltered_candidate_dict:
@@ -672,8 +666,9 @@ class Candidate(Designer):
             if len(unfiltered_candidate_dict[Renzyme]) > 0:
                 if len(endogenous_dict[Renzyme]) > 0:
                     candidate_unique_sites = list(
-                        set(unfiltered_candidate_dict[Renzyme])
-                        .difference(endogenous_dict[Renzyme])
+                        set(unfiltered_candidate_dict[Renzyme]).difference(
+                            endogenous_dict[Renzyme]
+                        )
                     )
                     if len(candidate_unique_sites) > 0:
                         filtered_dict[Renzyme] = candidate_unique_sites
@@ -692,7 +687,7 @@ class Candidate(Designer):
         REdistances = [
             abs(i - 1 - self.cutsite) for i in self.sub_dep_Renzymes[Renzyme]
         ]
-        return sum(REdistances)/len(REdistances)
+        return sum(REdistances) / len(REdistances)
 
     def get_distance_from_nonsynonymous_codon_to_Renzyme_cutsite(self, Renzyme):
         AA_change_site = self.endogenous.AA_change_site
@@ -718,10 +713,7 @@ class Candidate(Designer):
         bool
             False if the candidate only has one substitution, True otherwise
         """
-        if self.num_subs == 1:
-            return False
-        else:
-            return True
+        return self.num_subs != 1
 
     def no_new_cutsites(self):
         """
@@ -733,10 +725,7 @@ class Candidate(Designer):
         bool
             False if the synonymous changes did not create
             any new enzyme recognition sites, True otherwise"""
-        if len(self.sub_dep_Renzymes) == 0:
-            return False
-        else:
-            return True
+        return len(self.sub_dep_Renzymes) != 0
 
     def no_splicing_interference(self):
         """
@@ -751,10 +740,7 @@ class Candidate(Designer):
             candidate's synonymous changes interfered with the splicing hexamers),
             True otherwise.
         """
-        if self.splicing_hexamers == self.endogenous.splicing_hexamers:
-            return True
-        else:
-            return False
+        return self.splicing_hexamers == self.endogenous.splicing_hexamers
 
     def PAM_is_disrupted(self):
         """
@@ -769,23 +755,28 @@ class Candidate(Designer):
         PAM_start = self.endogenous.PAM_start
         which_PAM = self.endogenous.which_PAM
         if self.endogenous.PAM_can_change:
-            if which_PAM == 'CCN':
-                if self.sequence[PAM_start:PAM_start + 2] == 'CC':
-                    return False
-            
-            if which_PAM == 'NGG':
-                if self.sequence[PAM_start + 1: PAM_start + 3] == 'GG':
-                    return False
-            
-            if which_PAM == 'TTTV':
-                if (self.sequence[PAM_start: PAM_start + 3] == 'TTT'
-                and self.sequence[PAM_start + 3] != 'T'):
-                    return False
-            
-            if self.endogenous.which_PAM == 'BAAA':
-                if (self.sequence[PAM_start + 1: PAM_start + 4] == 'AAA'
-                and self.sequence[PAM_start] != 'A'):
-                    return False
+            if which_PAM == "CCN" and self.sequence[PAM_start : PAM_start + 2] == "CC":
+                return False
+
+            if (
+                which_PAM == "NGG"
+                and self.sequence[PAM_start + 1 : PAM_start + 3] == "GG"
+            ):
+                return False
+
+            if (
+                which_PAM == "TTTV"
+                and self.sequence[PAM_start : PAM_start + 3] == "TTT"
+                and self.sequence[PAM_start + 3] != "T"
+            ):
+                return False
+
+            if (
+                self.endogenous.which_PAM == "BAAA"
+                and self.sequence[PAM_start + 1 : PAM_start + 4] == "AAA"
+                and self.sequence[PAM_start] != "A"
+            ):
+                return False
         return True
 
     def miRNA_target_interference(self):
@@ -812,10 +803,7 @@ class Candidate(Designer):
             False if the Renzyme has any sandwiched cutsites, True otherwise
         """
 
-        if self.endogenous_matches[Renzyme] is not None:
-            return True
-        else:
-            return False
+        return self.endogenous_matches[Renzyme] is not None
 
     def non_ambiguous_cutsites(self, Renzyme):
         """
@@ -832,10 +820,7 @@ class Candidate(Designer):
         bool
             False if Renzyme has an unknown/ambiguous cutsite, True otherwise.
         """
-        if '?' in Renzyme.elucidate():
-            return False
-        else:
-            return True
+        return "?" not in Renzyme.elucidate()
 
     def no_endogenous_cutsites_within_Nnt_of_novel_cutsite(self, Renzyme, N=5):
         """
@@ -892,7 +877,6 @@ class Candidate(Designer):
         return True
 
     def novel_site_depends_on_at_least_two_substitutions(self, Renzyme):
-
         """
         Filters out Renzymes for this candidate that have substitution
         dependent recognition sites in the candidate sequence that depend on
@@ -916,18 +900,11 @@ class Candidate(Designer):
             Renzyme,
             self.endogenous.sequence,
             self.sequence,
-            self.sub_dep_Renzyme_recognition_sites[Renzyme]
+            self.sub_dep_Renzyme_recognition_sites[Renzyme],
         )
 
         # If there's a site with only one sub, we don't want that RE!
-        if all(
-            [
-                len(Renzyme_subs[i]) >= 2
-                for i in range(0, len(Renzyme_subs))
-            ]
-        ):
-            return True
-        return False
+        return bool(all(len(Renzyme_subs[i]) >= 2 for i in range(len(Renzyme_subs))))
 
     def num_recognition_sites_equals_num_cutsites(self, Renzyme):
         """
@@ -950,10 +927,11 @@ class Candidate(Designer):
             maybe the enzyme cuts twice), True otherwise"""
 
         full_Rsite_dict = utils.get_Rsite_dict(self.sequence, self.Renzymes)
-        if Renzyme in self.Renzymes and Renzyme in full_Rsite_dict:
-            if len(self.Renzymes[Renzyme]) == len(full_Rsite_dict[Renzyme]):
-                return True
-        return False
+        return bool(
+            Renzyme in self.Renzymes
+            and Renzyme in full_Rsite_dict
+            and len(self.Renzymes[Renzyme]) == len(full_Rsite_dict[Renzyme])
+        )
 
     "ENZYME PAIR FILTERING METHODS"
 
@@ -978,13 +956,10 @@ class Candidate(Designer):
             any endogenous sites (AKA if both have polarities of '0'), True
             otherwise.
         """
-        if (
-            self.endogenous_matches[RenzymeA] == '0'
-            and self.endogenous_matches[RenzymeB] == '0'
-        ):
-            return False
-        else:
-            return True
+        return not (
+            self.endogenous_matches[RenzymeA] == "0"
+            and self.endogenous_matches[RenzymeB] == "0"
+        )
 
     def both_have_endogenous_sites(self, RenzymeA, RenzymeB):
         """
@@ -1007,13 +982,10 @@ class Candidate(Designer):
             False unless both Renzymes have an endogenous site
         """
 
-        if (
-            self.endogenous_matches[RenzymeA] == '0'
-            or self.endogenous_matches[RenzymeB] == '0'
-        ):
-            return False
-        else:
-            return True
+        return not (
+            self.endogenous_matches[RenzymeA] == "0"
+            or self.endogenous_matches[RenzymeB] == "0"
+        )
 
     def compatible_polarity(self, RenzymeA, RenzymeB):
         """
@@ -1039,19 +1011,15 @@ class Candidate(Designer):
         """
 
         if (
-            self.endogenous_matches[RenzymeA] == '+'
-            and self.endogenous_matches[RenzymeB] == '-'
+            self.endogenous_matches[RenzymeA] == "+"
+            and self.endogenous_matches[RenzymeB] == "-"
         ):
             return False
 
-        if (
-            self.endogenous_matches[RenzymeA] == '-'
-            and self.endogenous_matches[RenzymeB] == '+'
-        ):
-            return False
-
-        else:
-            return True
+        return not (
+            self.endogenous_matches[RenzymeA] == "-"
+            and self.endogenous_matches[RenzymeB] == "+"
+        )
 
     def different_recognition_sites(self, RenzymeA, RenzymeB):
         """
@@ -1071,15 +1039,10 @@ class Candidate(Designer):
         -------
         bool
             False if RenzymeA and RenzymeB have the same recognition site"""
-        if RenzymeA.is_isoschizomer(RenzymeB):
-            return False
-        else:
-            return True
+        return not RenzymeA.is_isoschizomer(RenzymeB)
 
     def both_Renzymes_depend_on_at_least_one_unique_substitution(
-        self,
-        RenzymeA,
-        RenzymeB
+        self, RenzymeA, RenzymeB
     ):
         """
         Filters out Renzyme pairs for this candidate for which both Renzymes
@@ -1105,24 +1068,24 @@ class Candidate(Designer):
             RenzymeA,
             self.endogenous.sequence,
             self.sequence,
-            self.sub_dep_Renzyme_recognition_sites[RenzymeA]
+            self.sub_dep_Renzyme_recognition_sites[RenzymeA],
         )
         RenzymeB_subs = utils.get_substitutions_Renzyme_depends_on(
             RenzymeB,
             self.endogenous.sequence,
             self.sequence,
-            self.sub_dep_Renzyme_recognition_sites[RenzymeB]
+            self.sub_dep_Renzyme_recognition_sites[RenzymeB],
         )
 
         N = 0
         for Atuple in RenzymeA_subs:
             for Btuple in RenzymeB_subs:
-                if len(set(Atuple).difference(Btuple)) > 0 and len(set(Btuple).difference(Atuple)) > 0:
+                if (
+                    len(set(Atuple).difference(Btuple)) > 0
+                    and len(set(Btuple).difference(Atuple)) > 0
+                ):
                     N += 1
-        if N > 0:
-            return True
-        else:
-            return False
+        return N > 0
 
     def no_unneeded_substitutions(self, RenzymeA, RenzymeB=None):
         """
@@ -1157,7 +1120,7 @@ class Candidate(Designer):
             RenzymeA,
             self.endogenous.sequence,
             self.sequence,
-            self.sub_dep_Renzyme_recognition_sites[RenzymeA]
+            self.sub_dep_Renzyme_recognition_sites[RenzymeA],
         )
         flattened_RenzymeA_subs = list(sum(RenzymeA_subs, ()))
         flattened_RenzymeB_subs = flattened_RenzymeA_subs
@@ -1166,17 +1129,17 @@ class Candidate(Designer):
                 RenzymeB,
                 self.endogenous.sequence,
                 self.sequence,
-                self.sub_dep_Renzyme_recognition_sites[RenzymeB])
+                self.sub_dep_Renzyme_recognition_sites[RenzymeB],
+            )
             flattened_RenzymeB_subs = list(sum(RenzymeB_subs, ()))
 
         # for each character in self.sequence, check if there's a substitution.
-        for i in range(0, len(self.sequence)):
+        for i in range(len(self.sequence)):
             if self.endogenous.sequence[i] != self.sequence[i]:
                 # if there is, check if the substitution is outside of the
                 # codon yielding the nonsynonymous mutation
                 if i not in range(
-                        self.endogenous.AA_change_site,
-                        self.endogenous.AA_change_site + 3
+                    self.endogenous.AA_change_site, self.endogenous.AA_change_site + 3
                 ):
                     # then, check to make sure the substitution is not needed
                     # for a Renzyme recognition site
@@ -1187,33 +1150,28 @@ class Candidate(Designer):
                         # if the PAM can change, return False if the candidate
                         # has any unneeded substitutions
                         if self.endogenous.PAM_can_change:
-                            if self.endogenous.which_PAM == 'CCN':
-                                if i not in range(
-                                    self.endogenous.PAM_start,
-                                    self.endogenous.PAM_start + 2
-                                ):
-                                    return False
-                            if self.endogenous.which_PAM == 'NGG':
-                                if i not in range(
-                                    self.endogenous.PAM_start + 1,
-                                    self.endogenous.PAM_start + 3
-                                ):
-                                    return False
-                            if (
-                                    self.endogenous.which_PAM == 'TTTV'
-                                    or self.endogenous.which_PAM == 'BAAA'
+                            if self.endogenous.which_PAM == "CCN" and i not in range(
+                                self.endogenous.PAM_start, self.endogenous.PAM_start + 2
                             ):
-                                if i not in range(
-                                    self.endogenous.PAM_start,
-                                    self.endogenous.PAM_start + 4
-                                ):
-                                    return False
+                                return False
+                            if self.endogenous.which_PAM == "NGG" and i not in range(
+                                self.endogenous.PAM_start + 1,
+                                self.endogenous.PAM_start + 3,
+                            ):
+                                return False
+                            if (
+                                self.endogenous.which_PAM == "TTTV"
+                                or self.endogenous.which_PAM == "BAAA"
+                            ) and i not in range(
+                                self.endogenous.PAM_start, self.endogenous.PAM_start + 4
+                            ):
+                                return False
                         # if the PAM can't change, only exclude candidates with
                         # unneeded substitutions outside the gRNA
                         else:
                             if i not in range(
                                 self.endogenous.gRNA_location[0],
-                                self.endogenous.gRNA_location[1]
+                                self.endogenous.gRNA_location[1],
                             ):
                                 return False
         return True

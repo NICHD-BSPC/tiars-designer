@@ -30,4 +30,3 @@ dependencies=[
 tiarsdesigner='tiarsdesigner.run_locus:main'
 [project.urls]
 url='https://github.com/NICHD-BSPC/tiars-designer'
-

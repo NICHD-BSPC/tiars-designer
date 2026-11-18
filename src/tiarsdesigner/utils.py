@@ -1,11 +1,9 @@
-from Bio import Restriction
-from Bio.Restriction import *
-from Bio.Seq import Seq
 import itertools
 from collections import defaultdict
+
 from Bio.Data import CodonTable
-import fnmatch
-import re
+from Bio.Restriction import *
+from Bio.Seq import Seq
 from docx import Document
 from docx.enum.text import *
 from docx.shared import RGBColor
@@ -59,10 +57,11 @@ def reformat_codon_table(table=None):
             synonymous[i] = list(v)
     synonymous_dict = dict(synonymous)
     # add stop codons
-    synonymous_dict['TAA'] = ['TAA']
-    synonymous_dict['TGA'] = ['TGA']
-    synonymous_dict['TAG'] = ['TAG']
+    synonymous_dict["TAA"] = ["TAA"]
+    synonymous_dict["TGA"] = ["TGA"]
+    synonymous_dict["TAG"] = ["TAG"]
     return synonymous_dict
+
 
 def synonymous_seqs(seq, table=None):
     """
@@ -95,25 +94,19 @@ def synonymous_seqs(seq, table=None):
         seq = str(seq)
 
     if len(seq) % 3 != 0:
-        raise ValueError(
-            'Sequence is length {0}, not divisible by 3'.format(len(seq)))
+        raise ValueError(f"Sequence is length {len(seq)}, not divisible by 3")
 
-    codons = [seq[i:i+3] for i in range(0, len(seq)-2, 3)]
+    codons = [seq[i : i + 3] for i in range(0, len(seq) - 2, 3)]
 
     d = reformat_codon_table(table)
     expanded = [d[c] for c in codons]
 
     for i in itertools.product(*expanded):
-        yield ''.join(i)
+        yield "".join(i)
 
 
 def get_endogenous_sequence_and_stats(
-    full_seq,
-    gRNA_start,
-    gRNA_end,
-    PAM_start,
-    AA_change_site,
-    which_PAM
+    full_seq, gRNA_start, gRNA_end, PAM_start, AA_change_site, which_PAM
 ):
     """
     Given a full sequence and the locations of the gRNA, PAM, and AA change \
@@ -155,54 +148,49 @@ def get_endogenous_sequence_and_stats(
         Dictionary of the isolated endogenous sequence and the adjusted gRNA, PAM,
         and AA_change_site locations.
     """
-      
+
     # create dictionary with PAM startsites as keys and the locations of the
     # CRISPR cutsites relative to the PAM startsites as values
-    pam_dict = {
-        'CCN': 6,
-        'NGG': -3,
-        'TTTV': 23,
-        'BAAA': -23
-    }
+    pam_dict = {"CCN": 6, "NGG": -3, "TTTV": 23, "BAAA": -23}
 
     full_seq = full_seq.replace(" ", "").upper()
     Cas9_cutsite = PAM_start + pam_dict[which_PAM]
     seq_stats = {
-        'gRNA_start': gRNA_start,
-        'gRNA_end': gRNA_end,
-        'PAM_start': PAM_start,
-        'AA_change_site': AA_change_site
+        "gRNA_start": gRNA_start,
+        "gRNA_end": gRNA_end,
+        "PAM_start": PAM_start,
+        "AA_change_site": AA_change_site,
     }
 
-    #cut it down to 15 nt on either side of cutsite + 70 nt upstream and 35
-    #nt downstream + 70 nt spacers on either side.
+    # cut it down to 15 nt on either side of cutsite + 70 nt upstream and 35
+    # nt downstream + 70 nt spacers on either side.
     new_zero = 0
     new_end = len(full_seq)
-    if which_PAM == 'CCN' or which_PAM == 'TTTV':
+    if which_PAM == "CCN" or which_PAM == "TTTV":
         if Cas9_cutsite > 155:
             new_zero = Cas9_cutsite - 155
         if new_end - Cas9_cutsite > 120:
             new_end = Cas9_cutsite + 120
 
-    if which_PAM == 'NGG' or which_PAM == 'BAAA':
+    if which_PAM == "NGG" or which_PAM == "BAAA":
         if Cas9_cutsite > 120:
             new_zero = Cas9_cutsite - 120
         if new_end - Cas9_cutsite > 155:
             new_end = Cas9_cutsite + 155
-    focus_seq = full_seq[new_zero: new_end]
+    focus_seq = full_seq[new_zero:new_end]
 
-    #adjust all of the seq_stats to correspond focus_seq rather than full_seq
-    seq_stats.update((k,v - new_zero) for (k,v) in seq_stats.items())
-    #check the frame of the new sequence based the AA change site, which
-    #has to be at the beginning of a codon.
-    frame = seq_stats['AA_change_site'] % 3
-    #adjust the sequence to be in frame and divisible by 3
-    focus_seq = focus_seq[frame: 273 + frame]
-    #adjust the important locations to match the in frame focus_seq
+    # adjust all of the seq_stats to correspond focus_seq rather than full_seq
+    seq_stats.update((k, v - new_zero) for (k, v) in seq_stats.items())
+    # check the frame of the new sequence based the AA change site, which
+    # has to be at the beginning of a codon.
+    frame = seq_stats["AA_change_site"] % 3
+    # adjust the sequence to be in frame and divisible by 3
+    focus_seq = focus_seq[frame : 273 + frame]
+    # adjust the important locations to match the in frame focus_seq
     seq_stats.update((k, v - frame) for (k, v) in seq_stats.items())
-    #add focus_seq to the dictionary before returning it
-    seq_stats['sequence'] = focus_seq
-    seq_stats['which_PAM'] = which_PAM
+    # add focus_seq to the dictionary before returning it
+    seq_stats["sequence"] = focus_seq
+    seq_stats["which_PAM"] = which_PAM
     return seq_stats
 
 
@@ -237,11 +225,12 @@ def generate_exon_seqs(start, end, AA_change_seq):
         in_frame_end = in_frame_end + 3 - end_frame
     seqs = synonymous_seqs(AA_change_seq[in_frame_start:in_frame_end])
     for seq in seqs:
-        if seq[:start_frame] == AA_change_seq[in_frame_start: start]:
-            if seq[len(seq) - 3 + end_frame:] == AA_change_seq[end: in_frame_end]:
-                yield seq[start_frame: len(seq) -3 + end_frame]
+        if seq[:start_frame] == AA_change_seq[in_frame_start:start]:
+            if seq[len(seq) - 3 + end_frame :] == AA_change_seq[end:in_frame_end]:
+                yield seq[start_frame : len(seq) - 3 + end_frame]
             elif end_frame == 0:
                 yield seq[start_frame:]
+
 
 def get_restriction_sites(sequence, Renzymes=None):
     """
@@ -282,6 +271,7 @@ def get_restriction_sites(sequence, Renzymes=None):
     ana = Analysis(rb, seq)
     return ana.with_sites()
 
+
 def get_Rsite_dict(sequence, Renzymes):
     """
     Given a sequence and either a list or a dictionary of restriction enzymes, \
@@ -318,11 +308,15 @@ def get_Rsite_dict(sequence, Renzymes):
     Gba708II: [(0, 5)]}
     """
 
-    #Use the Renzyme dict or list to make a new dictionary with the recognition site coordinates
+    # Use the Renzyme dict or list to make a new dictionary with the recognition site coordinates
     Rcoords = {}
     for Renzyme in Renzymes:
-        Rcoords[Renzyme] = [tuple([n.start(), n.start() + len(Renzyme.site)]) for n in Renzyme.compsite.finditer(sequence)]
+        Rcoords[Renzyme] = [
+            (n.start(), n.start() + len(Renzyme.site))
+            for n in Renzyme.compsite.finditer(sequence)
+        ]
     return Rcoords
+
 
 def map_recognition_sites(sequence, Renzyme, num):
     """
@@ -354,14 +348,16 @@ def map_recognition_sites(sequence, Renzyme, num):
 
     """
     Rsite_dict = get_Rsite_dict(sequence, [Renzyme])
-    num_list = [0 for x in range(0, len(sequence))]
+    num_list = [0 for x in range(len(sequence))]
     for start, stop in Rsite_dict[Renzyme]:
         for i in range(start, stop):
             num_list[i] += num
     return num_list
 
 
-def get_substitutions_Renzyme_depends_on(Renzyme, endogenous_seq, candidate_seq, sub_dep_sites):
+def get_substitutions_Renzyme_depends_on(
+    Renzyme, endogenous_seq, candidate_seq, sub_dep_sites
+):
     """
     Given a restriction enzyme, an endogenous sequence, and a \
     candidate sequence, returns a list of tuples where each tuple corresponds to \
@@ -378,10 +374,13 @@ def get_substitutions_Renzyme_depends_on(Renzyme, endogenous_seq, candidate_seq,
         A DNA nucleotide sequence. All letters must be capitalized.
 
     candidate_seq: string
-        A candidate sequence based on the endogenous sequence. In other words, a sequence that's similar to the endogenous sequence, but it has one nonsynonymous substitution and a series of synonymous substitutions in the cutsite region.
+        A candidate sequence based on the endogenous sequence. In other words, a sequence
+        that's similar to the endogenous sequence, but it has one nonsynonymous substitution
+        and a series of synonymous substitutions in the cutsite region.
 
     sub_dep_sites: list
-        A list of tuples indicating start and end sites for substitution dependent recognition sites for Renzyme in candidate seq.
+        A list of tuples indicating start and end sites for substitution dependent recognition
+        sites for Renzyme in candidate seq.
 
     Returns
     ------
@@ -398,37 +397,36 @@ def get_substitutions_Renzyme_depends_on(Renzyme, endogenous_seq, candidate_seq,
     >>> get_substitutions_Renzyme_depends_on(Hpy188I, 'TTCTGCAGCCCTGGATGGGCTCTGCTGCTA', 'TTCTTCAGAGTTGGATGGGTTCTGCTGCTA',[(4,9)])
     [(4, 8)]
     """
-    nucleotide_code = {'N': ['G', 'A', 'T', 'C'],
-                       'W': ['A', 'T'],
-                       'S': ['C', 'G'],
-                       'M': ['A', 'C'],
-                       'K': ['G', 'T'],
-                       'R': ['A', 'G'],
-                       'Y': ['C', 'T'],
-                       'B': ['C', 'G', 'T'],
-                       'D': ['A', 'G', 'T'],
-                       'H': ['A', 'C', 'T'],
-                       'V': ['A', 'C', 'G']
-                      }
+    nucleotide_code = {
+        "N": ["G", "A", "T", "C"],
+        "W": ["A", "T"],
+        "S": ["C", "G"],
+        "M": ["A", "C"],
+        "K": ["G", "T"],
+        "R": ["A", "G"],
+        "Y": ["C", "T"],
+        "B": ["C", "G", "T"],
+        "D": ["A", "G", "T"],
+        "H": ["A", "C", "T"],
+        "V": ["A", "C", "G"],
+    }
 
-    # E.g., 
+    # E.g.,
     # nuc_delta = [0000000100010000]
     # where 1 indicates difference from endogenous
-    nuc_delta = [0 for x in range(0, len(candidate_seq))]
-    for i in range(0, len(nuc_delta)):
+    nuc_delta = [0 for x in range(len(candidate_seq))]
+    for i in range(len(nuc_delta)):
         if endogenous_seq[i] != candidate_seq[i]:
             nuc_delta[i] += 1
 
-
     # Each RE can have multiple sites; we'll be checking them all here and
     # putting the info for each site in `all_sub_sites`
-    all_sub_sites= []
+    all_sub_sites = []
     sites = sub_dep_sites
     for start, stop in sites:
         sub_sites = []
         for i in range(start, stop):
-            if nuc_delta[i]==1:
-
+            if nuc_delta[i] == 1:
                 # If an RE has an ambiguous base, need to handle that here.
                 # For example, if a substitution was C to T, but the RE has
                 # a "Y" in it's site, then it shouldn't be considered
@@ -443,13 +441,16 @@ def get_substitutions_Renzyme_depends_on(Renzyme, endogenous_seq, candidate_seq,
         all_sub_sites.append(tuple(sub_sites))
     return all_sub_sites
 
+
 def get_codon_frequency_dict(codon_usage_tsv):
     """
     Takes in a codon usage frequency tsv and converts it into a dictionary
 
     Parameters
     ----------
-    codon_usage_tsv: a tsv file of codons and their corresponding frequencies in the format [codon]>[frequency] with one codon per line
+    codon_usage_tsv:
+        a tsv file of codons and their corresponding frequencies in the format
+        [codon]>[frequency] with one codon per line
 
     Returns
     -------
@@ -458,12 +459,14 @@ def get_codon_frequency_dict(codon_usage_tsv):
 
     """
     codon_frequency_dict = {}
-    for line in open(codon_usage_tsv):
-        if not line.startswith('#'):
-            linelist = line.strip().split('\t')
-            codon = linelist[0].replace('U', 'T')
-            codon_frequency_dict[codon] = float(linelist[1])
+    with open(codon_usage_tsv) as file:
+        for line in file:
+            if not line.startswith("#"):
+                linelist = line.strip().split("\t")
+                codon = linelist[0].replace("U", "T")
+                codon_frequency_dict[codon] = float(linelist[1])
     return codon_frequency_dict
+
 
 def get_filter_function_dict(filter_list, candidate):
     """
@@ -485,18 +488,22 @@ def get_filter_function_dict(filter_list, candidate):
     """
 
     full_filter_dict = {
-        'no_sandwiched_cutsites': candidate.no_sandwiched_cutsites,
-        'no_endogenous_cutsites_within_Nnt_of_novel_cutsite': candidate.no_endogenous_cutsites_within_Nnt_of_novel_cutsite,
-        'novel_site_depends_on_at_least_two_substitutions': candidate.novel_site_depends_on_at_least_two_substitutions,
-        'num_recognition_sites_equals_num_cutsites': candidate.num_recognition_sites_equals_num_cutsites,
-        'no_unneeded_substitutions': candidate.no_unneeded_substitutions,
-        'at_least_one_has_endogenous_site': candidate.at_least_one_has_endogenous_site,
-        'both_have_endogenous_sites': candidate.both_have_endogenous_sites,
-        'compatible_polarity': candidate.compatible_polarity,
-        'both_Renzymes_depend_on_at_least_one_unique_substitution': candidate.both_Renzymes_depend_on_at_least_one_unique_substitution
+        "no_sandwiched_cutsites": candidate.no_sandwiched_cutsites,
+        "no_endogenous_cutsites_within_Nnt_of_novel_cutsite": candidate.no_endogenous_cutsites_within_Nnt_of_novel_cutsite,
+        "novel_site_depends_on_at_least_two_substitutions": candidate.novel_site_depends_on_at_least_two_substitutions,
+        "num_recognition_sites_equals_num_cutsites": candidate.num_recognition_sites_equals_num_cutsites,
+        "no_unneeded_substitutions": candidate.no_unneeded_substitutions,
+        "at_least_one_has_endogenous_site": candidate.at_least_one_has_endogenous_site,
+        "both_have_endogenous_sites": candidate.both_have_endogenous_sites,
+        "compatible_polarity": candidate.compatible_polarity,
+        "both_Renzymes_depend_on_at_least_one_unique_substitution": candidate.both_Renzymes_depend_on_at_least_one_unique_substitution,
     }
-    return({filter_name: filter_function for (filter_name, filter_function)
-            in full_filter_dict.items() if filter_name in filter_list}) 
+    return {
+        filter_name: filter_function
+        for (filter_name, filter_function) in full_filter_dict.items()
+        if filter_name in filter_list
+    }
+
 
 def get_codon_frequency_differences(seqA, seqB, codon_dict):
     """
@@ -525,14 +532,26 @@ def get_codon_frequency_differences(seqA, seqB, codon_dict):
     total_frequency_diff = 0
     # iterate over the starting coordinates for each codon in the sequences and
     # establish the codon frequency differences based on codon_dict
-    for i in range(0, (int(len(seqA)/3))):
-        seqA_codon = seqA[i * 3: (i * 3) + 3]
-        seqB_codon = seqB[i * 3: (i * 3) + 3]
+    for i in range(int(len(seqA) / 3)):
+        seqA_codon = seqA[i * 3 : (i * 3) + 3]
+        seqB_codon = seqB[i * 3 : (i * 3) + 3]
         frequency_diff = abs(codon_dict[seqA_codon] - codon_dict[seqB_codon])
         total_frequency_diff += frequency_diff
     return total_frequency_diff
 
-def add_sequence_to_doc(document, sequence, gRNA_start, gRNA_end, PAM_start, AA_change_site, Renzyme_list, endogenous, which_pam, paired = True):
+
+def add_sequence_to_doc(
+    document,
+    sequence,
+    gRNA_start,
+    gRNA_end,
+    PAM_start,
+    AA_change_site,
+    Renzyme_list,
+    endogenous,
+    which_pam,
+    paired=True,
+):
     """A helper function for make_doc(). The make_doc function calls \
     it to one of the candidate sequences to the document with the Renzyme \
     recognition sites, synonymous substitutions, PAM and gRNA and \
@@ -577,20 +596,31 @@ def add_sequence_to_doc(document, sequence, gRNA_start, gRNA_end, PAM_start, AA_
         A boolean value indicating whether or not to run the function on single
         enzymes or enzyme pairs. Default is enzyme pairs (AKA True)
     """
-    Rsite_dict = get_Rsite_dict(sequence, Renzyme_list)
+    get_Rsite_dict(sequence, Renzyme_list)
     if paired:
         RenzymeA_sites = map_recognition_sites(sequence, Renzyme_list[0], 1)
         RenzymeB_sites = map_recognition_sites(sequence, Renzyme_list[1], 7)
         recognition_sites = [x + y for x, y in zip(RenzymeA_sites, RenzymeB_sites)]
-        document.add_paragraph(str(Renzyme_list[0]) + ' (' + Renzyme_list[0].elucidate() + ') and ' + str(Renzyme_list[1]) + ' (' + Renzyme_list[1].elucidate() + ')')
+        document.add_paragraph(
+            str(Renzyme_list[0])
+            + " ("
+            + Renzyme_list[0].elucidate()
+            + ") and "
+            + str(Renzyme_list[1])
+            + " ("
+            + Renzyme_list[1].elucidate()
+            + ")"
+        )
     else:
         recognition_sites = map_recognition_sites(sequence, Renzyme_list[0], 1)
-        document.add_paragraph(str(Renzyme_list[0]) + '(' + Renzyme_list[0].elucidate() + ')')
-# start a new line for the sequence
+        document.add_paragraph(
+            str(Renzyme_list[0]) + "(" + Renzyme_list[0].elucidate() + ")"
+        )
+    # start a new line for the sequence
     seq = document.add_paragraph()
 
-# add onto the sequence character by character
-    for i in range(0, len(sequence)):
+    # add onto the sequence character by character
+    for i in range(len(sequence)):
         run_i = seq.add_run(sequence[i])
         if i in range(gRNA_start, gRNA_end):
             run_i.font.highlight_color = WD_COLOR_INDEX.GRAY_25
@@ -599,17 +629,27 @@ def add_sequence_to_doc(document, sequence, gRNA_start, gRNA_end, PAM_start, AA_
         if i in range(AA_change_site, AA_change_site + 3):
             run_i.bold = True
             run_i.italic = True
-        if recognition_sites[i]  in [1, 2, 3]:
+        if recognition_sites[i] in [1, 2, 3]:
             run_i.font.color.rgb = RGBColor(255, 0, 0)
-        if recognition_sites[i] in [7, 14, 21] :
+        if recognition_sites[i] in [7, 14, 21]:
             run_i.font.color.rgb = RGBColor(0, 0, 255)
         if recognition_sites[i] in [8, 9, 10, 15, 16, 17, 22, 23, 24]:
             run_i.font.color.rgb = RGBColor(127, 0, 255)
-        if endogenous is not None:
-            if sequence[i] != endogenous[i]:
-                run_i.underline = WD_UNDERLINE.THICK
+        if endogenous is not None and sequence[i] != endogenous[i]:
+            run_i.underline = WD_UNDERLINE.THICK
 
-def make_doc(endogenous_sequence, gRNA_start, gRNA_end, PAM_start, AA_change_site, candidate_df, sample, which_pam, paired=True):
+
+def make_doc(
+    endogenous_sequence,
+    gRNA_start,
+    gRNA_end,
+    PAM_start,
+    AA_change_site,
+    candidate_df,
+    sample,
+    which_pam,
+    paired=True,
+):
     """
     Makes a word document to visualize restriction sites \
     for each pair of enzymes (or single enzyme if paired != True) for each \
@@ -634,10 +674,13 @@ def make_doc(endogenous_sequence, gRNA_start, gRNA_end, PAM_start, AA_change_sit
         changed in the CRISPR/Cas9 sequence.
 
     candidate_df: dataframe
-        Pandas dataframe of candidate with either single enzymes or enzyme pairs that passed all filters. If single enzymes, it should have the 
-        following columns: {sequence, Renzyme, average distance to cas9 cut, codon frequency change, cutsite distance outside Rsite}. If paired, it
-        should have the following columns: {sequence, Renzyme pair, result, RenzymeA average distance to cas9 cut, RenzymeB average distance to cas9
-        cut, overall average distance to cas9 cut, codon_frequency_change}
+        Pandas dataframe of candidate with either single enzymes or enzyme pairs 
+        that passed all filters. If single enzymes, it should have the 
+        following columns: {sequence, Renzyme, average distance to cas9 cut, codon
+        frequency change, cutsite distance outside Rsite}. If paired, it should 
+        have the following columns: {sequence, Renzyme pair, result, RenzymeA 
+        average distance to cas9 cut, RenzymeB average distance to cas9 cut,
+        overall average distance to cas9 cut, codon_frequency_change}
 
     sample: string
         A unique identifier for this locus
@@ -650,51 +693,63 @@ def make_doc(endogenous_sequence, gRNA_start, gRNA_end, PAM_start, AA_change_sit
         A boolean value indicating whether or not to run the function on single
         enzymes or enzyme pairs. Default is enzyme pairs (AKA True)
     """
-    
+
     doc = Document()
-    key = doc.add_paragraph().add_run('Key:')
+    key = doc.add_paragraph().add_run("Key:")
     key.bold = True
-    gRNA_key = doc.add_paragraph().add_run('gRNA')
+    gRNA_key = doc.add_paragraph().add_run("gRNA")
     gRNA_key.font.highlight_color = WD_COLOR_INDEX.GRAY_25
-    PAM_key = doc.add_paragraph().add_run('PAM site')
+    PAM_key = doc.add_paragraph().add_run("PAM site")
     PAM_key.font.highlight_color = WD_COLOR_INDEX.YELLOW
-    AA_change_key = doc.add_paragraph().add_run('Amino acid change')
+    AA_change_key = doc.add_paragraph().add_run("Amino acid change")
     AA_change_key.bold = True
     AA_change_key.italic = True
     if paired:
-        RenzymeA_key = doc.add_paragraph().add_run('Renzyme A recognition site')
+        RenzymeA_key = doc.add_paragraph().add_run("Renzyme A recognition site")
         RenzymeA_key.font.color.rgb = RGBColor(255, 0, 0)
-        RenzymeB_key = doc.add_paragraph().add_run('Renzyme B recognition site')
+        RenzymeB_key = doc.add_paragraph().add_run("Renzyme B recognition site")
         RenzymeB_key.font.color.rgb = RGBColor(0, 0, 255)
-        overlapping_sites_key = doc.add_paragraph().add_run('Overlapping Renzyme A and B recognition sites')
+        overlapping_sites_key = doc.add_paragraph().add_run(
+            "Overlapping Renzyme A and B recognition sites"
+        )
         overlapping_sites_key.font.color.rgb = RGBColor(127, 0, 255)
     else:
-        Renzyme_key = doc.add_paragraph().add_run('Renzyme recognition site')
-        Renzyme_key.font.color.rgb = RGBColor(255,0,0)
-    cutsite_key1 = doc.add_paragraph().add_run("^ = cut on (+) strand")
-    cutsite_key2 = doc.add_paragraph().add_run("_ = cut on (-) strand")
-    substitution_key = doc.add_paragraph().add_run('base pair substitution')
+        Renzyme_key = doc.add_paragraph().add_run("Renzyme recognition site")
+        Renzyme_key.font.color.rgb = RGBColor(255, 0, 0)
+    doc.add_paragraph().add_run("^ = cut on (+) strand")
+    doc.add_paragraph().add_run("_ = cut on (-) strand")
+    substitution_key = doc.add_paragraph().add_run("base pair substitution")
     substitution_key.underline = WD_UNDERLINE.THICK
-    header = doc.add_paragraph().add_run('Endogenous sequence:')
+    header = doc.add_paragraph().add_run("Endogenous sequence:")
     header.bold = True
     Endogenous = doc.add_paragraph()
-    for i in range(0, len(endogenous_sequence)):
-                run_i = Endogenous.add_run(endogenous_sequence[i])
-                if i in range(gRNA_start, gRNA_end):
-                    run_i.font.highlight_color = WD_COLOR_INDEX.GRAY_25
-                if i in range(PAM_start, PAM_start + len(which_pam)):
-                    run_i.font.highlight_color = WD_COLOR_INDEX.YELLOW
+    for i in range(len(endogenous_sequence)):
+        run_i = Endogenous.add_run(endogenous_sequence[i])
+        if i in range(gRNA_start, gRNA_end):
+            run_i.font.highlight_color = WD_COLOR_INDEX.GRAY_25
+        if i in range(PAM_start, PAM_start + len(which_pam)):
+            run_i.font.highlight_color = WD_COLOR_INDEX.YELLOW
     for index, row in candidate_df.iterrows():
-        header = doc.add_paragraph().add_run('Option ' + str(index) + ':')
+        header = doc.add_paragraph().add_run("Option " + str(index) + ":")
         header.bold = True
         if paired:
-            Renzyme_list = list(RestrictionBatch(row['Renzyme pair'].split(' and ')))
+            Renzyme_list = list(RestrictionBatch(row["Renzyme pair"].split(" and ")))
         else:
-            Renzyme_list = list(RestrictionBatch([row['Renzyme'].strip()]))
-        add_sequence_to_doc(doc, row['seq'], gRNA_start, gRNA_end, PAM_start, AA_change_site, Renzyme_list, endogenous_sequence, which_pam,  paired)
+            Renzyme_list = list(RestrictionBatch([row["Renzyme"].strip()]))
+        add_sequence_to_doc(
+            doc,
+            row["seq"],
+            gRNA_start,
+            gRNA_end,
+            PAM_start,
+            AA_change_site,
+            Renzyme_list,
+            endogenous_sequence,
+            which_pam,
+            paired,
+        )
         doc.add_paragraph()
     if paired:
-        doc.save(sample + '_Renzyme_pairs.docx')
+        doc.save(sample + "_Renzyme_pairs.docx")
     else:
-        doc.save(sample + '_single_Renzymes.docx')
-
+        doc.save(sample + "_single_Renzymes.docx")
