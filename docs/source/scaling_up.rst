@@ -11,9 +11,9 @@ If you have multiple samples to run, you can run them all at once using the prov
 Sampletable.tsv
 ---------------
 
-For the sampletable.tsv file, each row will represent a sample and will have the following columns. Descriptions for each of these columns can be found on the :ref:`Required Inputs <required-inputs>` page. 
+For the sampletable.tsv file, each row will represent a sample and will have the following columns for the tool's required inputs:
 
-- sample
+- locus_name
 - AA_change_site
 - new_codon
 - PAM_start
@@ -27,7 +27,7 @@ Example sampletable.tsv
 
 .. code-block:: text
 
-    sample	AA_change_site	new_codon	PAM_start	gRNA_start	gRNA_end	which_PAM	sequence
+    locus_name	AA_change_site	new_codon	PAM_start	gRNA_start	gRNA_end	which_PAM	sequence
     sample_A	69	TTA	48	48	71	CCN	GCTGGGGGCTCCACGGTGGTCAACATGAGCCATGCGGGCTGGTGGCCCCCAAATTGGTGGTGGTGGTGGTCACTCTGCAACACTCTTTACGTCAACTTCTGC
     sample_B	66	AGA	66	46	69	NGG	TTGCATTTTGTGTGACAGATGGCTGCGATTCGTAAGAAGCTTGTAATCGTTGGATGGTGGTGGTGGGGGTGGTGGTGGTTACTCATCGTTTTCAGTAAAGACC
     sample_C	66	ACC	51	51	76	TTTV	AGTGGGAAACAGAGACCGAACGGCACTGAGTTCATGCACTTCCTCCCCATGTTTCTCTGGTCTTGGCCCTGGTGGTGGTGTTGGTGGGTGTGGGTTTAAACAT
@@ -35,7 +35,7 @@ Example sampletable.tsv
 Config.yaml
 -----------
 
-The config.yaml file will include the following arguments. Descriptions can be found on the :ref:`Required Inputs <required-inputs>` page.
+The config.yaml file will include the following arguments.
 
 - sampletable: path to 'sampletable.tsv file'
 - enzyme list: path to tsv file of desired enzymes. If default full enzyme list is desired write 'default'

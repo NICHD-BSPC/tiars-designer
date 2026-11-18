@@ -4,7 +4,7 @@ import tiarsdesigner
 
 configfile: 'config.yaml'
 sampletable = pd.read_csv(config['sampletable'], sep="\t", comment='#')
-sampletable = sampletable.set_index('sample')
+sampletable = sampletable.set_index('locus_name')
 samples = sampletable.index.values.tolist()
 
 sample_dict = {sample: tiarsdesigner.utils.get_endogenous_sequence_and_stats(
@@ -84,5 +84,5 @@ rule run_tiars_designer:
         min_Rsite_distance = min_rsite_distance,
         enzymes=enzyme_param
     shell:
-        "cd {wildcards.sample} && tiarsdesigner {params.sequence} {params.gRNA_start} {params.gRNA_end} {params.PAM_start} {params.which_PAM} {params.AA_change_site} {params.new_codon} {wildcards.sample} --single-enzyme-filters {params.single_enzyme_filters} --enzyme-pair-filters {params.enzyme_pair_filters} --codon-usage-tsv ../{input.codon_usage} {params.enzymes} {params.verbose} --min-Rsite-distance {params.min_Rsite_distance}"
+        "cd {wildcards.sample} && tiarsdesigner --endogenous_seq {params.sequence} --gRNA_start {params.gRNA_start} --gRNA_end {params.gRNA_end} --PAM_start {params.PAM_start} --which_PAM {params.which_PAM} --AA_change_site {params.AA_change_site} --new_codon {params.new_codon} --locus_name {wildcards.sample} --single-enzyme-filters {params.single_enzyme_filters} --enzyme-pair-filters {params.enzyme_pair_filters} --codon-usage-tsv ../{input.codon_usage} {params.enzymes} {params.verbose} --min-Rsite-distance {params.min_Rsite_distance}"
 

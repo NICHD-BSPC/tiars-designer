@@ -1,7 +1,6 @@
 from Bio import Restriction
 from Bio.Restriction import *
 from Bio.Seq import Seq
-#from Bio.Alphabet.IUPAC import IUPACAmbiguousDNA
 import itertools
 from collections import defaultdict
 from Bio.Data import CodonTable
@@ -528,9 +527,7 @@ def get_codon_frequency_differences(seqA, seqB, codon_dict):
     # establish the codon frequency differences based on codon_dict
     for i in range(0, (int(len(seqA)/3))):
         seqA_codon = seqA[i * 3: (i * 3) + 3]
-        print(seqA_codon)
         seqB_codon = seqB[i * 3: (i * 3) + 3]
-        print(seqB_codon)
         frequency_diff = abs(codon_dict[seqA_codon] - codon_dict[seqB_codon])
         total_frequency_diff += frequency_diff
     return total_frequency_diff

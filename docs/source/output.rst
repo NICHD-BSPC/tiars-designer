@@ -63,10 +63,12 @@ Single Enzyme Excel sheet
 Single Enzyme Word Document
 ---------------------------
 
-- Filename: [sample_name]_single_Renzymes.docx
-- Description: A word document for visualising all of the sequence-enzyme combinations that passed all of the single enzyme filters, with the PAM site, guideRNA, Restriction sites, and substitutions all mapped out. The option numbers in the word doc match the candidate IDs in the spreadsheet (column A) so you can easily find a candidate from the spreadsheeteven after sorting.
+:Filename:
+  [sample_name]_single_Renzymes.docx
+:Description:
+  A word document for visualising all of the sequence-enzyme combinations that passed all of the single enzyme filters, with the PAM site, guideRNA, Restriction sites, and substitutions all mapped out. The option numbers in the word doc match the candidate IDs in the spreadsheet (column A) so you can easily find a candidate from the spreadsheeteven after sorting.
 
-- example:
+:Example:
 
 .. image:: images/single_enzyme_docx.png
 
@@ -77,9 +79,13 @@ Enzyme Pair results
 
 Enzyme Pair Excel sheet
 -----------------------
-- Filename: [sample_name]_Renzyme_pairs.xlsx
-- Description: an excel spreadsheet containing sortable statistics for ranking all of the passed candidate-enzyme pair combos. Each row represents a candidate sequence and a pair of enzymes that each passed all of the single enzyme filters and as a pair passed all of the enzyme pair filters for that sequence.
-- Columns:
+
+:Filename:
+  [sample_name]_Renzyme_pairs.xlsx
+:Description:
+  an excel spreadsheet containing sortable statistics for ranking all of the passed candidate-enzyme pair combos. Each row represents a candidate sequence and a pair of enzymes that each passed all of the single enzyme filters and as a pair passed all of the enzyme pair filters for that sequence.
+:Columns:
+
    +--------+------------------------------------+----------------------------------------------------------------------------------+
    | Column | Name                               | Description                                                                      |
    +========+====================================+==================================================================================+
@@ -110,11 +116,15 @@ Enzyme Pair Excel sheet
 
 Enzyme Pair Word Document
 -------------------------
-- Name: [sample_name]_Renzyme_pairs.docx
 
-- Description: A word document for visualizing all of the sequence-enzyme pair combinations that passed all of the enzyme pair filters, with the PAM site, gRNA, Restriction sites, and substitutions all mapped out. The option numbers in the word doc match the candidate ID’s in the spreadsheet (column A) so you can easily find a candidate from the spreadsheet even after sorting.
+:Name:
 
-- Example:
+  [sample_name]_Renzyme_pairs.docx
+
+:Description:
+  A word document for visualizing all of the sequence-enzyme pair combinations that passed all of the enzyme pair filters, with the PAM site, gRNA, Restriction sites, and substitutions all mapped out. The option numbers in the word doc match the candidate ID’s in the spreadsheet (column A) so you can easily find a candidate from the spreadsheet even after sorting.
+
+:Example:
 
 .. image:: images/enzyme_pair_docx.png
 
