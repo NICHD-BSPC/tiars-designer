@@ -18,7 +18,7 @@ An important part of any CRISPR/Cas homology-directed repair experiment is being
 ## Workflow
 
 
-![workflow diagram](sphinx_documentation/source/usage/images/workflow.png)
+![workflow diagram](docs/source/images/workflow.png)
 
 
 The tool runs three main steps:
