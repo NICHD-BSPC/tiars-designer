@@ -1,0 +1,88 @@
+import pandas as pd
+import os
+import tiarsdesigner
+
+configfile: 'config.yaml'
+sampletable = pd.read_csv(config['sampletable'], sep="\t", comment='#')
+sampletable = sampletable.set_index('locus_name')
+samples = sampletable.index.values.tolist()
+
+sample_dict = {sample: tiarsdesigner.utils.get_endogenous_sequence_and_stats(
+    sampletable.loc[sample, 'sequence'],
+    int(sampletable.loc[sample, 'gRNA_start']),
+    int(sampletable.loc[sample, 'gRNA_end']),
+    int(sampletable.loc[sample, 'PAM_start']),
+    int(sampletable.loc[sample, 'AA_change_site']),
+    sampletable.loc[sample, 'which_PAM']) for sample in samples}
+
+for sample in samples:
+    sample_dict[sample]['new_codon'] = sampletable.loc[sample, 'new_codon']
+
+codon_usage_tsv=config['codon_usage_tsv']
+
+
+min_rsite_distance = config['min_Rsite_distance']
+
+single_enzyme_filters = config['single_enzyme_filters']
+
+    
+enzyme_pair_filters = config['enzyme_pair_filters']
+if enzyme_pair_filters == 'all':
+    enzyme_pair_filters = ['at_least_one_has_endogenous_site',
+                           'both_have_endogenous_sites',
+                           'compatible_polarity',
+                           'both_Renzymes_depend_on_at_least_one_unique_substitution',
+                           'no_unneeded_substitutions'
+                           ]
+
+verbose = ''
+if config['verbose']:
+    verbose = '--verbose'
+
+if config['enzyme_list'] == 'default':
+    enzyme_list = ([])
+    enzyme_param = ''
+else:
+    enzyme_list= config['enzyme_list']
+    enzyme_param = '--enzymes ../' + enzyme_list
+
+if single_enzyme_filters == 'all':
+    single_enzyme_filters = ['no_sandwiched_cutsites',
+                             'no_endogenous_cutsites_within_Nnt_of_novel_cutsite',
+                             'novel_site_depends_on_at_least_two_substitutions',
+                             'num_recognition_sites_equals_num_cutsites',
+                             'no_unneeded_substitutions'
+                             ]
+
+rule all:
+    input:
+        expand("{sample}/{sample}_Renzyme_pairs.docx", sample=samples),
+        expand("{sample}/{sample}_Renzyme_pairs.xlsx", sample=samples),
+        expand("{sample}/{sample}_single_Renzymes.docx", sample=samples),
+        expand("{sample}/{sample}_single_Renzymes.xlsx", sample=samples)
+
+rule run_tiars_designer:
+    input:
+        enzymes=enzyme_list,
+        codon_usage=codon_usage_tsv
+    output:
+        "{sample}/{sample}_Renzyme_pairs.docx",
+        "{sample}/{sample}_single_Renzymes.docx",
+        "{sample}/{sample}_Renzyme_pairs.xlsx",
+        "{sample}/{sample}_single_Renzymes.xlsx"
+    params:
+        AA_change_site = lambda wildcards: sample_dict[wildcards.sample]['AA_change_site'],
+        new_codon = lambda wildcards: sample_dict[wildcards.sample]['new_codon'],
+        PAM_start = lambda wildcards: sample_dict[wildcards.sample]['PAM_start'],
+        which_PAM = lambda wildcards: sample_dict[wildcards.sample]['which_PAM'],
+        gRNA_start = lambda wildcards: sample_dict[wildcards.sample]['gRNA_start'],
+        gRNA_end = lambda wildcards: sample_dict[wildcards.sample]['gRNA_end'],
+        sequence = lambda wildcards: sample_dict[wildcards.sample]['sequence'],
+        single_enzyme_filters = single_enzyme_filters,
+        enzyme_pair_filters = enzyme_pair_filters,
+        verbose=verbose,
+        min_Rsite_distance = min_rsite_distance,
+        enzymes=enzyme_param
+    shell:
+        "cd {wildcards.sample} && tiarsdesigner --endogenous_seq {params.sequence} --gRNA_start {params.gRNA_start} --gRNA_end {params.gRNA_end} --PAM_start {params.PAM_start} --which_PAM {params.which_PAM} --AA_change_site {params.AA_change_site} --new_codon {params.new_codon} --locus_name {wildcards.sample} --single-enzyme-filters {params.single_enzyme_filters} --enzyme-pair-filters {params.enzyme_pair_filters} --codon-usage-tsv ../{input.codon_usage} {params.enzymes} {params.verbose} --min-Rsite-distance {params.min_Rsite_distance}"
+

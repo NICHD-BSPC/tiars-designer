@@ -1,0 +1,11 @@
+biopython
+python-docx
+matplotlib
+numpy
+pandas
+xlwt
+seaborn
+openpyxl
+levenshtein
+snakemake
+
