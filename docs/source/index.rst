@@ -1,22 +1,23 @@
-Welcome to TIARS Designer's Documentation!
-==========================================
+TIARS Designer
+==============
 
-TIARS (Test for Added Recognition Sites) Designer generates a list of potential CRISPR repair oligo candidates for a provided locus that contain silent Restriction Fragment Length Polymorphisms (RFLP's) for two distinct restriction enzymes in addition to the desired edit.  This allows users to:
+.. note::
+
+   * For more information on the method, see the bioRxiv preprint https://www.biorxiv.org/content/10.1101/2021.04.20.440537v1.
+   * For source code, see https://github.com/NICHD-BSPC/tiars-designer
+
+TIARS (Test for Added Recognition Sites) Designer generates a list of potential CRISPR repair oligo candidates for a provided locus that contain silent Restriction Fragment Length Polymorphisms (RFLPs) for two distinct restriction enzymes in addition to the desired edit.  This allows users to:
 
 * Consider all viable combinations of synonymous edits and restriction enzymes to use in an easy to view word document
 
-
-
 * Automate the process of filtering out inviable candidate sequences and restriction enzyme pairs 
-
-
 
 * Rank the outputted candidate sequence/Restriction enzyme combinations based on statistics such as the departure in codon frequency of the candidate sequence from the endogenous sequence
 
 Why use this tool?
 ------------------
 
-An important part of any CRISPR/Cas homology-directed repair experiment is being able to verify that the experiment was successful and the desired edit was incorporated. Introducing RFLP's to the repair via synonymous (AKA silent) substitutions to the repair oligo is one way to do so, as digestion with the enzymes that correspond to the RFLP's would reveal whether or not the repair oligo containing the edit and novel restriction sites was incorporated. TIARS Designer automates the process of figuring out where best to introduce the silent RFLP's, which is a time consuming and error prone process to do by hand.
+An important part of any CRISPR/Cas homology-directed repair experiment is being able to verify that the experiment was successful and the desired edit was incorporated. Introducing RFLPs to the repair via synonymous (AKA silent) substitutions to the repair oligo is one way to do so, as digestion with the enzymes that correspond to the RFLPs would reveal whether or not the repair oligo containing the edit and novel restriction sites was incorporated. TIARS Designer automates the process of figuring out where best to introduce the silent RFLP's, which is a time consuming and error prone process to do by hand.
 
 Workflow
 --------
