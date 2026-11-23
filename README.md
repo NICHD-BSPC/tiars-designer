@@ -29,6 +29,6 @@ The tool runs three main steps:
 
 3. For each candidate sequence, any enzymes that haven't been filtered out are paired together in all possible combinations, and filtered on the enzyme pair level based on the compatibility of the pair with the sequence. Outputs all sequence + restriction enzyme pair combinations that passed all the pair filters as the final output.
 
-**For more informatiion, see the documentation at https://nichd-bspc.github.io/tiars-designer/**.
+**For more information, see the documentation at https://nichd-bspc.github.io/tiars-designer/**.
 
 **For more background, see the bioRxiv preprint at https://www.biorxiv.org/content/10.1101/2021.04.20.440537v1**.
